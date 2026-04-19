@@ -1,0 +1,200 @@
+@import "tailwindcss";
+
+/* ── Font faces ──────────────────────────────────────────────────── */
+@font-face {
+  font-family: 'TWK Lausanne Pan';
+  src: url('/fonts/TWKLausannePan 2/Web/TWKLausannePan-300.woff2') format('woff2'),
+       url('/fonts/TWKLausannePan 2/Web/TWKLausannePan-300.woff') format('woff');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'TWK Lausanne Pan';
+  src: url('/fonts/TWKLausannePan 2/Web/TWKLausannePan-300Italic.woff2') format('woff2'),
+       url('/fonts/TWKLausannePan 2/Web/TWKLausannePan-300Italic.woff') format('woff');
+  font-weight: 300;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'TWK Lausanne Pan';
+  src: url('/fonts/TWKLausannePan 2/Web/TWKLausannePan-400.woff2') format('woff2'),
+       url('/fonts/TWKLausannePan 2/Web/TWKLausannePan-400.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'TWK Lausanne Pan';
+  src: url('/fonts/TWKLausannePan 2/Web/TWKLausannePan-500.woff2') format('woff2'),
+       url('/fonts/TWKLausannePan 2/Web/TWKLausannePan-500.woff') format('woff');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'TWK Lausanne Pan';
+  src: url('/fonts/TWKLausannePan 2/Web/TWKLausannePan-600.woff2') format('woff2'),
+       url('/fonts/TWKLausannePan 2/Web/TWKLausannePan-600.woff') format('woff');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'TWK Lausanne Pan';
+  src: url('/fonts/TWKLausannePan 2/Web/TWKLausannePan-700.woff2') format('woff2'),
+       url('/fonts/TWKLausannePan 2/Web/TWKLausannePan-700.woff') format('woff');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ── Theme tokens ────────────────────────────────────────────────── */
+@theme inline {
+  --font-lausanne: 'TWK Lausanne Pan', system-ui, sans-serif;
+
+  --color-bg:          #FAFAFA;
+  --color-text:        #0A0A0A;
+  --color-secondary:   #6B6B6B;
+  --color-tertiary:    #A0A0A0;
+  --color-border:      #E5E5E5;
+  --color-tile-default: #EBEBEB;
+
+  /* Project accent colors */
+  --color-odo:         #088559;
+  --color-remarkt:     #00363A;
+  --color-maya:        #EB684E;
+  --color-expressive:  #3D2F5C;
+  --color-spotify:     #2B6CB0;
+  --color-blend:       #5A1A4F;
+  --color-packyourride: #B45309;
+}
+
+/* ── Site-wide spacing tokens ────────────────────────────────────── */
+:root {
+  --page-px: 2rem;   /* horizontal edge inset — used by header, grid, all pages */
+  --page-py: 1.4rem; /* vertical nav/header inset */
+}
+
+/* ── Base reset ──────────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: auto; /* Lenis handles smooth scroll */
+  overflow-x: hidden;
+  cursor: auto !important;
+}
+
+a, button, [role="button"], label, select, input[type="submit"], input[type="button"] {
+  cursor: pointer !important;
+}
+
+body {
+  background-color: #FAFAFA;
+  color: #0A0A0A;
+  font-family: 'TWK Lausanne Pan', system-ui, sans-serif;
+  font-weight: 300;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  /* scroll-snap-type removed from body — html handles it */
+}
+
+/* ── Scroll snap container ───────────────────────────────────────── */
+.snap-container {
+  height: 100dvh;
+  overflow-y: scroll;
+  scroll-snap-type: y mandatory;
+  overscroll-behavior-y: contain;
+}
+
+.snap-section {
+  scroll-snap-align: start;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+.snap-section-normal {
+  scroll-snap-align: start;
+  min-height: auto;
+}
+
+/* ── Typography scale ────────────────────────────────────────────── */
+.text-display {
+  font-weight: 700;
+  font-size: clamp(3.5rem, 9vw, 10rem);
+  line-height: 0.95;
+  letter-spacing: -0.02em;
+}
+
+.text-headline {
+  font-weight: 500;
+  font-size: clamp(2rem, 3.5vw, 3.5rem);
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+}
+
+.text-subheadline {
+  font-weight: 400;
+  font-size: clamp(1.1rem, 1.5vw, 1.5rem);
+  line-height: 1.4;
+}
+
+.text-body {
+  font-weight: 300;
+  font-size: 1rem;
+  line-height: 1.7;
+  text-align: justify;
+}
+
+.text-label {
+  font-weight: 400;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.text-number {
+  font-weight: 600;
+  font-size: clamp(2.5rem, 4vw, 5rem);
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+
+/* ── Utility ─────────────────────────────────────────────────────── */
+.content-width {
+  max-width: 1280px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 2rem;
+  padding-right: 2rem;
+}
+
+.editorial-width {
+  max-width: 760px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* ── Selection ───────────────────────────────────────────────────── */
+::selection {
+  background: #0A0A0A;
+  color: #FAFAFA;
+}
+
+/* ── Project section ─────────────────────────────────────────────── */
+.projects-section {
+  background-color: #FAFAFA;
+}
+
+/* ── Scrollbar ───────────────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 0px;
+}
