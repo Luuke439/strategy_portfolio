@@ -11,21 +11,12 @@ import { caseStudyContent, type CaseStudyContent, type CsImage } from '@/data/ca
 import CaseStudyNav from './CaseStudyNav'
 import ChallengeBlock from './ChallengeBlock'
 import MetaRow from './MetaRow'
+import GlassNav from './GlassNav'
 
 const Hero3D = dynamic(() => import('@/components/Hero3D'), { ssr: false })
 
 // ── Shared style constants ────────────────────────────────────────────────────
 const FONT = "'TWK Lausanne Pan', system-ui, sans-serif"
-
-const csNavLink: React.CSSProperties = {
-  fontFamily:      FONT,
-  fontWeight:      400,
-  fontSize:        '0.75rem',
-  letterSpacing:   '0.06em',
-  textTransform:   'uppercase',
-  color:           '#0A0A0A',
-  textDecoration:  'none',
-}
 
 // ── Image slot — Next.js Image with fallback placeholder ─────────────────────
 
@@ -370,6 +361,81 @@ function ImpactGrid({ stats, accentColor }: { stats: { number: string; descripti
   )
 }
 
+// ── Phone row — 3 screens side by side with accent border ────────────────────
+
+function PhoneRowSlot({ images, accentColor }: { images: CsImage[]; accentColor: string }) {
+  const [failedMap, setFailedMap] = useState<Record<number, boolean>>({})
+  const count = images.length
+  return (
+    <div
+      style={{
+        display: 'flex',
+        gap: '14px',
+        margin: '1.75rem 0',
+        overflowX: 'auto',
+        paddingBottom: '2px',
+      }}
+    >
+      {images.map((img, i) => {
+        const ar = img.aspectRatio ?? '9/16'
+        return (
+          <div
+            key={i}
+            style={{
+              flex: `0 0 calc((100% - ${(count - 1) * 14}px) / ${count})`,
+              minWidth: '100px',
+              position: 'relative',
+              aspectRatio: ar,
+              borderRadius: '10px',
+              overflow: 'hidden',
+              border: `2px solid ${accentColor}`,
+            }}
+          >
+            {failedMap[i] ? (
+              <div
+                style={{
+                  position: 'absolute', inset: 0,
+                  backgroundColor: '#EBEBEB',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}
+              >
+                <span style={{ fontFamily: FONT, fontSize: '0.6rem', letterSpacing: '0.08em', textTransform: 'uppercase', color: '#A0A0A0', textAlign: 'center', padding: '0 0.5rem' }}>
+                  {img.alt}
+                </span>
+              </div>
+            ) : (
+              <Image
+                src={img.src}
+                fill
+                alt={img.alt}
+                style={{ objectFit: 'cover', objectPosition: 'center top' }}
+                onError={() => setFailedMap((prev) => ({ ...prev, [i]: true }))}
+              />
+            )}
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+// ── Chapter video slot ────────────────────────────────────────────────────────
+
+function ChapterVideoSlot({ src }: { src: string }) {
+  return (
+    <div style={{ margin: '1.5rem 0' }}>
+      <video
+        src={src}
+        autoPlay
+        muted
+        loop
+        playsInline
+        style={{ width: '100%', height: 'auto', display: 'block', borderRadius: '4px' }}
+      />
+    </div>
+  )
+}
+
 // ── Section fade-in wrapper ───────────────────────────────────────────────────
 
 function FadeSection({ id, children }: { id: string; children: React.ReactNode }) {
@@ -447,7 +513,7 @@ export default function CaseStudyPage({ project }: CaseStudyPageProps) {
   return (
     <div style={{ backgroundColor: '#FAFAFA', minHeight: '100vh' }}>
 
-      {/* ── Fixed top nav ─────────────────────────────────────────────── */}
+      {/* ── Fixed top nav — transparent, name floats ─────────────────── */}
       <header
         style={{
           position: 'fixed',
@@ -457,9 +523,6 @@ export default function CaseStudyPage({ project }: CaseStudyPageProps) {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          backgroundColor: 'rgba(250,250,250,0.94)',
-          backdropFilter: 'blur(10px)',
-          borderBottom: '1px solid #E5E5E5',
         }}
       >
         {/* Invisible click target — 3D name (z:110, pointerEvents:none) renders on top.
@@ -483,11 +546,7 @@ export default function CaseStudyPage({ project }: CaseStudyPageProps) {
           Luke Caporelli
         </Link>
 
-        <nav style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-          <Link href="/about" style={csNavLink}>About</Link>
-          <a href="/Luke_Caporelli_CV.pdf" target="_blank" rel="noopener noreferrer" style={csNavLink}>CV</a>
-          <a href="https://linkedin.com/in/lukecaporelli" target="_blank" rel="noopener noreferrer" style={csNavLink}>LinkedIn</a>
-        </nav>
+        <GlassNav />
       </header>
 
       {/* ── 3D name — always in nav position ─────────────────────────── */}
@@ -538,38 +597,27 @@ export default function CaseStudyPage({ project }: CaseStudyPageProps) {
               lineHeight: 1.45,
               letterSpacing: '-0.01em',
               color: '#6B6B6B',
-              margin: '0 0 3rem',
+              margin: '0 0 1.75rem',
             }}
           >
             {project.problemStatement}
           </h2>
 
           {/* Metadata */}
-          <div style={{ marginBottom: '4rem' }}>
+          <div style={{ marginBottom: '2.5rem' }}>
             {meta.map((m) => (
               <MetaRow key={m.label} label={m.label} value={m.value} accentColor={accent} />
             ))}
           </div>
 
-          {/* Hero image — same column, full editorial width */}
+          {/* Hero image — natural aspect ratio */}
           {content && (
-            <div
-              style={{
-                position: 'relative',
-                width: '100%',
-                aspectRatio: '16/9',
-                overflow: 'hidden',
-                marginBottom: '0',
-              }}
-            >
-              <Image
-                src={content.heroImage}
-                fill
-                alt={project.name}
-                priority
-                style={{ objectFit: 'cover', objectPosition: 'center top' }}
-              />
-            </div>
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={content.heroImage}
+              alt={project.name}
+              style={{ width: '100%', height: 'auto', display: 'block' }}
+            />
           )}
 
         </div>
@@ -689,6 +737,11 @@ export default function CaseStudyPage({ project }: CaseStudyPageProps) {
                 {/* First paragraph — always visible */}
                 <Para>{chapter.paragraphs[0]}</Para>
 
+                {/* Before-expand video — always visible */}
+                {chapter.beforeVideo && (
+                  <ChapterVideoSlot src={chapter.beforeVideo} />
+                )}
+
                 {/* Before-expand image — always visible, max 1 */}
                 {chapter.beforeImage && (
                   chapter.beforeImage.fullWidth ? (
@@ -696,6 +749,11 @@ export default function CaseStudyPage({ project }: CaseStudyPageProps) {
                   ) : (
                     <CsImageSlot image={chapter.beforeImage} accentColor={accent} />
                   )
+                )}
+
+                {/* Phone row — always visible, side-by-side with accent border */}
+                {chapter.phoneRow && chapter.phoneRow.length > 0 && (
+                  <PhoneRowSlot images={chapter.phoneRow} accentColor={accent} />
                 )}
 
                 {/* Impact stats — always visible */}

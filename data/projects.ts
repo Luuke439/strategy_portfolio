@@ -15,7 +15,9 @@ export interface Project {
   coverVideo?: string
   coverVideoStart?: number
   coverPosition?: string
+  coverFit?: 'cover' | 'contain'
   year: string
+  tags?: string[]
   label: string
   accentColor: string
   category: string
@@ -43,6 +45,7 @@ export const projects: Project[] = [
     type: 'case-study',
     coverPosition: '50% 30%',
     year: '2025',
+    tags: ['Routing Systems', 'Personalization', '0→1'],
     label: 'B.A. Thesis',
     accentColor: '#088559',
     category: 'Case Study',
@@ -77,6 +80,7 @@ export const projects: Project[] = [
     coverVideo: 'cover.mp4',
     coverVideoStart: 7,
     year: '2025',
+    tags: ['Crisis Infrastructure', 'Service Design', 'Systems Thinking'],
     label: 'Ministry Presentation',
     accentColor: '#00363A',
     category: 'Case Study',
@@ -107,7 +111,10 @@ export const projects: Project[] = [
     name: 'maya',
     shortName: 'maya',
     type: 'case-study',
+    coverVideo: 'cover.mov',
+    coverVideoStart: 0,
     year: '2025',
+    tags: ['AI Integration', 'Enterprise', 'Language & Inclusion'],
     label: 'Partner: Stiftung Liebenau',
     accentColor: '#EB684E',
     category: 'Case Study',
@@ -141,6 +148,7 @@ export const projects: Project[] = [
     type: 'lab',
     coverVideo: 'cover.mp4',
     year: '2025',
+    tags: ['Interaction Design', 'Motion', 'Speculative'],
     label: 'Interaction Study',
     accentColor: '#3D2F5C',
     category: 'Lab',
@@ -161,6 +169,7 @@ export const projects: Project[] = [
     shortName: 'Spotify Dashboard',
     type: 'lab',
     year: '2023',
+    tags: ['Data Visualization', 'Information Design'],
     label: 'Data Visualization',
     accentColor: '#2B6CB0',
     category: 'Lab',
@@ -184,6 +193,7 @@ export const projects: Project[] = [
     coverVideo: 'cover.mp4',
     coverVideoStart: 3,
     year: '2024',
+    tags: ['Live Product', 'E-Commerce', 'Solo Built'],
     label: 'Live Product',
     accentColor: '#B45309',
     category: 'External',
@@ -201,6 +211,7 @@ export const projects: Project[] = [
     shortName: 'blend it!',
     type: 'lab',
     year: '2023',
+    tags: ['Hardware', 'IoT', 'Prototyping'],
     label: 'Physical + Digital',
     accentColor: '#5A1A4F',
     category: 'Lab',
@@ -221,6 +232,7 @@ export const projects: Project[] = [
     shortName: 'Brand Comm. Project',
     type: 'placeholder',
     year: '2026',
+    tags: [],
     label: 'Coming Soon',
     accentColor: '#8B7355',
     category: '',

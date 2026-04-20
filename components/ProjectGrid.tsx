@@ -36,34 +36,11 @@ function useBreakpoint(): Breakpoint {
 }
 
 // ── Row height formula ────────────────────────────────────────────────────────
-const ROW = 'calc(18.5vw - 1rem)'
+const ROW = 'calc(20vw)'
 
 export default function ProjectGrid({ onProjectHover }: ProjectGridProps) {
   const bp = useBreakpoint()
   const find = (slug: string) => projects.find((p) => p.slug === slug)!
-
-  // ── Reveal state ───────────────────────────────────────────────────────────
-  const topRef    = useRef<HTMLDivElement>(null)
-  const bottomRef = useRef<HTMLDivElement>(null)
-  const [topRevealed,    setTopRevealed]    = useState(false)
-  const [bottomRevealed, setBottomRevealed] = useState(false)
-
-  useEffect(() => {
-    const obs = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((e) => {
-          if (e.isIntersecting) {
-            if (e.target === topRef.current)    setTopRevealed(true)
-            if (e.target === bottomRef.current) setBottomRevealed(true)
-          }
-        })
-      },
-      { threshold: 0.04, rootMargin: '0px 0px -40px 0px' },
-    )
-    if (topRef.current)    obs.observe(topRef.current)
-    if (bottomRef.current) obs.observe(bottomRef.current)
-    return () => obs.disconnect()
-  }, [bp]) // re-attach when layout switches (topRef moves to a new element)
 
   // ── Mobile: single-column stack ────────────────────────────────────────────
   if (bp === 'mobile') {
@@ -72,14 +49,13 @@ export default function ProjectGrid({ onProjectHover }: ProjectGridProps) {
       'expressive-messaging', 'blend-it', 'brand-communication', 'remarkt',
     ]
     return (
-      <div ref={topRef} style={{ padding: '4.5rem 1rem 2.5rem', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+      <div style={{ padding: '4.5rem 1rem 2.5rem', display: 'flex', flexDirection: 'column', gap: '8px' }}>
         {order.map((slug, i) => (
           <div key={slug} style={{ height: '220px' }}>
             <ProjectCard
               project={find(slug)}
               onHoverChange={onProjectHover}
               revealIndex={i}
-              isRevealed={topRevealed}
             />
           </div>
         ))}
@@ -89,34 +65,30 @@ export default function ProjectGrid({ onProjectHover }: ProjectGridProps) {
 
   // ── Tablet: 2-column grid ──────────────────────────────────────────────────
   if (bp === 'tablet') {
-    const order = [
-      'odo', 'packyourride', 'spotify-dashboard', 'maya',
-      'expressive-messaging', 'blend-it', 'brand-communication', 'remarkt',
-    ]
     return (
-      <div ref={topRef} style={{ padding: '4.5rem 1.5rem 2.5rem' }}>
+      <div style={{ padding: '4.5rem 1.5rem 2.5rem' }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px' }}>
           <div style={{ gridColumn: '1 / 3', height: '320px' }}>
-            <ProjectCard project={find('odo')} onHoverChange={onProjectHover} revealIndex={0} isRevealed={topRevealed} />
+            <ProjectCard project={find('odo')} onHoverChange={onProjectHover} revealIndex={0} />
           </div>
           {['packyourride', 'spotify-dashboard'].map((slug, i) => (
             <div key={slug} style={{ height: '180px' }}>
-              <ProjectCard project={find(slug)} onHoverChange={onProjectHover} revealIndex={i + 1} isRevealed={topRevealed} />
+              <ProjectCard project={find(slug)} onHoverChange={onProjectHover} revealIndex={i + 1} />
             </div>
           ))}
           <div style={{ gridColumn: '1 / 3', height: '280px' }}>
-            <ProjectCard project={find('maya')} onHoverChange={onProjectHover} revealIndex={3} isRevealed={topRevealed} />
+            <ProjectCard project={find('maya')} onHoverChange={onProjectHover} revealIndex={0} />
           </div>
           {['expressive-messaging', 'blend-it'].map((slug, i) => (
             <div key={slug} style={{ height: '180px' }}>
-              <ProjectCard project={find(slug)} onHoverChange={onProjectHover} revealIndex={i + 4} isRevealed={topRevealed} />
+              <ProjectCard project={find(slug)} onHoverChange={onProjectHover} revealIndex={i + 1} />
             </div>
           ))}
           <div style={{ gridColumn: '1 / 3', height: '180px' }}>
-            <ProjectCard project={find('brand-communication')} onHoverChange={onProjectHover} revealIndex={6} isRevealed={topRevealed} />
+            <ProjectCard project={find('brand-communication')} onHoverChange={onProjectHover} revealIndex={2} />
           </div>
           <div style={{ gridColumn: '1 / 3', height: '320px' }}>
-            <ProjectCard project={find('remarkt')} onHoverChange={onProjectHover} revealIndex={7} isRevealed={topRevealed} />
+            <ProjectCard project={find('remarkt')} onHoverChange={onProjectHover} revealIndex={0} />
           </div>
         </div>
       </div>
@@ -137,46 +109,46 @@ export default function ProjectGrid({ onProjectHover }: ProjectGridProps) {
   }
 
   return (
-    <div style={{ padding: '4.5rem 2rem 0' }}>
+    <div style={{ padding: '4.5rem 8px 0' }}>
 
       {/* ── TOP HALF ─────────────────────────────────────────────────────── */}
-      <div ref={topRef} style={{ ...colGrid, marginBottom: '8px' }}>
+      <div style={{ ...colGrid, marginBottom: '8px' }}>
 
         <div style={{ gridColumn: '1 / 7', gridRow: '1 / 3' }}>
-          <ProjectCard project={find('odo')} onHoverChange={onProjectHover} revealIndex={0} isRevealed={topRevealed} />
+          <ProjectCard project={find('odo')} onHoverChange={onProjectHover} revealIndex={0} />
         </div>
 
         <div style={{ gridColumn: '7 / 10', gridRow: '1 / 2' }}>
-          <ProjectCard project={find('packyourride')} onHoverChange={onProjectHover} revealIndex={1} isRevealed={topRevealed} />
+          <ProjectCard project={find('packyourride')} onHoverChange={onProjectHover} revealIndex={1} />
         </div>
 
         <div style={{ gridColumn: '7 / 10', gridRow: '2 / 3' }}>
-          <ProjectCard project={find('spotify-dashboard')} onHoverChange={onProjectHover} revealIndex={3} isRevealed={topRevealed} />
+          <ProjectCard project={find('spotify-dashboard')} onHoverChange={onProjectHover} revealIndex={3} />
         </div>
 
         <div style={{ gridColumn: '10 / 13', gridRow: '1 / 3' }}>
-          <ProjectCard project={find('maya')} onHoverChange={onProjectHover} revealIndex={2} isRevealed={topRevealed} />
+          <ProjectCard project={find('maya')} onHoverChange={onProjectHover} revealIndex={2} />
         </div>
       </div>
 
       {/* ── BOTTOM HALF ──────────────────────────────────────────────────── */}
-      <div style={{ paddingBottom: '1.4rem' }}>
-        <div ref={bottomRef} style={colGrid}>
+      <div style={{ paddingBottom: '8px' }}>
+        <div style={colGrid}>
 
           <div style={{ gridColumn: '1 / 4', gridRow: '1 / 3' }}>
-            <ProjectCard project={find('expressive-messaging')} onHoverChange={onProjectHover} revealIndex={0} isRevealed={bottomRevealed} />
+            <ProjectCard project={find('expressive-messaging')} onHoverChange={onProjectHover} revealIndex={0} />
           </div>
 
           <div style={{ gridColumn: '4 / 7', gridRow: '1 / 2' }}>
-            <ProjectCard project={find('blend-it')} onHoverChange={onProjectHover} revealIndex={1} isRevealed={bottomRevealed} />
+            <ProjectCard project={find('blend-it')} onHoverChange={onProjectHover} revealIndex={1} />
           </div>
 
           <div style={{ gridColumn: '4 / 7', gridRow: '2 / 3' }}>
-            <ProjectCard project={find('brand-communication')} onHoverChange={onProjectHover} revealIndex={3} isRevealed={bottomRevealed} />
+            <ProjectCard project={find('brand-communication')} onHoverChange={onProjectHover} revealIndex={3} />
           </div>
 
           <div style={{ gridColumn: '7 / 13', gridRow: '1 / 3' }}>
-            <ProjectCard project={find('remarkt')} onHoverChange={onProjectHover} revealIndex={2} isRevealed={bottomRevealed} />
+            <ProjectCard project={find('remarkt')} onHoverChange={onProjectHover} revealIndex={2} />
           </div>
         </div>
       </div>

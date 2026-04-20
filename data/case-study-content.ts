@@ -27,6 +27,8 @@ export interface CsChapter {
   headline: string
   paragraphs: string[]         // [0] always visible, rest in expandable
   beforeImage?: CsImage        // shown before the expand toggle (max 1 per chapter)
+  beforeVideo?: string         // video src shown before the expand toggle (always visible)
+  phoneRow?: CsImage[]         // row of phone screenshots shown always-visible, with accent border
   pullQuote?: CsPullQuote      // inside expandable
   callout?: CsCallout          // inside expandable
   expandImages?: CsImage[]     // inside expandable, fade in on open
@@ -69,7 +71,7 @@ const odo: CaseStudyContent = {
   },
   chapters: [
     {
-      label: '01 · Context',
+      label: '01 · The Situation',
       headline: 'A market full of tools, none of them personal.',
       paragraphs: [
         'Cyclists plan rides in two distinct settings. For familiar areas, they rely on memory and habit. For unfamiliar terrain — a new region, a travel destination, a route longer than their usual range — they turn to digital tools. This is where the planning gap lives.',
@@ -79,7 +81,7 @@ const odo: CaseStudyContent = {
       ],
     },
     {
-      label: '02 · Discover',
+      label: '02 · What We Found',
       headline: 'What 100 cyclists actually told us.',
       paragraphs: [
         'We ran a survey of over 100 cyclists before sketching a single screen. This was not a formality. The survey results fundamentally shaped the direction of the project — and in one case, overturned an assumption we had walked in with.',
@@ -101,7 +103,7 @@ const odo: CaseStudyContent = {
       ],
     },
     {
-      label: '03 · Define',
+      label: '03 · The Real Problem',
       headline: 'Profiles over parameters.',
       paragraphs: [
         'After research, the question was not "what features should we build?" It was "what model of personalization would actually work for this context?"',
@@ -112,7 +114,7 @@ const odo: CaseStudyContent = {
       ],
     },
     {
-      label: '04 · System',
+      label: '04 · How It Works',
       headline: 'The pipeline behind the profile.',
       paragraphs: [
         'The interface is simple. The system behind it is not. The design work that matters here is not the UI — it is the data architecture.',
@@ -144,7 +146,7 @@ const odo: CaseStudyContent = {
       ],
     },
     {
-      label: '05 · Prototype',
+      label: '05 · The Idea',
       headline: 'Two flows, real data, live APIs.',
       paragraphs: [
         'We designed two entry flows based on a consistent finding in the interviews: the difference between a rider who has 15 minutes and a rider who wants to spend an hour planning.',
@@ -163,7 +165,7 @@ const odo: CaseStudyContent = {
       ],
     },
     {
-      label: '06 · Deliver',
+      label: '06 · The Result',
       headline: 'Plan. Navigate. Improve.',
       paragraphs: [
         'The final product loop has three phases, designed as a continuous cycle rather than a one-shot experience.',
@@ -194,7 +196,7 @@ const odo: CaseStudyContent = {
       ],
     },
     {
-      label: '07 · Impact',
+      label: '07 · What Changed',
       headline: 'What we validated.',
       paragraphs: [
         'The most important thing we validated was not the interface. It was the feasibility of the underlying system.',
@@ -215,7 +217,7 @@ const odo: CaseStudyContent = {
       },
     },
     {
-      label: '08 · Reflection',
+      label: '08 · What I Learned',
       headline: 'Control beats automation every time.',
       paragraphs: [
         'The clearest finding from our research — confirmed repeatedly through interviews — was that cyclists do not want the system to decide for them. They want to understand what the system is doing, adjust it, and trust the output because they can trace it back to their own preferences.',
@@ -242,7 +244,7 @@ const odo: CaseStudyContent = {
 
 const maya: CaseStudyContent = {
   slug: 'maya',
-  heroImage: '/images/maya/cover.jpg',
+  heroImage: '/images/maya/mainvisualdashboard.jpg',
   opening: {
     paragraphs: [
       'Germany will be short 350,000 nursing staff by 2034. The country\'s response, by necessity, is international recruitment. Thousands of care trainees arrive each year from the Philippines, Vietnam, Mexico, and elsewhere — qualified, motivated, and holding language certificates that say they\'re ready.',
@@ -261,7 +263,7 @@ const maya: CaseStudyContent = {
   },
   chapters: [
     {
-      label: '01 · Context',
+      label: '01 · The Situation',
       headline: 'A structural crisis with a solvable upstream cause.',
       paragraphs: [
         'Stiftung Liebenau is one of Germany\'s larger social welfare organizations — over 8,900 employees across care facilities, residential services, and social programs. Like most operators in the sector, they depend heavily on international recruitment to meet staffing demands that domestic supply cannot fill.',
@@ -271,7 +273,7 @@ const maya: CaseStudyContent = {
       ],
     },
     {
-      label: '02 · Discover',
+      label: '02 · What We Found',
       headline: 'What we heard in the hallways.',
       paragraphs: [
         'We conducted desk research, focus group interviews, on-site visits to Liebenau facilities, and interviews with HR leadership, care coordinators, practical supervisors, and care workers — both from Liebenau and one external operator.',
@@ -285,7 +287,7 @@ const maya: CaseStudyContent = {
       },
     },
     {
-      label: '03 · Define',
+      label: '03 · The Real Problem',
       headline: 'Language is the upstream lever.',
       paragraphs: [
         'The problem map we built after research showed six distinct problem areas: staff overhead from repeated explanations, housing scarcity limiting recruitment capacity, missing local knowledge in daily life, onboarding overload from bureaucracy, dropout from repeated language test failures, and the core pattern of trainees reverting to their native language in off-hours.',
@@ -299,7 +301,7 @@ const maya: CaseStudyContent = {
       },
     },
     {
-      label: '04 · Concept',
+      label: '04 · The Idea',
       headline: 'Shape the housing. Then shape the language.',
       paragraphs: [
         'maya is a two-part system. The parts are designed to work together, but each solves a distinct problem.',
@@ -308,12 +310,11 @@ const maya: CaseStudyContent = {
         'The second part is maya 1.0: an AI assistant that covers the first phase of a trainee\'s journey. It begins in the trainee\'s native language — because arriving in a foreign country is already overwhelming, and adding language pressure at that moment is counterproductive. Then, as the trainee gains confidence, the assistant gradually shifts toward German.',
         'In phase one, the assistant covers onboarding questions, local navigation, bureaucratic processes, and daily life basics. It is available before arrival, so a trainee can begin to understand their new context before they step off the plane. It is intentionally scoped away from medical and clinical content — trust must be established before scope can expand.',
       ],
-      beforeImage: {
-        src: '/images/maya/ch04-marygrace.jpg',
-        alt: '"HI MARY GRACE!" — maya 1.0 onboarding screen in Tagalog',
-        aspectRatio: '9/16',
-        layout: 'phone',
-      },
+      phoneRow: [
+        { src: '/images/maya/onboarding1.jpg', alt: 'Onboarding screen 1 — language welcome', aspectRatio: '9/16' },
+        { src: '/images/maya/onboarding2.jpg', alt: 'Onboarding screen 2 — topic selection', aspectRatio: '9/16' },
+        { src: '/images/maya/onboarding3.jpg', alt: 'Onboarding screen 3 — language shift', aspectRatio: '9/16' },
+      ],
       expandImages: [
         {
           src: '/images/maya/ch04-matrix.jpg',
@@ -328,7 +329,7 @@ const maya: CaseStudyContent = {
       ],
     },
     {
-      label: '05 · System',
+      label: '05 · How It Works',
       headline: 'One assistant, two phases, a gradual shift.',
       paragraphs: [
         'The matching system and the assistant are connected by a shared logic: start where the person is, then shift gradually toward where they need to be. Neither system forces progress. Both systems make progress feel natural.',
@@ -338,8 +339,9 @@ const maya: CaseStudyContent = {
       ],
     },
     {
-      label: '06 · Deliver',
+      label: '06 · The Result',
       headline: 'Three prototypes, one coherent system.',
+      beforeVideo: '/videos/maya/cover.mov',
       paragraphs: [
         'We delivered three linked prototypes as the semester outcome.',
         'The shared-living matching dashboard is a provider-facing tool for HR. It visualizes current housing compositions, flags imbalances, and surfaces the matching questionnaire flow for incoming trainees. The questionnaire captures language level, country of origin, time already spent in Germany, and a small number of compatibility preferences. From these inputs, the system generates balanced household proposals.',
@@ -375,7 +377,7 @@ const maya: CaseStudyContent = {
       ],
     },
     {
-      label: '07 · Impact',
+      label: '07 · What Changed',
       headline: 'What changes if this works.',
       paragraphs: [
         'The expected impact operates on two levels.',
@@ -393,7 +395,7 @@ const maya: CaseStudyContent = {
       ],
     },
     {
-      label: '08 · Reflection',
+      label: '08 · What I Learned',
       headline: 'What shifted in how I think about systems.',
       paragraphs: [
         'The biggest shift for me was understanding that fixing the downstream symptom — the language failure at work — required intervening upstream in the living situation. That is not an obvious design move. It requires stepping back far enough from the immediate problem to see what is feeding it.',
@@ -434,7 +436,7 @@ const remarkt: CaseStudyContent = {
   },
   chapters: [
     {
-      label: '01 · Context',
+      label: '01 · The Situation',
       headline: 'A system optimized for stability, not resilience.',
       paragraphs: [
         'Supermarkets are essential infrastructure but not designed for failure. In normal conditions, they are extraordinarily efficient — lean inventory, just-in-time logistics, optimized shelf space. That efficiency is the problem. It leaves no slack for disruption.',
@@ -443,7 +445,7 @@ const remarkt: CaseStudyContent = {
       ],
     },
     {
-      label: '02 · Discover',
+      label: '02 · What We Found',
       headline: 'Where the current system breaks.',
       paragraphs: [
         'We analyzed failure cascades across four dimensions: energy, cold chain, logistics, and human behavior. Each revealed a different layer of the same problem.',
@@ -456,7 +458,7 @@ const remarkt: CaseStudyContent = {
       },
     },
     {
-      label: '03 · Define',
+      label: '03 · The Real Problem',
       headline: 'Three things that had to be true at once.',
       paragraphs: [
         'The design requirements were unusually constrained. The concept had to work in three simultaneously difficult conditions: limited energy, high and unpredictable demand, and a staff that would be under significant stress. Any solution that required extensive training, complex technology, or additional infrastructure to activate was not a solution — it was a dependency.',
@@ -470,7 +472,7 @@ const remarkt: CaseStudyContent = {
       },
     },
     {
-      label: '04 · Concept',
+      label: '04 · The Idea',
       headline: 'A store that operates in two modes.',
       paragraphs: [
         'The core idea is a prepared switch. re:markt is designed as a normal supermarket that contains, within its existing footprint, a fully operational crisis distribution system. Activating crisis mode does not require external resources or emergency decisions. It requires executing a plan that was already made.',
@@ -486,7 +488,7 @@ const remarkt: CaseStudyContent = {
       },
     },
     {
-      label: '05 · System',
+      label: '05 · How It Works',
       headline: 'Three mechanisms that make it enforceable.',
       paragraphs: [
         'A good concept is not enough. The system has to be operable by real staff, under real stress, without specialized equipment. Three mechanisms form the operational core of re:markt.',
@@ -502,7 +504,7 @@ const remarkt: CaseStudyContent = {
       },
     },
     {
-      label: '06 · Deliver',
+      label: '06 · The Result',
       headline: 'Five ways to reach a household.',
       paragraphs: [
         'A single store cannot serve an entire neighborhood under crisis conditions. re:markt is not a point of distribution — it is the anchor of a multi-channel distribution network that uses existing infrastructure wherever possible.',
@@ -519,7 +521,7 @@ const remarkt: CaseStudyContent = {
       },
     },
     {
-      label: '07 · Impact',
+      label: '07 · What Changed',
       headline: 'What the numbers say.',
       paragraphs: [
         'The expected impact is predictability.',
@@ -536,7 +538,7 @@ const remarkt: CaseStudyContent = {
       ],
     },
     {
-      label: '08 · Reflection',
+      label: '08 · What I Learned',
       headline: 'What this changed for me.',
       paragraphs: [
         'I came into this project expecting to design an interface. I left it having designed a governance system.',

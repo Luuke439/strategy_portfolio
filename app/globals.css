@@ -195,6 +195,10 @@ body {
 }
 
 /* ── Scrollbar ───────────────────────────────────────────────────── */
-::-webkit-scrollbar {
-  width: 0px;
+* {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+*::-webkit-scrollbar {
+  display: none;
 }

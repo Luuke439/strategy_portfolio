@@ -11,31 +11,52 @@ interface ProjectCardProps {
   project: Project
   onHoverChange?: (info: TileHoverInfo | null) => void
   revealIndex?: number
-  isRevealed?: boolean
 }
 
-const MAX_TILT = 5.5
+// Large cards get a gentler tilt so the effect doesn't look extreme
+const TILT_LARGE  = 2.0
+const TILT_NORMAL = 5.0
 const SPRING = { stiffness: 180, damping: 24, mass: 0.55 }
+const RADIUS = '8px'
 
 export default function ProjectCard({
   project,
   onHoverChange,
   revealIndex = 0,
-  isRevealed = false,
 }: ProjectCardProps) {
   const isPlaceholder = project.type === 'placeholder'
+  const maxTilt = project.size === 'large' ? TILT_LARGE : TILT_NORMAL
 
   const [hovered, setHovered] = useState(false)
   const [videoReady, setVideoReady] = useState(false)
-  const videoRef = useRef<HTMLVideoElement>(null)
-  const sheenRef = useRef<HTMLDivElement>(null)
+  const [revealed, setRevealed] = useState(false)
+  const videoRef  = useRef<HTMLVideoElement>(null)
+  const sheenRef  = useRef<HTMLDivElement>(null)
+  const cardRef   = useRef<HTMLDivElement>(null)
   const startTime = project.coverVideoStart ?? 0
+
+  // ── Per-card scroll reveal ────────────────────────────────────────────────
+  useEffect(() => {
+    const el = cardRef.current
+    if (!el) return
+    const obs = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setRevealed(true)
+          obs.disconnect()
+        }
+      },
+      { threshold: 0.07, rootMargin: '0px 0px -20px 0px' },
+    )
+    obs.observe(el)
+    return () => obs.disconnect()
+  }, [])
 
   // ── Tilt ──────────────────────────────────────────────────────────────────
   const mx = useMotionValue(0)
   const my = useMotionValue(0)
-  const rotateX = useSpring(useTransform(my, [-0.5, 0.5], [MAX_TILT, -MAX_TILT]), SPRING)
-  const rotateY = useSpring(useTransform(mx, [-0.5, 0.5], [-MAX_TILT, MAX_TILT]), SPRING)
+  const rotateX = useSpring(useTransform(my, [-0.5, 0.5], [maxTilt, -maxTilt]), SPRING)
+  const rotateY = useSpring(useTransform(mx, [-0.5, 0.5], [-maxTilt, maxTilt]), SPRING)
 
   // ── Video metadata & seek ─────────────────────────────────────────────────
   useEffect(() => {
@@ -100,45 +121,44 @@ export default function ProjectCard({
     onHoverChange?.(null)
   }
 
-  // ── Reveal variant ────────────────────────────────────────────────────────
-  const revealDelay = revealIndex * 0.088
+  const revealDelay = revealIndex * 0.12
 
   return (
     <motion.div
+      ref={cardRef}
       initial="hidden"
-      animate={isRevealed ? 'visible' : 'hidden'}
+      animate={revealed ? 'visible' : 'hidden'}
       variants={{
-        hidden: { opacity: 0, y: 20 },
+        hidden: { opacity: 0, y: 55, scale: 0.97 },
         visible: {
-          opacity: 1,
-          y: 0,
-          transition: {
-            duration: 0.74,
-            delay: revealDelay,
-            ease: [0.22, 1, 0.36, 1],
-          },
+          opacity: 1, y: 0, scale: 1,
+          transition: { duration: 0.95, delay: revealDelay, ease: [0.16, 1, 0.3, 1] },
         },
       }}
-      style={{ height: '100%' }}
+      style={{ height: '100%', borderRadius: RADIUS }}
     >
+      {/* ── Tilt wrapper — also hosts the full-card hover stroke ── */}
       <motion.div
         style={{
+          position: 'relative',
           height: '100%',
           rotateX,
           rotateY,
           transformPerspective: 900,
           transformOrigin: 'center center',
           willChange: 'transform',
+          borderRadius: RADIUS,
         }}
         onMouseMove={handleMouseMove}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
+
         {isPlaceholder ? (
 
-          /* ── Placeholder ────────────────────────────────────────────── */
-          <div style={{ display: 'flex', flexDirection: 'column', height: '100%', cursor: 'default' }}>
-            <div style={{ flex: 1, position: 'relative', overflow: 'hidden', minHeight: 0 }}>
+          /* ── Placeholder ────────────────────────────────────────── */
+          <div style={{ display: 'flex', flexDirection: 'column', height: '100%', cursor: 'default', borderRadius: RADIUS, overflow: 'hidden' }}>
+            <div style={{ flex: 1, position: 'relative', overflow: 'hidden', minHeight: 0, borderRadius: `${RADIUS} ${RADIUS} 0 0` }}>
               <div style={{ position: 'absolute', inset: 0, backgroundColor: '#F0EDEA' }} />
               <div style={{
                 position: 'absolute', inset: 0,
@@ -153,29 +173,26 @@ export default function ProjectCard({
                   {project.name}
                 </span>
               </div>
-              <motion.div
-                animate={{ boxShadow: hovered ? `inset 0 0 0 2px ${project.accentColor}` : `inset 0 0 0 0px transparent` }}
-                transition={{ duration: 0.28, ease: 'easeOut' }}
-                style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}
-              />
               <div
                 ref={sheenRef}
-                style={{ position: 'absolute', inset: 0, opacity: 0, pointerEvents: 'none', transition: 'opacity 0.38s ease', zIndex: 2 }}
+                style={{ position: 'absolute', inset: 0, opacity: 0, pointerEvents: 'none', transition: 'opacity 0.18s ease', zIndex: 2 }}
               />
             </div>
-            <div style={{ height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#FAFAFA', flexShrink: 0, padding: '0 1px' }}>
+            <div style={{ height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#FAFAFA', flexShrink: 0, padding: '0 8px', borderRadius: `0 0 ${RADIUS} ${RADIUS}` }}>
               <span style={{ fontFamily: "'TWK Lausanne Pan', system-ui, sans-serif", fontWeight: 400, fontSize: '0.76rem', letterSpacing: '-0.01em', color: '#B8B0A8' }}>
                 {project.shortName}
               </span>
-              <span style={{ fontFamily: "'TWK Lausanne Pan', system-ui, sans-serif", fontWeight: 300, fontSize: '0.70rem', color: '#C8C0B8', letterSpacing: '0.02em' }}>
-                {project.year}
-              </span>
+              {project.tags && project.tags.length > 0 && (
+                <span style={{ fontFamily: "'TWK Lausanne Pan', system-ui, sans-serif", fontWeight: 400, fontSize: '0.76rem', letterSpacing: '-0.01em', color: '#C8C0B8', textAlign: 'right' }}>
+                  {project.tags.join(' / ')}
+                </span>
+              )}
             </div>
           </div>
 
         ) : (
 
-          /* ── Regular project card ────────────────────────────────────── */
+          /* ── Regular project card ──────────────────────────────── */
           (() => {
             const cta =
               project.type === 'case-study' ? 'View Case Study' :
@@ -190,13 +207,19 @@ export default function ProjectCard({
               <Link
                 href={href}
                 {...(isExternal ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
-                style={{ textDecoration: 'none', display: 'flex', flexDirection: 'column', height: '100%' }}
+                style={{ textDecoration: 'none', display: 'flex', flexDirection: 'column', height: '100%', borderRadius: RADIUS }}
               >
-                {/* ── Image area ─────────────────────────────────────── */}
-                <div style={{ flex: 1, position: 'relative', overflow: 'hidden', minHeight: 0 }}>
+                {/* ── Image area — top corners rounded ─────────────── */}
+                <div style={{
+                  flex: 1, position: 'relative',
+                  overflow: 'hidden', minHeight: 0,
+                  borderRadius: RADIUS,
+                }}>
 
-                  {/* Accent fallback */}
-                  <div style={{ position: 'absolute', inset: 0, backgroundColor: project.accentColor, opacity: 0.55 }} />
+                  {/* Accent fallback — hidden for contain mode */}
+                  {project.coverFit !== 'contain' && (
+                    <div style={{ position: 'absolute', inset: 0, backgroundColor: project.accentColor, opacity: 0.55 }} />
+                  )}
 
                   {/* Media — subtle zoom on hover */}
                   <motion.div
@@ -206,9 +229,11 @@ export default function ProjectCard({
                   >
                     <div style={{
                       position: 'absolute', inset: 0,
+                      backgroundColor: project.coverFit === 'contain' ? '#FAFAFA' : undefined,
                       backgroundImage: `url(/images/${project.slug}/cover.jpg)`,
-                      backgroundSize: 'cover',
+                      backgroundSize: project.coverFit ?? 'cover',
                       backgroundPosition: project.coverPosition ?? 'center',
+                      backgroundRepeat: 'no-repeat',
                     }} />
                     {project.coverVideo && (
                       <motion.video
@@ -223,23 +248,32 @@ export default function ProjectCard({
                     )}
                   </motion.div>
 
-                  {/* Hover border */}
-                  <motion.div
-                    animate={{ boxShadow: hovered ? `inset 0 0 0 2px ${project.accentColor}` : `inset 0 0 0 0px transparent` }}
-                    transition={{ duration: 0.28, ease: 'easeOut' }}
-                    style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 1 }}
-                  />
-
                   {/* Reflective sheen */}
                   <div
                     ref={sheenRef}
-                    style={{ position: 'absolute', inset: 0, opacity: 0, pointerEvents: 'none', transition: 'opacity 0.38s ease', zIndex: 2 }}
+                    style={{ position: 'absolute', inset: 0, opacity: 0, pointerEvents: 'none', transition: 'opacity 0.18s ease', zIndex: 2 }}
                   />
 
-                  {/* CTA label */}
+                  {/* Image-only hover stroke */}
                   <motion.div
-                    animate={{ opacity: hovered ? 1 : 0, y: hovered ? 0 : 4 }}
-                    transition={{ duration: 0.2 }}
+                    animate={{
+                      boxShadow: hovered
+                        ? `inset 0 0 0 2px ${project.accentColor}`
+                        : `inset 0 0 0 0px transparent`,
+                    }}
+                    transition={{ duration: 0.18, ease: 'easeOut' }}
+                    style={{
+                      position: 'absolute', inset: 0,
+                      borderRadius: RADIUS,
+                      pointerEvents: 'none',
+                      zIndex: 10,
+                    }}
+                  />
+
+                  {/* CTA label — snaps up quickly */}
+                  <motion.div
+                    animate={{ opacity: hovered ? 1 : 0, y: hovered ? 0 : 6 }}
+                    transition={{ duration: 0.13, ease: [0.22, 1, 0.36, 1] }}
                     style={{
                       position: 'absolute', bottom: 12, left: 12, zIndex: 3,
                       fontFamily: "'TWK Lausanne Pan', system-ui, sans-serif",
@@ -253,19 +287,25 @@ export default function ProjectCard({
                   </motion.div>
                 </div>
 
-                {/* ── Label bar ──────────────────────────────────────── */}
-                <div style={{ height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#FAFAFA', flexShrink: 0, padding: '0 1px' }}>
+                {/* ── Label bar ────────────────────────────────────── */}
+                <div style={{
+                  height: '36px', display: 'flex', alignItems: 'center',
+                  justifyContent: 'space-between', backgroundColor: '#FAFAFA',
+                  flexShrink: 0, padding: '0 8px',
+                  borderRadius: `0 0 ${RADIUS} ${RADIUS}`,
+                }}>
                   <span style={{ fontFamily: "'TWK Lausanne Pan', system-ui, sans-serif", fontWeight: 400, fontSize: '0.76rem', letterSpacing: '-0.01em', color: '#0A0A0A' }}>
                     {project.shortName}
                   </span>
-                  <span style={{ fontFamily: "'TWK Lausanne Pan', system-ui, sans-serif", fontWeight: 300, fontSize: '0.70rem', color: '#A8A8A8', letterSpacing: '0.02em' }}>
-                    {project.year}
-                  </span>
+                  {project.tags && project.tags.length > 0 && (
+                    <span style={{ fontFamily: "'TWK Lausanne Pan', system-ui, sans-serif", fontWeight: 400, fontSize: '0.76rem', letterSpacing: '-0.01em', color: '#A8A8A8', textAlign: 'right' }}>
+                      {project.tags.join(' / ')}
+                    </span>
+                  )}
                 </div>
               </Link>
             )
           })()
-
         )}
       </motion.div>
     </motion.div>
