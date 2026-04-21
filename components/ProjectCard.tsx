@@ -270,28 +270,26 @@ export default function ProjectCard({
                     }}
                   />
 
-                  {/* Hover quote — top right, odo only */}
-                  {project.keyInsight && (
+                  {/* Hover quote — odo only */}
+                  {project.slug === 'odo' && project.keyInsight && (
                     <motion.div
                       animate={{ opacity: hovered ? 1 : 0, y: hovered ? 0 : -6 }}
-                      transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
+                      transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
                       style={{
-                        position: 'absolute', top: 14, right: 14, zIndex: 4,
-                        maxWidth: '52%', pointerEvents: 'none',
-                        backgroundColor: 'rgba(0,0,0,0.42)',
-                        backdropFilter: 'blur(6px)',
-                        borderRadius: '4px',
-                        padding: '10px 13px',
+                        position: 'absolute', top: 18, right: 18, zIndex: 4,
+                        maxWidth: '54%', pointerEvents: 'none',
                       }}
                     >
                       <p style={{
                         fontFamily: "'TWK Lausanne Pan', system-ui, sans-serif",
                         fontWeight: 300,
-                        fontSize: '0.78rem',
-                        lineHeight: 1.5,
+                        fontSize: '1rem',
+                        lineHeight: 1.55,
                         color: '#FFFFFF',
                         margin: 0,
-                        letterSpacing: '0.01em',
+                        letterSpacing: '-0.01em',
+                        textAlign: 'right',
+                        textShadow: '0 1px 12px rgba(0,0,0,0.55)',
                       }}>
                         "{project.keyInsight}"
                       </p>
