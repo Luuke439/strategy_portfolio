@@ -271,13 +271,15 @@ export default function ProjectCard({
                   />
 
                   {/* Hover quote — odo only */}
-                  {project.slug === 'odo' && project.keyInsight && (
+                  {project.slug === 'odo' && project.problemStatement && (
                     <motion.div
                       animate={{ opacity: hovered ? 1 : 0, y: hovered ? 0 : -6 }}
                       transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
                       style={{
                         position: 'absolute', top: 18, right: 18, zIndex: 4,
                         maxWidth: '54%', pointerEvents: 'none',
+                        backgroundColor: 'rgba(0,0,0,0.62)',
+                        padding: '12px 16px',
                       }}
                     >
                       <p style={{
@@ -289,9 +291,8 @@ export default function ProjectCard({
                         margin: 0,
                         letterSpacing: '-0.01em',
                         textAlign: 'right',
-                        textShadow: '0 1px 12px rgba(0,0,0,0.55)',
                       }}>
-                        "{project.keyInsight}"
+                        "{project.problemStatement}"
                       </p>
                     </motion.div>
                   )}
