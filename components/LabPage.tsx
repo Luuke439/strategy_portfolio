@@ -272,6 +272,44 @@ export default function LabPage({ project }: LabPageProps) {
           {/* Secondary visual */}
           <SecondaryVisual project={project} />
 
+          {/* Prototype duo — blend it only */}
+          {project.slug === 'blend-it' && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              style={{ marginBottom: '3rem' }}
+            >
+              <span
+                style={{
+                  fontFamily: "'TWK Lausanne Pan', system-ui, sans-serif",
+                  fontWeight: 400,
+                  fontSize: '0.72rem',
+                  letterSpacing: '0.08em',
+                  textTransform: 'uppercase',
+                  color: '#A0A0A0',
+                  display: 'block',
+                  marginBottom: '1rem',
+                }}
+              >
+                Technical prototype
+              </span>
+              <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
+                <img
+                  src="/images/blend-it/prototype.jpg"
+                  alt="Blend it prototype"
+                  style={{ width: '60%', height: 'auto', display: 'block' }}
+                />
+                <img
+                  src="/images/blend-it/prototype2.jpg"
+                  alt="Blend it prototype detail"
+                  style={{ width: '40%', height: 'auto', display: 'block' }}
+                />
+              </div>
+            </motion.div>
+          )}
+
           {/* Collaborators */}
           <div
             style={{
