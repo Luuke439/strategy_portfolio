@@ -295,16 +295,16 @@ export default function LabPage({ project }: LabPageProps) {
               >
                 Technical prototype
               </span>
-              <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
+              <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'stretch', height: '420px' }}>
                 <img
                   src="/images/blend-it/prototype.jpg"
                   alt="Blend it prototype"
-                  style={{ width: '60%', height: 'auto', display: 'block' }}
+                  style={{ width: '68%', height: '100%', objectFit: 'cover', display: 'block' }}
                 />
                 <img
                   src="/images/blend-it/prototype2.jpg"
                   alt="Blend it prototype detail"
-                  style={{ width: '40%', height: 'auto', display: 'block' }}
+                  style={{ width: '32%', height: '100%', objectFit: 'cover', display: 'block' }}
                 />
               </div>
             </motion.div>

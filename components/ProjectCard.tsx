@@ -243,7 +243,7 @@ export default function ProjectCard({
                         preload={project.coverVideoStart !== undefined ? 'auto' : 'none'}
                         animate={{ opacity: videoReady ? 1 : 0 }}
                         transition={{ duration: 0.4 }}
-                        style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', pointerEvents: 'none' }}
+                        style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: project.coverPosition ?? 'center', pointerEvents: 'none' }}
                       />
                     )}
                   </motion.div>
@@ -269,6 +269,34 @@ export default function ProjectCard({
                       zIndex: 10,
                     }}
                   />
+
+                  {/* Hover quote — top right, odo only */}
+                  {project.keyInsight && (
+                    <motion.div
+                      animate={{ opacity: hovered ? 1 : 0, y: hovered ? 0 : -6 }}
+                      transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
+                      style={{
+                        position: 'absolute', top: 14, right: 14, zIndex: 4,
+                        maxWidth: '52%', pointerEvents: 'none',
+                        backgroundColor: 'rgba(0,0,0,0.42)',
+                        backdropFilter: 'blur(6px)',
+                        borderRadius: '4px',
+                        padding: '10px 13px',
+                      }}
+                    >
+                      <p style={{
+                        fontFamily: "'TWK Lausanne Pan', system-ui, sans-serif",
+                        fontWeight: 300,
+                        fontSize: '0.78rem',
+                        lineHeight: 1.5,
+                        color: '#FFFFFF',
+                        margin: 0,
+                        letterSpacing: '0.01em',
+                      }}>
+                        "{project.keyInsight}"
+                      </p>
+                    </motion.div>
+                  )}
 
                   {/* CTA label — snaps up quickly */}
                   <motion.div

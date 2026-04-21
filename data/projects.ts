@@ -79,6 +79,7 @@ export const projects: Project[] = [
     type: 'case-study',
     coverVideo: 'cover.mp4',
     coverVideoStart: 7,
+    coverPosition: '38% center',
     year: '2025',
     tags: ['Crisis Infrastructure', 'Service Design', 'Systems Thinking'],
     label: 'Ministry Presentation',
