@@ -270,33 +270,6 @@ export default function ProjectCard({
                     }}
                   />
 
-                  {/* Hover quote — odo only */}
-                  {project.slug === 'odo' && project.problemStatement && (
-                    <motion.div
-                      animate={{ opacity: hovered ? 1 : 0, y: hovered ? 0 : -6 }}
-                      transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
-                      style={{
-                        position: 'absolute', top: 18, right: 18, zIndex: 4,
-                        maxWidth: '54%', pointerEvents: 'none',
-                        backgroundColor: 'rgba(0,0,0,0.62)',
-                        padding: '12px 16px',
-                      }}
-                    >
-                      <p style={{
-                        fontFamily: "'TWK Lausanne Pan', system-ui, sans-serif",
-                        fontWeight: 300,
-                        fontSize: '1rem',
-                        lineHeight: 1.55,
-                        color: '#FFFFFF',
-                        margin: 0,
-                        letterSpacing: '-0.01em',
-                        textAlign: 'right',
-                      }}>
-                        "{project.problemStatement}"
-                      </p>
-                    </motion.div>
-                  )}
-
                   {/* CTA label — snaps up quickly */}
                   <motion.div
                     animate={{ opacity: hovered ? 1 : 0, y: hovered ? 0 : 6 }}
