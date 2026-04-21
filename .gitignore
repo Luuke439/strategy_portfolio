@@ -42,3 +42,4 @@ next-env.d.ts
 
 # Desktop fonts (not needed for web)
 public/fonts/TWKLausannePan*/Desktop/
+.claude/
