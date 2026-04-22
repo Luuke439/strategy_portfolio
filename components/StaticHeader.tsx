@@ -60,7 +60,7 @@ export default function StaticHeader() {
               textDecoration: 'none',
               cursor:         'pointer',
               padding:        '10px 20px 10px 0',
-              minWidth:       '350px',
+              minWidth:       '330px',
               pointerEvents:  'auto',
             }}
           >

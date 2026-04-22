@@ -110,7 +110,7 @@ export default function Home() {
               background:    'none',
               border:        'none',
               padding:       '10px 20px 10px 0',
-              minWidth:      '350px',
+              minWidth:      '330px',
               cursor:        'pointer',
               userSelect:    'none',
               pointerEvents: 'auto',
