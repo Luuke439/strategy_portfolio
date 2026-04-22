@@ -8,7 +8,7 @@ const FONT = "'TWK Lausanne Pan', system-ui, sans-serif"
 const NAV_LINKS = [
   { label: 'About',    href: '/about',                                external: false },
   { label: 'CV',       href: '/Luke_Caporelli_CV.pdf',               external: true  },
-  { label: 'LinkedIn', href: 'https://linkedin.com/in/lukecaporelli', external: true  },
+  { label: 'LinkedIn', href: 'https://www.linkedin.com/in/luke-caporelli', external: true  },
 ]
 
 // Chrome-metallic 3D text — matches the visual language of the Three.js name mesh
