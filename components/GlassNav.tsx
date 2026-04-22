@@ -18,16 +18,16 @@ function NavLabel3D({ children }: { children: string }) {
       style={{
         display:              'inline-block',
         color:                'transparent',
-        background:           'linear-gradient(172deg, #d8d8d8 0%, #a4a4a4 26%, #f0f0f0 46%, #747474 66%, #c4c4c4 100%)',
+        background:           'linear-gradient(352deg, #d8d8d8 0%, #a4a4a4 26%, #f0f0f0 46%, #747474 66%, #c4c4c4 100%)',
         WebkitBackgroundClip: 'text',
         backgroundClip:       'text',
         textShadow: [
-          '0px 0.5px 0 rgba(0,0,0,0.28)',
-          '0px 1px   0 rgba(0,0,0,0.18)',
-          '0px 1.5px 0 rgba(0,0,0,0.10)',
-          '0px 2px   4px rgba(0,0,0,0.11)',
+          '0px -0.5px 0 rgba(0,0,0,0.28)',
+          '0px -1px   0 rgba(0,0,0,0.18)',
+          '0px -1.5px 0 rgba(0,0,0,0.10)',
+          '0px -2px   4px rgba(0,0,0,0.11)',
         ].join(', '),
-        filter: 'drop-shadow(0 -0.5px 0 rgba(255,255,255,0.58))',
+        filter: 'drop-shadow(0 0.5px 0 rgba(255,255,255,0.58))',
       }}
     >
       {children}
