@@ -1,34 +1,33 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { motion } from 'framer-motion'
 import Link from 'next/link'
 
 const FONT = "'TWK Lausanne Pan', system-ui, sans-serif"
 
 const NAV_LINKS = [
-  { label: 'About',    href: '/about',                                 external: false },
-  { label: 'CV',       href: '/Luke_Caporelli_CV.pdf',                external: true  },
+  { label: 'About',    href: '/about',                                external: false },
+  { label: 'CV',       href: '/Luke_Caporelli_CV.pdf',               external: true  },
   { label: 'LinkedIn', href: 'https://linkedin.com/in/lukecaporelli', external: true  },
 ]
 
-// 3D metallic label — gradient face + layered extrusion shadows
-function Label3D({ children }: { children: string }) {
+// Chrome-metallic 3D text — matches the visual language of the Three.js name mesh
+function NavLabel3D({ children }: { children: string }) {
   return (
     <span
       style={{
         display:              'inline-block',
         color:                'transparent',
-        background:           'linear-gradient(168deg, #4a4a4a 0%, #888 38%, #1a1a1a 68%, #555 100%)',
+        background:           'linear-gradient(172deg, #d8d8d8 0%, #a4a4a4 26%, #f0f0f0 46%, #747474 66%, #c4c4c4 100%)',
         WebkitBackgroundClip: 'text',
         backgroundClip:       'text',
         textShadow: [
-          '0px 0.5px 0 rgba(0,0,0,0.32)',
-          '0px 1px   0 rgba(0,0,0,0.22)',
-          '0px 1.5px 0 rgba(0,0,0,0.13)',
-          '0px 2px   3px rgba(0,0,0,0.14)',
+          '0px 0.5px 0 rgba(0,0,0,0.28)',
+          '0px 1px   0 rgba(0,0,0,0.18)',
+          '0px 1.5px 0 rgba(0,0,0,0.10)',
+          '0px 2px   4px rgba(0,0,0,0.11)',
         ].join(', '),
-        // Tiny highlight on top edge
-        filter: 'drop-shadow(0 -0.5px 0 rgba(255,255,255,0.55))',
+        filter: 'drop-shadow(0 -0.5px 0 rgba(255,255,255,0.58))',
       }}
     >
       {children}
@@ -36,75 +35,43 @@ function Label3D({ children }: { children: string }) {
   )
 }
 
-export default function GlassNav() {
-  const barRef = useRef<HTMLDivElement>(null)
-  const [glow, setGlow] = useState<{ x: number; y: number } | null>(null)
+interface GlassNavProps {
+  isVisible?: boolean
+}
 
-  const onMove = (e: React.MouseEvent) => {
-    const r = barRef.current?.getBoundingClientRect()
-    if (!r) return
-    setGlow({
-      x: ((e.clientX - r.left) / r.width)  * 100,
-      y: ((e.clientY - r.top)  / r.height) * 100,
-    })
-  }
-
+export default function GlassNav({ isVisible = true }: GlassNavProps) {
   return (
-    <div
-      ref={barRef}
-      onMouseMove={onMove}
-      onMouseLeave={() => setGlow(null)}
-      style={{
-        position:             'relative',
-        display:              'flex',
-        alignItems:           'center',
-        borderRadius:         '100px',
-        overflow:             'hidden',
-        background:           'linear-gradient(175deg, rgba(255,255,255,0.32) 0%, rgba(255,255,255,0.11) 100%)',
-        backdropFilter:       'blur(22px) saturate(200%)',
-        WebkitBackdropFilter: 'blur(22px) saturate(200%)',
-        border:               '1px solid rgba(255,255,255,0.32)',
-        boxShadow: [
-          'inset 0 1.5px 0 rgba(255,255,255,0.72)',
-          'inset 0 -1px 0 rgba(0,0,0,0.07)',
-          '0 8px 32px rgba(0,0,0,0.11)',
-          '0 2px 6px rgba(0,0,0,0.08)',
-        ].join(', '),
-      }}
-    >
-      {/* Mouse-light glow */}
-      <div
-        style={{
-          position:      'absolute',
-          inset:         0,
-          pointerEvents: 'none',
-          borderRadius:  '100px',
-          zIndex:        1,
-          transition:    'opacity 0.15s ease',
-          opacity:       glow ? 1 : 0,
-          background:    glow
-            ? `radial-gradient(ellipse 90px 46px at ${glow.x}% ${glow.y}%, rgba(255,255,255,0.42) 0%, transparent 72%)`
-            : 'none',
-        }}
-      />
-
+    <div style={{ display: 'flex', alignItems: 'center' }}>
       {NAV_LINKS.map((link, i) => (
-        <div
-          key={link.label}
-          style={{ display: 'flex', alignItems: 'center', position: 'relative', zIndex: 2 }}
-        >
-          {i > 0 && (
-            <div style={{ width: '1px', height: '13px', background: 'rgba(0,0,0,0.09)', flexShrink: 0 }} />
-          )}
-          {link.external ? (
-            <a href={link.href} target="_blank" rel="noopener noreferrer" style={linkStyle}>
-              <Label3D>{link.label}</Label3D>
-            </a>
-          ) : (
-            <Link href={link.href} style={linkStyle}>
-              <Label3D>{link.label}</Label3D>
-            </Link>
-          )}
+        <div key={link.label} style={{ display: 'flex', alignItems: 'center' }}>
+          {/* Thin divider before each item */}
+          <div style={{ width: '1px', height: '13px', background: 'rgba(0,0,0,0.09)', flexShrink: 0 }} />
+
+          <motion.div
+            initial={{ y: -14, opacity: 0 }}
+            animate={isVisible ? { y: 0, opacity: 1 } : { y: -14, opacity: 0 }}
+            transition={{
+              y:       { duration: 0.68, delay: i * 0.10, ease: [0.22, 1, 0.36, 1] },
+              opacity: { duration: 0.55, delay: i * 0.10, ease: [0.22, 1, 0.36, 1] },
+              scale:   { type: 'spring', stiffness: 320, damping: 22 },
+              filter:  { duration: 0.20, ease: 'easeOut' },
+            }}
+            whileHover={{
+              scale:  1.08,
+              filter: 'drop-shadow(0 2px 10px rgba(155,160,180,0.44))',
+            }}
+            whileTap={{ scale: 0.96 }}
+          >
+            {link.external ? (
+              <a href={link.href} target="_blank" rel="noopener noreferrer" style={linkStyle}>
+                <NavLabel3D>{link.label}</NavLabel3D>
+              </a>
+            ) : (
+              <Link href={link.href} style={linkStyle}>
+                <NavLabel3D>{link.label}</NavLabel3D>
+              </Link>
+            )}
+          </motion.div>
         </div>
       ))}
     </div>
@@ -115,10 +82,10 @@ const linkStyle: React.CSSProperties = {
   fontFamily:     FONT,
   fontWeight:     500,
   fontSize:       '0.72rem',
-  letterSpacing:  '0.06em',
+  letterSpacing:  '0.08em',
   textTransform:  'uppercase',
   textDecoration: 'none',
-  padding:        '6px 16px',
+  padding:        '10px 16px',
   display:        'block',
   whiteSpace:     'nowrap',
 }
