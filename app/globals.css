@@ -105,6 +105,21 @@ body {
   /* scroll-snap-type removed from body — html handles it */
 }
 
+/* ── About page layout ───────────────────────────────────────────── */
+.about-grid {
+  display: grid;
+  grid-template-columns: 45fr 55fr;
+  gap: 5rem;
+  align-items: start;
+}
+
+@media (max-width: 768px) {
+  .about-grid {
+    grid-template-columns: 1fr;
+    gap: 3rem;
+  }
+}
+
 /* ── Scroll snap container ───────────────────────────────────────── */
 .snap-container {
   height: 100dvh;
