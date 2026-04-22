@@ -148,7 +148,7 @@ export const projects: Project[] = [
     shortName: 'expressive msg.',
     type: 'lab',
     coverVideo: 'cover.mp4',
-    coverPosition: '10% center',
+    coverPosition: '18% center',
     year: '2025',
     tags: ['Interaction Design', 'Motion', 'Speculative'],
     label: 'Interaction Study',
