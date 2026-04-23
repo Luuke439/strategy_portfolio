@@ -346,6 +346,19 @@ function NameMesh({ scrollRef, navRef, accentHoverRef, mousePosRef, onReady, geo
   const curLightPos = useRef(new THREE.Vector3(0, 0, 8))
   const { size, camera } = useThree()
 
+  // ── Viewport-invariant nav scale ─────────────────────────────────────────
+  // The perspective camera maps world units to canvas height, so a fixed world
+  // size renders at different pixel sizes on different displays. Invert that:
+  // scale the nav-pose size inversely with viewport height, calibrated on a
+  // MacBook Air M1 fullscreen (~800 CSS px). Clamped so very small/large
+  // viewports don't explode.
+  const NAV_SCALE_REFERENCE_VH = 800
+  const navScaleFactor = Math.min(
+    1.25,
+    Math.max(0.45, NAV_SCALE_REFERENCE_VH / Math.max(size.height, 1)),
+  )
+  const effectiveNavScale = anim.navScale * navScaleFactor
+
   // Nav target from DOM span — uses LEFT edge of span + half text width so the
   // text left-aligns correctly at every viewport size without a manual correction.
   useEffect(() => {
@@ -362,14 +375,14 @@ function NameMesh({ scrollRef, navRef, accentHoverRef, mousePosRef, onReady, geo
       const t = -camera.position.z / dir.z
       const wp = camera.position.clone().addScaledVector(dir, t)
       // Shift center right so the text's left edge lands at the span's left edge
-      const halfW = (textWidthRef.current * anim.navScale) / 2
+      const halfW = (textWidthRef.current * effectiveNavScale) / 2
       navRef.current = { x: wp.x + halfW, y: wp.y }
     }
     recomputeNavRef.current = compute
     compute()
     window.addEventListener('resize', compute)
     return () => window.removeEventListener('resize', compute)
-  }, [size, camera, navRef, anim.navScale])
+  }, [size, camera, navRef, effectiveNavScale])
 
   useEffect(() => { onReady() }, [onReady])
 
@@ -393,7 +406,7 @@ function NameMesh({ scrollRef, navRef, accentHoverRef, mousePosRef, onReady, geo
     const navX = nav?.x ?? anim.heroX
     const tX = anim.heroX + (navX - anim.heroX) * p
     const tY = anim.heroY + ((nav?.y ?? anim.heroY) - anim.heroY) * p + floatY
-    const tS = 1 + (anim.navScale - 1) * p
+    const tS = 1 + (effectiveNavScale - 1) * p
 
     // If the pathname just changed (snapTick bumped) and nav target is known
     // for the p=1 case, set the transform directly — no lerp, no visible
