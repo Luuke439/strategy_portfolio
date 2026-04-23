@@ -270,8 +270,8 @@ export default function LabPage({ project }: LabPageProps) {
             <h1
               style={{
                 fontFamily: "'TWK Lausanne Pan', system-ui, sans-serif",
-                fontWeight: 700,
-                fontSize: 'clamp(2.5rem, 6vw, 6rem)',
+                fontWeight: 500,
+                fontSize: 'clamp(2.8rem, 6vw, 5.5rem)',
                 lineHeight: 0.95,
                 color: '#0A0A0A',
                 letterSpacing: '-0.03em',
