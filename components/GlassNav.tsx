@@ -37,9 +37,13 @@ function NavLabel3D({ children }: { children: string }) {
 
 interface GlassNavProps {
   isVisible?: boolean
+  /** When false, the isVisible flip is instant (no stagger entrance). Used on
+   *  non-home routes so the nav is simply present without replaying the
+   *  hero→nav animation every navigation. */
+  animated?: boolean
 }
 
-export default function GlassNav({ isVisible = true }: GlassNavProps) {
+export default function GlassNav({ isVisible = true, animated = true }: GlassNavProps) {
   return (
     <div style={{ display: 'flex', alignItems: 'center' }}>
       {NAV_LINKS.map((link, i) => (
@@ -48,14 +52,21 @@ export default function GlassNav({ isVisible = true }: GlassNavProps) {
           <div style={{ width: '1px', height: '13px', background: 'rgba(0,0,0,0.09)', flexShrink: 0 }} />
 
           <motion.div
-            initial={{ y: -14, opacity: 0 }}
+            // `initial={false}` skips the mount animation — when the header is
+            // already meant to be visible (any non-home route), items render in
+            // place instantly instead of re-staggering in.
+            initial={false}
             animate={isVisible ? { y: 0, opacity: 1 } : { y: -14, opacity: 0 }}
-            transition={{
-              y:       { duration: 0.68, delay: i * 0.10, ease: [0.22, 1, 0.36, 1] },
-              opacity: { duration: 0.55, delay: i * 0.10, ease: [0.22, 1, 0.36, 1] },
-              scale:   { type: 'spring', stiffness: 320, damping: 22 },
-              filter:  { duration: 0.20, ease: 'easeOut' },
-            }}
+            transition={
+              animated
+                ? {
+                    y:       { duration: 0.68, delay: i * 0.10, ease: [0.22, 1, 0.36, 1] },
+                    opacity: { duration: 0.55, delay: i * 0.10, ease: [0.22, 1, 0.36, 1] },
+                    scale:   { type: 'spring', stiffness: 320, damping: 22 },
+                    filter:  { duration: 0.20, ease: 'easeOut' },
+                  }
+                : { duration: 0 }
+            }
             whileHover={{
               scale:  1.08,
               filter: 'drop-shadow(0 2px 10px rgba(155,160,180,0.44))',

@@ -1,7 +1,6 @@
 'use client'
 
 import { useRef, useEffect, useState } from 'react'
-import { motion } from 'framer-motion'
 
 interface StaggerTextProps {
   children: string
@@ -37,21 +36,23 @@ export default function StaggerText({
   return (
     <span
       ref={ref}
-      className={`stagger-reveal ${className}`}
+      className={`stagger-reveal ${inView ? 'is-visible' : ''} ${className}`}
       style={{ display: 'inline', ...style }}
       aria-label={children}
     >
       {children.split('').map((char, i) => (
-        <motion.span
+        <span
           key={i}
           aria-hidden="true"
-          style={{ display: 'inline-block', whiteSpace: char === ' ' ? 'pre' : 'normal' }}
-          initial={{ opacity: 0, y: 12 }}
-          animate={inView ? { opacity: 1, y: 0 } : { opacity: 0, y: 12 }}
-          transition={{ duration: 0.4, ease: 'easeOut', delay: i * 0.015 }}
+          className="stagger-char"
+          style={{
+            whiteSpace: char === ' ' ? 'pre' : 'normal',
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            ['--i' as any]: i,
+          }}
         >
           {char === ' ' ? '\u00A0' : char}
-        </motion.span>
+        </span>
       ))}
     </span>
   )

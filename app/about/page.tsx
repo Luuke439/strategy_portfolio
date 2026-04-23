@@ -1,9 +1,5 @@
 'use client'
 
-import dynamic from 'next/dynamic'
-
-const StaticHeader = dynamic(() => import('@/components/StaticHeader'), { ssr: false })
-
 const FONT = "'TWK Lausanne Pan', system-ui, sans-serif"
 
 const EXPERIENCE = [
@@ -127,8 +123,6 @@ function TimelineRow({ years, org, role, detail }: {
 export default function AboutPage() {
   return (
     <div style={{ backgroundColor: '#FAFAFA', minHeight: '100vh' }}>
-      <StaticHeader />
-
       <main style={{
         paddingTop:    '7rem',
         paddingBottom: '8rem',

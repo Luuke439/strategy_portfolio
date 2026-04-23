@@ -58,6 +58,15 @@ export default function ProjectCard({
   const rotateX = useSpring(useTransform(my, [-0.5, 0.5], [maxTilt, -maxTilt]), SPRING)
   const rotateY = useSpring(useTransform(mx, [-0.5, 0.5], [-maxTilt, maxTilt]), SPRING)
 
+  // ── Pointer coalescing ────────────────────────────────────────────────────
+  // mousemove fires faster than the browser paints. We coalesce into a single
+  // rAF so we never do more than one DOM write + motion-value update per frame.
+  const pointerRef = useRef<{ nx: number; ny: number } | null>(null)
+  const rafRef = useRef<number | null>(null)
+  useEffect(() => () => {
+    if (rafRef.current != null) cancelAnimationFrame(rafRef.current)
+  }, [])
+
   // ── Video metadata & seek ─────────────────────────────────────────────────
   useEffect(() => {
     if (isPlaceholder) return
@@ -92,14 +101,23 @@ export default function ProjectCard({
     const rect = e.currentTarget.getBoundingClientRect()
     const nx = (e.clientX - rect.left) / rect.width - 0.5
     const ny = (e.clientY - rect.top) / rect.height - 0.5
-    mx.set(nx)
-    my.set(ny)
-    if (sheenRef.current) {
-      const sx = ((nx + 0.5) * 100).toFixed(1)
-      const sy = ((ny + 0.5) * 100).toFixed(1)
-      sheenRef.current.style.backgroundImage =
-        `radial-gradient(ellipse 72% 62% at ${sx}% ${sy}%, rgba(255,255,255,0.09) 0%, rgba(255,255,255,0.035) 42%, transparent 68%)`
-    }
+    pointerRef.current = { nx, ny }
+    if (rafRef.current != null) return
+    rafRef.current = requestAnimationFrame(() => {
+      rafRef.current = null
+      const p = pointerRef.current
+      if (!p) return
+      mx.set(p.nx)
+      my.set(p.ny)
+      if (sheenRef.current) {
+        const sx = (p.nx + 0.5) * 100
+        const sy = (p.ny + 0.5) * 100
+        // CSS custom properties are cheaper to update than re-parsing a full
+        // background-image string on every frame; the gradient reads them live.
+        sheenRef.current.style.setProperty('--sx', `${sx}%`)
+        sheenRef.current.style.setProperty('--sy', `${sy}%`)
+      }
+    })
   }
 
   const handleMouseEnter = (e: React.MouseEvent<HTMLElement>) => {
@@ -175,7 +193,15 @@ export default function ProjectCard({
               </div>
               <div
                 ref={sheenRef}
-                style={{ position: 'absolute', inset: 0, opacity: 0, pointerEvents: 'none', transition: 'opacity 0.18s ease', zIndex: 2 }}
+                style={{
+                  position: 'absolute', inset: 0, opacity: 0, pointerEvents: 'none',
+                  transition: 'opacity 0.18s ease', zIndex: 2,
+                  ['--sx' as string]: '50%',
+                  ['--sy' as string]: '50%',
+                  backgroundImage:
+                    'radial-gradient(ellipse 72% 62% at var(--sx) var(--sy), rgba(255,255,255,0.09) 0%, rgba(255,255,255,0.035) 42%, transparent 68%)',
+                  willChange: 'opacity',
+                }}
               />
             </div>
             <div style={{ height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#FAFAFA', flexShrink: 0, padding: '0 8px', borderRadius: `0 0 ${RADIUS} ${RADIUS}` }}>
@@ -240,7 +266,11 @@ export default function ProjectCard({
                         ref={videoRef}
                         src={`/videos/${project.slug}/${project.coverVideo}`}
                         muted loop playsInline
-                        preload={project.coverVideoStart !== undefined ? 'auto' : 'none'}
+                        // metadata is enough to seek to the poster frame; the
+                        // full payload streams on hover. Loading all 4 grid
+                        // videos eagerly at mount was the single biggest source
+                        // of first-load jank.
+                        preload="metadata"
                         animate={{ opacity: videoReady ? 1 : 0 }}
                         transition={{ duration: 0.4 }}
                         style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: project.coverPosition ?? 'center', pointerEvents: 'none' }}
@@ -251,7 +281,15 @@ export default function ProjectCard({
                   {/* Reflective sheen */}
                   <div
                     ref={sheenRef}
-                    style={{ position: 'absolute', inset: 0, opacity: 0, pointerEvents: 'none', transition: 'opacity 0.18s ease', zIndex: 2 }}
+                    style={{
+                      position: 'absolute', inset: 0, opacity: 0, pointerEvents: 'none',
+                      transition: 'opacity 0.18s ease', zIndex: 2,
+                      ['--sx' as string]: '50%',
+                      ['--sy' as string]: '50%',
+                      backgroundImage:
+                        'radial-gradient(ellipse 72% 62% at var(--sx) var(--sy), rgba(255,255,255,0.09) 0%, rgba(255,255,255,0.035) 42%, transparent 68%)',
+                      willChange: 'opacity',
+                    }}
                   />
 
                   {/* Image-only hover stroke */}

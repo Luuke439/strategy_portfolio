@@ -9,13 +9,59 @@
  * All visual knobs are live-tweakable via the Leva panel (top-right).
  */
 
-import { useRef, useState, useEffect, Suspense, useCallback } from 'react'
+import { useRef, useState, useEffect, Suspense, useCallback, useMemo, lazy } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { Center, Text3D } from '@react-three/drei'
-import { Leva, useControls, button } from 'leva'
 import * as THREE from 'three'
 
 const FONT = '/fonts/Fredoka Expanded_Bold.json'
+
+// ─── Static scene defaults ──────────────────────────────────────────────────
+// These are the values the Leva panel used to expose. They're hoisted into
+// plain constants so the Leva runtime (~45kb + React store updates) is only
+// paid when the designer opts in via ?leva.
+const DEFAULT_GEO = {
+  textSize:       0.36,
+  depth:          0.025,
+  bevelSize:      0.045,
+  bevelThickness: 0.060,
+  bevelSegments:  8,
+  curveSegments:  32,
+} as const
+
+const DEFAULT_MAT = {
+  color:              '#c8c8c8',
+  metalness:          1.00,
+  roughness:          0.05,
+  clearcoat:          1.00,
+  clearcoatRoughness: 0.05,
+  reflectivity:       1.00,
+  envMapIntensity:    6.00,
+} as const
+
+const DEFAULT_LIGHTS = {
+  key:          2.0,
+  fill:         0.80,
+  rim:          3.5,
+  kicker:       1.50,
+  ambient:      0.10,
+  envIntensity: 2.00,
+} as const
+
+const DEFAULT_ANIM = {
+  heroX:           0.0,
+  heroY:           0.0,
+  navScale:        0.28,
+  flipX:           1,
+  flipSpins:       0,
+  floatAmp:        0.04,
+  sunIntensity:    14,
+  accentIntensity: 32,
+} as const
+
+// Leva is only imported on demand (see SceneLeva below).
+const SceneLeva = lazy(() => import('./Hero3D.leva').then(m => ({ default: m.SceneLeva })))
+const LevaPanel = lazy(() => import('./Hero3D.leva').then(m => ({ default: m.LevaPanel })))
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Sets up transparent bg AND disables pointer events on the canvas DOM element.
@@ -36,22 +82,10 @@ function CanvasSetup() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// ImageEnv — loads day.jpg (06:00–20:00 Berlin) or night.jpeg otherwise as an
-// equirectangular PMREM environment map for the chrome reflections.
-// Falls back to a neutral chrome gradient if neither file loads.
+// ImageEnv — loads day.jpg as an equirectangular PMREM environment map for the
+// chrome reflections. A neutral studio gradient is applied synchronously on
+// mount so the chrome never flashes black while day.jpg is downloading.
 // ─────────────────────────────────────────────────────────────────────────────
-function getBerlinIsDay(): boolean {
-  const hour = parseInt(
-    new Date().toLocaleString('en-US', {
-      timeZone: 'Europe/Berlin',
-      hour: 'numeric',
-      hour12: false,
-    }),
-    10,
-  )
-  return hour >= 6 && hour < 20
-}
-
 function buildNeutralEnv(gl: THREE.WebGLRenderer): THREE.Texture {
   // Three-point studio setup: bright white sky, warm key light, cool fill,
   // sharp rim at the horizon — gives chrome the contrast it needs to shine.
@@ -105,20 +139,19 @@ function ImageEnv({ intensity }: { intensity: number }) {
   const { scene, gl } = useThree()
 
   useEffect(() => {
-    let envMap: THREE.Texture | null = null
+    // Apply neutral studio env synchronously — guarantees the chrome is lit
+    // from frame 0, so we never render black while day.jpg is downloading.
+    const neutral = buildNeutralEnv(gl)
+    scene.environment = neutral
 
-    const apply = (map: THREE.Texture) => {
-      envMap = map
-      scene.environment = map
-    }
-
-    const isDay = getBerlinIsDay()
-    const path  = isDay ? '/day.jpg' : '/night.jpeg'
+    let hdriMap: THREE.Texture | null = null
+    let cancelled = false
 
     const loader = new THREE.TextureLoader()
     loader.load(
-      path,
+      '/day.jpg',
       (texture) => {
+        if (cancelled) { texture.dispose(); return }
         const img = texture.image as HTMLImageElement
         const W   = img.naturalWidth  || img.width
         const H   = img.naturalHeight || img.height
@@ -126,17 +159,11 @@ function ImageEnv({ intensity }: { intensity: number }) {
         c.width = W; c.height = H
         const ctx = c.getContext('2d')!
 
-        if (isDay) {
-          // Flip vertically (sun to zenith) + gentle exposure boost
-          ctx.filter = 'brightness(130%) saturate(110%)'
-          ctx.translate(0, H)
-          ctx.scale(1, -1)
-          ctx.drawImage(img, 0, 0)
-        } else {
-          // Night images tend to be very dark — boost heavily for chrome
-          ctx.filter = 'brightness(280%) contrast(115%) saturate(120%)'
-          ctx.drawImage(img, 0, 0)
-        }
+        // Flip vertically (sun to zenith) + gentle exposure boost
+        ctx.filter = 'brightness(130%) saturate(110%)'
+        ctx.translate(0, H)
+        ctx.scale(1, -1)
+        ctx.drawImage(img, 0, 0)
 
         texture.dispose()
         const processed      = new THREE.CanvasTexture(c)
@@ -144,15 +171,20 @@ function ImageEnv({ intensity }: { intensity: number }) {
         processed.colorSpace = THREE.SRGBColorSpace
         const pmrem = new THREE.PMREMGenerator(gl)
         pmrem.compileEquirectangularShader()
-        apply(pmrem.fromEquirectangular(processed).texture)
+        hdriMap = pmrem.fromEquirectangular(processed).texture
         processed.dispose(); pmrem.dispose()
+        if (cancelled) { hdriMap.dispose(); hdriMap = null; return }
+        scene.environment = hdriMap
+        neutral.dispose()
       },
       undefined,
-      () => { apply(buildNeutralEnv(gl)) },
+      () => { /* keep neutral — day.jpg failed to load */ },
     )
 
     return () => {
-      if (envMap) { envMap.dispose(); if (scene.environment === envMap) scene.environment = null }
+      cancelled = true
+      if (hdriMap) { hdriMap.dispose(); if (scene.environment === hdriMap) scene.environment = null }
+      else { neutral.dispose(); if (scene.environment === neutral) scene.environment = null }
     }
   }, [scene, gl])
 
@@ -225,70 +257,23 @@ interface SceneProps {
   onReady: () => void
 }
 
-function SceneContent({ scrollRef, navRef, accentHoverRef, mousePosRef, onReady }: SceneProps) {
-  // Ref always holds latest values so the copy button callback isn't stale
-  const latest = useRef<Record<string, unknown>>({})
-
-  // ── Leva controls ──────────────────────────────────────────────────────────
-  const geo = useControls('Geometry', {
-    textSize: { value: 0.36, min: 0.1, max: 1.5, step: 0.01 },
-    depth: { value: 0.025, min: 0.005, max: 0.15, step: 0.005 },
-    bevelSize: { value: 0.045, min: 0.005, max: 0.20, step: 0.005 },
-    bevelThickness: { value: 0.060, min: 0.01, max: 0.20, step: 0.005 },
-    bevelSegments: { value: 8, min: 2, max: 64, step: 1 },
-    curveSegments: { value: 32, min: 8, max: 128, step: 4 },
-  })
-
-  const mat = useControls('Material', {
-    color: '#c8c8c8',
-    metalness: { value: 1.00, min: 0, max: 1, step: 0.01 },
-    roughness: { value: 0.05, min: 0, max: 1, step: 0.01 },
-    clearcoat: { value: 1.00, min: 0, max: 1, step: 0.01 },
-    clearcoatRoughness: { value: 0.05, min: 0, max: 1, step: 0.01 },
-    reflectivity: { value: 1.00, min: 0, max: 1, step: 0.01 },
-    envMapIntensity: { value: 6.00, min: 0, max: 12, step: 0.1 },
-  })
-
-  const lights = useControls('Lights', {
-    key: { value: 2.0, min: 0, max: 10, step: 0.1, label: 'Key (warm)' },
-    fill: { value: 0.80, min: 0, max: 5, step: 0.1, label: 'Fill (cool)' },
-    rim: { value: 3.5, min: 0, max: 10, step: 0.1, label: 'Rim (back)' },
-    kicker: { value: 1.50, min: 0, max: 5, step: 0.1, label: 'Kicker' },
-    ambient: { value: 0.10, min: 0, max: 2, step: 0.01, label: 'Ambient' },
-    envIntensity: { value: 2.00, min: 0, max: 6, step: 0.05, label: 'Env map' },
-  })
-
-  const anim = useControls('Animation', {
-    heroX: { value: 0.0, min: -4, max: 4, step: 0.05 },
-    heroY: { value: 0.0, min: -2, max: 2, step: 0.05 },
-    navScale: { value: 0.28, min: 0.05, max: 0.5, step: 0.005 },
-    flipX: { value: 1, min: 0, max: 3, step: 0.5, label: 'Coin flip (X)' },
-    flipSpins: { value: 0, min: 0, max: 4, step: 0.5, label: 'Y spin' },
-    floatAmp: { value: 0.04, min: 0, max: 0.2, step: 0.005 },
-    sunIntensity:    { value: 14, min: 0, max: 40, step: 0.5, label: 'Sun beam' },
-    accentIntensity: { value: 32, min: 0, max: 60, step: 0.5, label: 'Tile glow' },
-  })
-
-  useControls('Save', {
-    '📋 Copy settings to clipboard': button(() => {
-      navigator.clipboard.writeText(JSON.stringify(latest.current, null, 2))
-        .then(() => alert('Settings copied! Paste them to Claude.'))
-        .catch(() => console.log('Settings:', JSON.stringify(latest.current, null, 2)))
-    }),
-  })
-
-  // Keep latest ref in sync each render
-  latest.current = { geo, mat, lights, anim }
-
-  // ── Lights ─────────────────────────────────────────────────────────────────
+export function SceneBody({
+  scrollRef, navRef, accentHoverRef, mousePosRef, onReady,
+  geo, mat, lights, anim,
+}: SceneProps & {
+  geo: typeof DEFAULT_GEO | Record<string, number>
+  mat: typeof DEFAULT_MAT | Record<string, number | string>
+  lights: typeof DEFAULT_LIGHTS | Record<string, number>
+  anim: typeof DEFAULT_ANIM | Record<string, number>
+}) {
   return (
     <>
-      <directionalLight color="#FFE4C0" intensity={lights.key} position={[6, 4, 2.5]} />
-      <directionalLight color="#C8D8FF" intensity={lights.fill} position={[-5, -2, 1.5]} />
-      <directionalLight color="#FFFFFF" intensity={lights.rim} position={[0, 1.5, -6]} />
-      <directionalLight color="#FFD0A0" intensity={lights.kicker} position={[3, -2, -4]} />
-      <ambientLight intensity={lights.ambient} />
-      <ImageEnv intensity={lights.envIntensity} />
+      <directionalLight color="#FFE4C0" intensity={lights.key as number} position={[6, 4, 2.5]} />
+      <directionalLight color="#C8D8FF" intensity={lights.fill as number} position={[-5, -2, 1.5]} />
+      <directionalLight color="#FFFFFF" intensity={lights.rim as number} position={[0, 1.5, -6]} />
+      <directionalLight color="#FFD0A0" intensity={lights.kicker as number} position={[3, -2, -4]} />
+      <ambientLight intensity={lights.ambient as number} />
+      <ImageEnv intensity={lights.envIntensity as number} />
 
       <Suspense fallback={null}>
         <NameMesh
@@ -303,6 +288,18 @@ function SceneContent({ scrollRef, navRef, accentHoverRef, mousePosRef, onReady 
         />
       </Suspense>
     </>
+  )
+}
+
+function SceneContent(props: SceneProps) {
+  return (
+    <SceneBody
+      {...props}
+      geo={DEFAULT_GEO}
+      mat={DEFAULT_MAT}
+      lights={DEFAULT_LIGHTS}
+      anim={DEFAULT_ANIM}
+    />
   )
 }
 
@@ -496,20 +493,37 @@ function NameMesh({ scrollRef, navRef, accentHoverRef, mousePosRef, onReady, geo
 // ─────────────────────────────────────────────────────────────────────────────
 interface Hero3DProps {
   hoverInfo?: { color: string; x: number; y: number } | null
-  mousePosRef?: React.MutableRefObject<{ x: number; y: number }>
   /** When true: skip hero animation, always render in nav position */
   navOnly?: boolean
 }
 
-export default function Hero3D({ hoverInfo, mousePosRef, navOnly }: Hero3DProps) {
+export default function Hero3D({ hoverInfo, navOnly }: Hero3DProps) {
   const [isMounted, setIsMounted] = useState(false)
   const [fontLoaded, setFontLoaded] = useState(false)
 
   const scrollRef = useRef<number>(navOnly ? 1 : 0)
   const navRef = useRef<{ x: number; y: number } | null>(null)
   const accentHoverRef = useRef<TileHover | null>(null)
-  const internalMouseRef = useRef({ x: 0.5, y: 0.5 })
-  const effectiveMouseRef = mousePosRef ?? internalMouseRef
+  const mousePosRef = useRef({ x: 0.5, y: 0.5 })
+
+  // Track pointer for the sun-beam orbit. Owned here so the hero is fully
+  // self-contained and doesn't need a prop drilled through a route-level shell.
+  useEffect(() => {
+    const onMove = (e: MouseEvent) => {
+      mousePosRef.current.x = e.clientX / window.innerWidth
+      mousePosRef.current.y = e.clientY / window.innerHeight
+    }
+    window.addEventListener('mousemove', onMove, { passive: true })
+    return () => window.removeEventListener('mousemove', onMove)
+  }, [])
+
+  // Leva is an opt-in design tool — only loads when ?leva is in the URL.
+  // This keeps the leva bundle (and its per-render store updates) out of
+  // normal visitor traffic.
+  const levaEnabled = useMemo(() => {
+    if (typeof window === 'undefined') return false
+    return new URLSearchParams(window.location.search).has('leva')
+  }, [])
 
   useEffect(() => { accentHoverRef.current = hoverInfo ?? null }, [hoverInfo])
 
@@ -534,9 +548,11 @@ export default function Hero3D({ hoverInfo, mousePosRef, navOnly }: Hero3DProps)
 
   return (
     <>
-      {/* Leva panel — top-right, collapsed by default */}
-      <Leva hidden />
-
+      {levaEnabled && (
+        <Suspense fallback={null}>
+          <LevaPanel />
+        </Suspense>
+      )}
       <div
         style={{
           position: 'fixed',
@@ -548,25 +564,37 @@ export default function Hero3D({ hoverInfo, mousePosRef, navOnly }: Hero3DProps)
         }}
       >
         <Canvas
-          camera={{ position: [0, 0, 6], fov: 50 }}
-          dpr={[1, 1.5]}
-          gl={{
-            alpha: true,
-            antialias: true,
-            powerPreference: 'high-performance',
-            toneMapping: THREE.ACESFilmicToneMapping,
-            toneMappingExposure: 1.15,
-          }}
-          style={{ background: 'transparent', pointerEvents: 'none' }}
-        >
-          <CanvasSetup />
+        camera={{ position: [0, 0, 6], fov: 50 }}
+        dpr={[1, 1.5]}
+        gl={{
+          alpha: true,
+          antialias: true,
+          powerPreference: 'high-performance',
+          toneMapping: THREE.ACESFilmicToneMapping,
+          toneMappingExposure: 1.15,
+        }}
+        style={{ background: 'transparent', pointerEvents: 'none' }}
+      >
+        <CanvasSetup />
+        {levaEnabled ? (
+          <Suspense fallback={null}>
+            <SceneLeva
+              scrollRef={scrollRef}
+              navRef={navRef}
+              accentHoverRef={accentHoverRef}
+              mousePosRef={mousePosRef}
+              onReady={handleReady}
+            />
+          </Suspense>
+        ) : (
           <SceneContent
             scrollRef={scrollRef}
             navRef={navRef}
             accentHoverRef={accentHoverRef}
-            mousePosRef={effectiveMouseRef}
+            mousePosRef={mousePosRef}
             onReady={handleReady}
           />
+        )}
         </Canvas>
       </div>
     </>

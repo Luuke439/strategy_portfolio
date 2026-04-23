@@ -11,7 +11,6 @@ import { caseStudyContent, type CaseStudyContent, type CsImage } from '@/data/ca
 import CaseStudyNav from './CaseStudyNav'
 import ChallengeBlock from './ChallengeBlock'
 import MetaRow from './MetaRow'
-import StaticHeader from './StaticHeader'
 
 // ── Shared style constants ────────────────────────────────────────────────────
 const FONT = "'TWK Lausanne Pan', system-ui, sans-serif"
@@ -510,8 +509,6 @@ export default function CaseStudyPage({ project }: CaseStudyPageProps) {
 
   return (
     <div style={{ backgroundColor: '#FAFAFA', minHeight: '100vh' }}>
-
-      <StaticHeader />
 
       {/* ── Side chapter nav ──────────────────────────────────────────── */}
       <CaseStudyNav chapters={navChapters} accentColor={accent} />

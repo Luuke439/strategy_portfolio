@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 import { useLenis } from 'lenis/react'
 import type { Project } from '@/data/projects'
-import StaticHeader from './StaticHeader'
 
 const FONT = "'TWK Lausanne Pan', system-ui, sans-serif"
 
@@ -241,8 +240,6 @@ export default function LabPage({ project }: LabPageProps) {
 
   return (
     <div style={{ backgroundColor: '#FAFAFA', minHeight: '100vh' }}>
-
-      <StaticHeader />
 
       <main style={{ paddingTop: '7rem', paddingBottom: '8rem' }}>
         <div
