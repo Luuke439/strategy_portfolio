@@ -44,20 +44,30 @@ const EDUCATION = [
   },
 ]
 
+// Centered Bauhaus-style label: thin rule · LABEL · thin rule.
 function SectionLabel({ children }: { children: string }) {
   return (
-    <div style={{ marginBottom: '1.25rem' }}>
+    <div
+      style={{
+        display:       'grid',
+        gridTemplateColumns: '1fr auto 1fr',
+        alignItems:    'center',
+        gap:           '1.25rem',
+        marginBottom:  '2rem',
+      }}
+    >
+      <div style={{ height: '1px', background: '#E5E5E5' }} />
       <span style={{
         fontFamily:    FONT,
         fontWeight:    500,
         fontSize:      '0.68rem',
-        letterSpacing: '0.12em',
+        letterSpacing: '0.14em',
         textTransform: 'uppercase' as const,
         color:         '#0A0A0A',
       }}>
         {children}
       </span>
-      <div style={{ height: '1px', background: '#E5E5E5', marginTop: '0.5rem' }} />
+      <div style={{ height: '1px', background: '#E5E5E5' }} />
     </div>
   )
 }
@@ -71,7 +81,7 @@ function TimelineRow({ years, org, role, detail }: {
   return (
     <div style={{
       display:             'grid',
-      gridTemplateColumns: '100px 1fr',
+      gridTemplateColumns: '110px 1fr',
       gap:                 '0 1.5rem',
       marginBottom:        '1.5rem',
     }}>
@@ -123,186 +133,177 @@ function TimelineRow({ years, org, role, detail }: {
 export default function AboutPage() {
   return (
     <div style={{ backgroundColor: '#FAFAFA', minHeight: '100vh' }}>
-      <main style={{
-        paddingTop:    '7rem',
-        paddingBottom: '8rem',
-        paddingLeft:   '2rem',
-        paddingRight:  '2rem',
-      }}>
-        <div style={{ maxWidth: '1160px', margin: '0 auto' }}>
-          <div className="about-grid">
+      <main
+        style={{
+          paddingTop:    '9rem',
+          paddingBottom: '8rem',
+          paddingLeft:   '2rem',
+          paddingRight:  '2rem',
+        }}
+      >
+        <div
+          style={{
+            maxWidth: '640px',
+            margin:   '0 auto',
+          }}
+        >
 
-            {/* ── Left column: photo + contact ─────────────────────────── */}
-            <div>
-              {/* Photo — replace div with <Image> once photo is available */}
-              <div style={{
-                width:           '100%',
-                maxWidth:        '420px',
-                aspectRatio:     '3 / 4',
-                backgroundColor: '#E0E0E0',
-              }} />
-            </div>
+          {/* ── Portrait (centered) ───────────────────────────────────── */}
+          <div
+            style={{
+              width:           '220px',
+              aspectRatio:     '3 / 4',
+              backgroundColor: '#E0E0E0',
+              margin:          '0 auto 3.5rem',
+            }}
+          />
 
-            {/* ── Right column: all text ───────────────────────────────── */}
-            <div>
-
-              {/* Title + subtitle — matches the h1 + problem statement
-                  treatment from CaseStudyPage. Name lives in the header. */}
-              <div style={{ marginBottom: '2.5rem' }}>
-                <h1 style={{
-                  fontFamily:    FONT,
-                  fontWeight:    500,
-                  fontSize:      'clamp(2.8rem, 6vw, 5.5rem)',
-                  lineHeight:    0.95,
-                  letterSpacing: '-0.03em',
-                  color:         '#0A0A0A',
-                  margin:        '0 0 1.5rem',
-                }}>
-                  Strategic Designer
-                </h1>
-                <h2 style={{
-                  fontFamily:    FONT,
-                  fontWeight:    300,
-                  fontSize:      'clamp(1.1rem, 1.8vw, 1.5rem)',
-                  lineHeight:    1.45,
-                  letterSpacing: '-0.01em',
-                  color:         '#6B6B6B',
-                  margin:        '0 0 1.75rem',
-                }}>
-                  I lead disruptive transformation across industrial systems.
-                </h2>
-                <div style={{
-                  fontFamily:    FONT,
-                  fontWeight:    400,
-                  fontSize:      '0.78rem',
-                  letterSpacing: '0.08em',
-                  textTransform: 'uppercase',
-                  color:         '#A0A0A0',
-                }}>
-                  Germany · US Citizen · Open to relocate
-                </div>
-              </div>
-
-              {/* Opening paragraph */}
-              <p style={{
-                fontFamily:   FONT,
-                fontWeight:   300,
-                fontSize:     '1rem',
-                lineHeight:   1.8,
-                color:        '#0A0A0A',
-                marginBottom: '3rem',
-                maxWidth:     '52ch',
-              }}>
-                I work at the start of things — before the brief is right,
-                before the technology is certain, before anyone knows what
-                to build. My background is in UX and interaction design.
-                Where I&apos;m headed is concept and strategy. I&apos;m most useful
-                in the room where the problem is still being defined.
-              </p>
-
-              {/* Experience */}
-              <div style={{ marginBottom: '2.5rem' }}>
-                <SectionLabel>Experience</SectionLabel>
-                {EXPERIENCE.map((item, i) => (
-                  <TimelineRow key={i} {...item} />
-                ))}
-              </div>
-
-              {/* Education */}
-              <div style={{ marginBottom: '2.5rem' }}>
-                <SectionLabel>Education</SectionLabel>
-                {EDUCATION.map((item, i) => (
-                  <TimelineRow key={i} {...item} />
-                ))}
-              </div>
-
-              {/* Collaborations */}
-              <div style={{ marginBottom: '2.5rem' }}>
-                <SectionLabel>Collaborations</SectionLabel>
-                <p style={{
-                  fontFamily: FONT,
-                  fontWeight: 300,
-                  fontSize:   '0.85rem',
-                  color:      '#6B6B6B',
-                  lineHeight: 1.7,
-                }}>
-                  Stiftung Liebenau · Paul Bauder · Festool · Staedtler · Lebenshilfe Österreich
-                </p>
-              </div>
-
-              {/* Outside Work — extra breathing room signals register shift */}
-              <div style={{ marginTop: '3.5rem', marginBottom: '3.5rem' }}>
-                <SectionLabel>Outside Work</SectionLabel>
-                <p style={{
-                  fontFamily: FONT,
-                  fontWeight: 300,
-                  fontSize:   '0.92rem',
-                  color:      '#0A0A0A',
-                  lineHeight: 1.85,
-                  maxWidth:   '52ch',
-                }}>
-                  Long-distance cycling is where I do some of my best thinking —
-                  planning a 200km route the night before and executing it alone
-                  requires the same combination of system logic and improvisation
-                  I try to bring to design. I also read a lot of history, which
-                  is mostly just studying how systems fail over long time horizons.
-                </p>
-              </div>
-
-              {/* Contact */}
-              <div>
-                <a
-                  href="mailto:hello@lukecaporelli.com"
-                  style={{
-                    fontFamily:     FONT,
-                    fontWeight:     400,
-                    fontSize:       '1.1rem',
-                    color:          '#0A0A0A',
-                    textDecoration: 'none',
-                    display:        'block',
-                    marginBottom:   '1.25rem',
-                  }}
-                >
-                  hello@lukecaporelli.com
-                </a>
-                <div style={{ display: 'flex', gap: '2rem' }}>
-                  <a
-                    href="https://www.linkedin.com/in/luke-caporelli"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{
-                      fontFamily:    FONT,
-                      fontWeight:    400,
-                      fontSize:      '0.72rem',
-                      letterSpacing: '0.08em',
-                      textTransform: 'uppercase',
-                      color:         '#0A0A0A',
-                      textDecoration:'none',
-                    }}
-                  >
-                    LinkedIn ↗
-                  </a>
-                  <a
-                    href="/Resume_Luke_Caporelli.pdf"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{
-                      fontFamily:    FONT,
-                      fontWeight:    400,
-                      fontSize:      '0.72rem',
-                      letterSpacing: '0.08em',
-                      textTransform: 'uppercase',
-                      color:         '#0A0A0A',
-                      textDecoration:'none',
-                    }}
-                  >
-                    CV ↗
-                  </a>
-                </div>
-              </div>
-
+          {/* ── Title + subtitle + meta (centered) ────────────────────── */}
+          <div style={{ textAlign: 'center', marginBottom: '5rem' }}>
+            <h1 style={{
+              fontFamily:    FONT,
+              fontWeight:    500,
+              fontSize:      'clamp(2.8rem, 6vw, 5.5rem)',
+              lineHeight:    0.95,
+              letterSpacing: '-0.03em',
+              color:         '#0A0A0A',
+              margin:        '0 0 1.5rem',
+            }}>
+              Strategic Designer
+            </h1>
+            <h2 style={{
+              fontFamily:    FONT,
+              fontWeight:    300,
+              fontSize:      'clamp(1.1rem, 1.8vw, 1.5rem)',
+              lineHeight:    1.45,
+              letterSpacing: '-0.01em',
+              color:         '#6B6B6B',
+              margin:        '0 auto 1.75rem',
+              maxWidth:      '28ch',
+            }}>
+              I lead disruptive transformation across industrial systems.
+            </h2>
+            <div style={{
+              fontFamily:    FONT,
+              fontWeight:    400,
+              fontSize:      '0.78rem',
+              letterSpacing: '0.08em',
+              textTransform: 'uppercase',
+              color:         '#A0A0A0',
+            }}>
+              Germany · US Citizen · Open to relocate
             </div>
           </div>
+
+          {/* ── Experience ────────────────────────────────────────────── */}
+          <section style={{ marginBottom: '4rem' }}>
+            <SectionLabel>Experience</SectionLabel>
+            {EXPERIENCE.map((item, i) => (
+              <TimelineRow key={i} {...item} />
+            ))}
+          </section>
+
+          {/* ── Education ─────────────────────────────────────────────── */}
+          <section style={{ marginBottom: '4rem' }}>
+            <SectionLabel>Education</SectionLabel>
+            {EDUCATION.map((item, i) => (
+              <TimelineRow key={i} {...item} />
+            ))}
+          </section>
+
+          {/* ── Collaborations (single centered line) ────────────────── */}
+          <section style={{ marginBottom: '4rem' }}>
+            <SectionLabel>Collaborations</SectionLabel>
+            <p style={{
+              fontFamily: FONT,
+              fontWeight: 300,
+              fontSize:   '0.88rem',
+              color:      '#6B6B6B',
+              lineHeight: 1.7,
+              textAlign:  'center',
+              margin:     0,
+            }}>
+              Stiftung Liebenau · Paul Bauder · Festool · Staedtler · Lebenshilfe Österreich
+            </p>
+          </section>
+
+          {/* ── Outside Work ──────────────────────────────────────────── */}
+          <section style={{ marginBottom: '5rem' }}>
+            <SectionLabel>Outside Work</SectionLabel>
+            <p style={{
+              fontFamily: FONT,
+              fontWeight: 300,
+              fontSize:   '0.95rem',
+              color:      '#0A0A0A',
+              lineHeight: 1.8,
+              maxWidth:   '52ch',
+              margin:     '0 auto',
+              textAlign:  'center',
+            }}>
+              Long-distance cycling is where I do some of my best thinking —
+              planning a 200km route the night before and executing it alone
+              requires the same combination of system logic and improvisation
+              I try to bring to design. I also read a lot of history, which
+              is mostly just studying how systems fail over long time horizons.
+            </p>
+          </section>
+
+          {/* ── Contact (centered) ────────────────────────────────────── */}
+          <section style={{ textAlign: 'center' }}>
+            <a
+              href="mailto:hello@lukecaporelli.com"
+              style={{
+                fontFamily:     FONT,
+                fontWeight:     400,
+                fontSize:       '1.1rem',
+                color:          '#0A0A0A',
+                textDecoration: 'none',
+                display:        'inline-block',
+                marginBottom:   '1.5rem',
+              }}
+            >
+              hello@lukecaporelli.com
+            </a>
+            <div style={{
+              display:        'flex',
+              gap:            '2rem',
+              justifyContent: 'center',
+            }}>
+              <a
+                href="https://www.linkedin.com/in/luke-caporelli"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  fontFamily:     FONT,
+                  fontWeight:     400,
+                  fontSize:       '0.72rem',
+                  letterSpacing:  '0.08em',
+                  textTransform:  'uppercase',
+                  color:          '#0A0A0A',
+                  textDecoration: 'none',
+                }}
+              >
+                LinkedIn ↗
+              </a>
+              <a
+                href="/Resume_Luke_Caporelli.pdf"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  fontFamily:     FONT,
+                  fontWeight:     400,
+                  fontSize:       '0.72rem',
+                  letterSpacing:  '0.08em',
+                  textTransform:  'uppercase',
+                  color:          '#0A0A0A',
+                  textDecoration: 'none',
+                }}
+              >
+                CV ↗
+              </a>
+            </div>
+          </section>
+
         </div>
       </main>
     </div>
