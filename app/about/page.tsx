@@ -70,7 +70,7 @@ function SectionLabel({ children }: { children: string }) {
 function Portrait() {
   const [failed, setFailed] = useState(false)
   const frame: React.CSSProperties = {
-    width:       '160px',
+    width:       '260px',
     aspectRatio: '3 / 4',
     flexShrink:  0,
     objectFit:   'cover',
@@ -165,33 +165,35 @@ export default function AboutPage() {
           {/* ── Header row: heading block (left) + portrait (right) ───── */}
           <div
             style={{
-              display:      'flex',
-              alignItems:   'flex-start',
-              gap:          '3rem',
-              marginBottom: '4rem',
+              display:        'flex',
+              alignItems:     'flex-start',
+              justifyContent: 'space-between',
+              gap:            '3rem',
+              marginBottom:   '4rem',
             }}
           >
-            {/* Left: compact heading block */}
-            <div style={{ flex: 1, minWidth: 0 }}>
+            {/* Left: compact heading block. Fixed column width keeps the
+                title, subtitle and meta aligned to the same measure. */}
+            <div style={{ width: '260px', flexShrink: 0 }}>
               <h1 style={{
                 fontFamily:    FONT,
                 fontWeight:    500,
                 fontSize:      'clamp(2rem, 3.5vw, 3.5rem)',
-                lineHeight:    1.05,
+                lineHeight:    1.0,
                 letterSpacing: '-0.02em',
                 color:         '#0A0A0A',
-                margin:        '0 0 1rem',
+                margin:        '0 0 1.25rem',
               }}>
-                Strategic Designer
+                Strategic<br />Designer
               </h1>
               <h2 style={{
                 fontFamily:    FONT,
                 fontWeight:    300,
                 fontSize:      'clamp(1rem, 1.4vw, 1.2rem)',
-                lineHeight:    1.5,
+                lineHeight:    1.4,
                 letterSpacing: '-0.01em',
                 color:         '#6B6B6B',
-                margin:        '0 0 1.25rem',
+                margin:        '0 0 1.5rem',
               }}>
                 I lead disruptive transformation across industrial systems.
               </h2>
@@ -202,6 +204,7 @@ export default function AboutPage() {
                 letterSpacing: '0.08em',
                 textTransform: 'uppercase',
                 color:         '#A0A0A0',
+                lineHeight:    1.5,
               }}>
                 Germany · US Citizen · Open to relocate
               </div>
