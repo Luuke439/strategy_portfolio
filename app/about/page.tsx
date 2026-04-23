@@ -146,29 +146,30 @@ export default function AboutPage() {
             {/* ── Right column: all text ───────────────────────────────── */}
             <div>
 
-              {/* Name + title */}
+              {/* Title + subtitle — name lives in the persistent header */}
               <div style={{ marginBottom: '2.5rem' }}>
-                <div style={{
-                  fontFamily:   FONT,
-                  fontWeight:   500,
-                  fontSize:     '2rem',
-                  color:        '#0A0A0A',
-                  lineHeight:   1.15,
-                  marginBottom: '0.5rem',
-                }}>
-                  Luke Caporelli
-                </div>
-                <div style={{
+                <h1 style={{
                   fontFamily:    FONT,
-                  fontWeight:    400,
-                  fontSize:      '0.78rem',
-                  letterSpacing: '0.08em',
-                  textTransform: 'uppercase',
-                  color:         '#6B6B6B',
-                  lineHeight:    1.6,
+                  fontWeight:    500,
+                  fontSize:      'clamp(2.8rem, 6vw, 5.5rem)',
+                  lineHeight:    0.95,
+                  letterSpacing: '-0.03em',
+                  color:         '#0A0A0A',
+                  marginBottom:  '1.25rem',
                 }}>
                   Strategic Designer
-                </div>
+                </h1>
+                <p style={{
+                  fontFamily: FONT,
+                  fontWeight: 300,
+                  fontSize:   'clamp(1.1rem, 1.7vw, 1.5rem)',
+                  lineHeight: 1.35,
+                  color:      '#3A3A3A',
+                  maxWidth:   '28ch',
+                  marginBottom: '1.25rem',
+                }}>
+                  I lead disruptive transformation across industrial systems.
+                </p>
                 <div style={{
                   fontFamily:    FONT,
                   fontWeight:    400,
