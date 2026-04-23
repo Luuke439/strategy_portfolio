@@ -164,7 +164,7 @@ function EmotionVideoCard({
         muted
         playsInline
         preload="metadata"
-        style={{ width: '100%', display: 'block', aspectRatio: '9/16', objectFit: 'cover' }}
+        style={{ width: '100%', height: 'auto', display: 'block' }}
       />
       <div style={{ padding: '1rem 1.25rem 1.25rem' }}>
         <span
@@ -224,7 +224,7 @@ function EmotionStudies({ accentColor }: { accentColor: string }) {
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(2, 1fr)',
+          gridTemplateColumns: 'repeat(4, 1fr)',
           gap: '1px',
           backgroundColor: '#E5E5E5',
         }}
