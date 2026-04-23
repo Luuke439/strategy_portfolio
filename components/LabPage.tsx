@@ -26,6 +26,26 @@ const labNavLink: React.CSSProperties = {
 function PrimaryVisual({ project }: { project: Project }) {
   const [imgError, setImgError] = useState(false)
 
+  if (project.slug === 'expressive-messaging') {
+    return (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.8, delay: 0.2 }}
+        style={{ width: '100%', marginBottom: '3rem', overflow: 'hidden' }}
+      >
+        <video
+          src="/videos/expressive-messaging/cover.mp4"
+          autoPlay
+          loop
+          muted
+          playsInline
+          style={{ width: '100%', height: 'auto', display: 'block' }}
+        />
+      </motion.div>
+    )
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -57,9 +77,7 @@ function PrimaryVisual({ project }: { project: Project }) {
             letterSpacing: '0.06em',
             textTransform: 'uppercase',
           }}>
-            {project.slug === 'expressive-messaging'
-              ? 'Video — 4 motion studies'
-              : `Primary visual — ${project.name}`}
+            {`Primary visual — ${project.name}`}
           </span>
         </div>
       )}
@@ -86,6 +104,135 @@ function SecondaryVisual({ project }: { project: Project }) {
           onError={() => setImgError(true)}
         />
       ) : null}
+    </motion.div>
+  )
+}
+
+const EMOTION_STUDIES = [
+  {
+    slug: 'romance',
+    label: 'Romance',
+    description: 'Two users hold their screens simultaneously — their fingerprints merge into a shared trace.',
+  },
+  {
+    slug: 'anger',
+    label: 'Anger',
+    description: 'Shaking the device transforms the message bubble, turning physical tension into visible intensity.',
+  },
+  {
+    slug: 'joy',
+    label: 'Joy',
+    description: 'A real-world object, captured and gifted — the effort is the emotion.',
+  },
+  {
+    slug: 'sarcasm',
+    label: 'Sarcasm',
+    description: "A subtle shift in the bubble's behavior signals ironic intent before it gets lost in translation.",
+  },
+]
+
+function EmotionVideoCard({
+  study,
+  accentColor,
+}: {
+  study: typeof EMOTION_STUDIES[number]
+  accentColor: string
+}) {
+  const videoRef = useRef<HTMLVideoElement>(null)
+
+  const handleMouseEnter = () => {
+    videoRef.current?.play()
+  }
+  const handleMouseLeave = () => {
+    const v = videoRef.current
+    if (!v) return
+    v.pause()
+    v.currentTime = 0
+  }
+
+  return (
+    <div
+      key={study.slug}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      style={{ backgroundColor: '#FAFAFA', display: 'flex', flexDirection: 'column', cursor: 'default' }}
+    >
+      <video
+        ref={videoRef}
+        src={`/videos/expressive-messaging/${study.slug}.mp4`}
+        loop
+        muted
+        playsInline
+        preload="metadata"
+        style={{ width: '100%', display: 'block', aspectRatio: '9/16', objectFit: 'cover' }}
+      />
+      <div style={{ padding: '1rem 1.25rem 1.25rem' }}>
+        <span
+          style={{
+            fontFamily: "'TWK Lausanne Pan', system-ui, sans-serif",
+            fontWeight: 500,
+            fontSize: '0.78rem',
+            letterSpacing: '0.06em',
+            textTransform: 'uppercase',
+            color: accentColor,
+            display: 'block',
+            marginBottom: '0.4rem',
+          }}
+        >
+          {study.label}
+        </span>
+        <p
+          style={{
+            fontFamily: "'TWK Lausanne Pan', system-ui, sans-serif",
+            fontWeight: 300,
+            fontSize: '0.85rem',
+            lineHeight: 1.55,
+            color: '#6B6B6B',
+            margin: 0,
+          }}
+        >
+          {study.description}
+        </p>
+      </div>
+    </div>
+  )
+}
+
+function EmotionStudies({ accentColor }: { accentColor: string }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.6 }}
+      style={{ marginBottom: '3rem' }}
+    >
+      <span
+        style={{
+          fontFamily: "'TWK Lausanne Pan', system-ui, sans-serif",
+          fontWeight: 400,
+          fontSize: '0.72rem',
+          letterSpacing: '0.08em',
+          textTransform: 'uppercase',
+          color: '#A0A0A0',
+          display: 'block',
+          marginBottom: '1.5rem',
+        }}
+      >
+        Motion studies
+      </span>
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(2, 1fr)',
+          gap: '1px',
+          backgroundColor: '#E5E5E5',
+        }}
+      >
+        {EMOTION_STUDIES.map((study) => (
+          <EmotionVideoCard key={study.slug} study={study} accentColor={accentColor} />
+        ))}
+      </div>
     </motion.div>
   )
 }
@@ -267,6 +414,11 @@ export default function LabPage({ project }: LabPageProps) {
                 </p>
               ))}
             </motion.div>
+          )}
+
+          {/* Emotion studies — expressive messaging only */}
+          {project.slug === 'expressive-messaging' && (
+            <EmotionStudies accentColor={project.accentColor} />
           )}
 
           {/* Secondary visual */}
