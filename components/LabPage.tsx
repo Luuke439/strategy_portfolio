@@ -1,27 +1,12 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import Image from 'next/image'
-import Link from 'next/link'
 import { motion } from 'framer-motion'
-import dynamic from 'next/dynamic'
 import { useLenis } from 'lenis/react'
 import type { Project } from '@/data/projects'
-import MetaRow from './MetaRow'
-
-const Hero3D = dynamic(() => import('@/components/Hero3D'), { ssr: false })
+import StaticHeader from './StaticHeader'
 
 const FONT = "'TWK Lausanne Pan', system-ui, sans-serif"
-
-const labNavLink: React.CSSProperties = {
-  fontFamily:     FONT,
-  fontWeight:     400,
-  fontSize:       '0.75rem',
-  letterSpacing:  '0.06em',
-  textTransform:  'uppercase',
-  color:          '#0A0A0A',
-  textDecoration: 'none',
-}
 
 function PrimaryVisual({ project }: { project: Project }) {
   const [imgError, setImgError] = useState(false)
@@ -257,51 +242,7 @@ export default function LabPage({ project }: LabPageProps) {
   return (
     <div style={{ backgroundColor: '#FAFAFA', minHeight: '100vh' }}>
 
-      {/* ── Fixed top nav ─────────────────────────────────────────────── */}
-      <header
-        style={{
-          position: 'fixed',
-          top: 0, left: 0, right: 0,
-          zIndex: 50,
-          padding: '1.4rem 2rem',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          backgroundColor: 'rgba(250,250,250,0.94)',
-          backdropFilter: 'blur(10px)',
-          borderBottom: '1px solid #E5E5E5',
-        }}
-      >
-        {/* Invisible click target — 3D name (z:110, pointerEvents:none) renders on top.
-            paddingRight extends the hit area to cover the full width of the 3D text. */}
-        <Link
-          href="/"
-          id="nav-name-span"
-          style={{
-            fontFamily: FONT,
-            fontWeight: 500,
-            fontSize: '0.95rem',
-            whiteSpace: 'nowrap',
-            opacity: 0,
-            userSelect: 'none',
-            color: '#0A0A0A',
-            textDecoration: 'none',
-            cursor: 'pointer',
-            paddingRight: '7rem',
-          }}
-        >
-          Luke Caporelli
-        </Link>
-
-        <nav style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-          <Link href="/about" style={labNavLink}>About</Link>
-          <a href="/Luke_Caporelli_CV.pdf" target="_blank" rel="noopener noreferrer" style={labNavLink}>CV</a>
-          <a href="https://linkedin.com/in/lukecaporelli" target="_blank" rel="noopener noreferrer" style={labNavLink}>LinkedIn</a>
-        </nav>
-      </header>
-
-      {/* ── 3D name — always in nav position ─────────────────────────── */}
-      <Hero3D navOnly />
+      <StaticHeader />
 
       <main style={{ paddingTop: '7rem', paddingBottom: '8rem' }}>
         <div
