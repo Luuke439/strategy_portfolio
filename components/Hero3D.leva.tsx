@@ -19,7 +19,7 @@ interface Props {
   accentHoverRef: React.MutableRefObject<TileHover | null>
   mousePosRef: React.MutableRefObject<{ x: number; y: number }>
   onReady: () => void
-  snapTick: number
+  navOnly: boolean
 }
 
 export function LevaPanel() {
