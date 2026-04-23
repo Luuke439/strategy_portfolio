@@ -44,30 +44,21 @@ const EDUCATION = [
   },
 ]
 
-// Centered Bauhaus-style label: thin rule · LABEL · thin rule.
+// Left-aligned label + 1px underline — same treatment used on case study pages.
 function SectionLabel({ children }: { children: string }) {
   return (
-    <div
-      style={{
-        display:       'grid',
-        gridTemplateColumns: '1fr auto 1fr',
-        alignItems:    'center',
-        gap:           '1.25rem',
-        marginBottom:  '2rem',
-      }}
-    >
-      <div style={{ height: '1px', background: '#E5E5E5' }} />
+    <div style={{ marginBottom: '1.5rem' }}>
       <span style={{
         fontFamily:    FONT,
         fontWeight:    500,
         fontSize:      '0.68rem',
-        letterSpacing: '0.14em',
+        letterSpacing: '0.12em',
         textTransform: 'uppercase' as const,
         color:         '#0A0A0A',
       }}>
         {children}
       </span>
-      <div style={{ height: '1px', background: '#E5E5E5' }} />
+      <div style={{ height: '1px', background: '#E5E5E5', marginTop: '0.5rem' }} />
     </div>
   )
 }
@@ -137,29 +128,25 @@ export default function AboutPage() {
         style={{
           paddingTop:    '9rem',
           paddingBottom: '8rem',
-          paddingLeft:   '2rem',
-          paddingRight:  '2rem',
         }}
       >
         <div
-          style={{
-            maxWidth: '640px',
-            margin:   '0 auto',
-          }}
+          className="editorial-width"
+          style={{ paddingLeft: '2rem', paddingRight: '2rem' }}
         >
 
-          {/* ── Portrait (centered) ───────────────────────────────────── */}
+          {/* ── Portrait (left, top) ──────────────────────────────────── */}
           <div
             style={{
               width:           '220px',
               aspectRatio:     '3 / 4',
               backgroundColor: '#E0E0E0',
-              margin:          '0 auto 3.5rem',
+              marginBottom:    '3rem',
             }}
           />
 
-          {/* ── Title + subtitle + meta (centered) ────────────────────── */}
-          <div style={{ textAlign: 'center', marginBottom: '5rem' }}>
+          {/* ── Title + subtitle + meta ───────────────────────────────── */}
+          <div style={{ marginBottom: '4rem' }}>
             <h1 style={{
               fontFamily:    FONT,
               fontWeight:    500,
@@ -178,8 +165,7 @@ export default function AboutPage() {
               lineHeight:    1.45,
               letterSpacing: '-0.01em',
               color:         '#6B6B6B',
-              margin:        '0 auto 1.75rem',
-              maxWidth:      '28ch',
+              margin:        '0 0 1.75rem',
             }}>
               I lead disruptive transformation across industrial systems.
             </h2>
@@ -196,7 +182,7 @@ export default function AboutPage() {
           </div>
 
           {/* ── Experience ────────────────────────────────────────────── */}
-          <section style={{ marginBottom: '4rem' }}>
+          <section style={{ marginBottom: '3.5rem' }}>
             <SectionLabel>Experience</SectionLabel>
             {EXPERIENCE.map((item, i) => (
               <TimelineRow key={i} {...item} />
@@ -204,15 +190,15 @@ export default function AboutPage() {
           </section>
 
           {/* ── Education ─────────────────────────────────────────────── */}
-          <section style={{ marginBottom: '4rem' }}>
+          <section style={{ marginBottom: '3.5rem' }}>
             <SectionLabel>Education</SectionLabel>
             {EDUCATION.map((item, i) => (
               <TimelineRow key={i} {...item} />
             ))}
           </section>
 
-          {/* ── Collaborations (single centered line) ────────────────── */}
-          <section style={{ marginBottom: '4rem' }}>
+          {/* ── Collaborations ────────────────────────────────────────── */}
+          <section style={{ marginBottom: '3.5rem' }}>
             <SectionLabel>Collaborations</SectionLabel>
             <p style={{
               fontFamily: FONT,
@@ -220,7 +206,6 @@ export default function AboutPage() {
               fontSize:   '0.88rem',
               color:      '#6B6B6B',
               lineHeight: 1.7,
-              textAlign:  'center',
               margin:     0,
             }}>
               Stiftung Liebenau · Paul Bauder · Festool · Staedtler · Lebenshilfe Österreich
@@ -228,7 +213,7 @@ export default function AboutPage() {
           </section>
 
           {/* ── Outside Work ──────────────────────────────────────────── */}
-          <section style={{ marginBottom: '5rem' }}>
+          <section style={{ marginBottom: '4rem' }}>
             <SectionLabel>Outside Work</SectionLabel>
             <p style={{
               fontFamily: FONT,
@@ -237,8 +222,7 @@ export default function AboutPage() {
               color:      '#0A0A0A',
               lineHeight: 1.8,
               maxWidth:   '52ch',
-              margin:     '0 auto',
-              textAlign:  'center',
+              margin:     0,
             }}>
               Long-distance cycling is where I do some of my best thinking —
               planning a 200km route the night before and executing it alone
@@ -248,8 +232,9 @@ export default function AboutPage() {
             </p>
           </section>
 
-          {/* ── Contact (centered) ────────────────────────────────────── */}
-          <section style={{ textAlign: 'center' }}>
+          {/* ── Contact — email only; LinkedIn + CV live in the header ─ */}
+          <section>
+            <SectionLabel>Contact</SectionLabel>
             <a
               href="mailto:hello@lukecaporelli.com"
               style={{
@@ -258,50 +243,10 @@ export default function AboutPage() {
                 fontSize:       '1.1rem',
                 color:          '#0A0A0A',
                 textDecoration: 'none',
-                display:        'inline-block',
-                marginBottom:   '1.5rem',
               }}
             >
               hello@lukecaporelli.com
             </a>
-            <div style={{
-              display:        'flex',
-              gap:            '2rem',
-              justifyContent: 'center',
-            }}>
-              <a
-                href="https://www.linkedin.com/in/luke-caporelli"
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  fontFamily:     FONT,
-                  fontWeight:     400,
-                  fontSize:       '0.72rem',
-                  letterSpacing:  '0.08em',
-                  textTransform:  'uppercase',
-                  color:          '#0A0A0A',
-                  textDecoration: 'none',
-                }}
-              >
-                LinkedIn ↗
-              </a>
-              <a
-                href="/Resume_Luke_Caporelli.pdf"
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  fontFamily:     FONT,
-                  fontWeight:     400,
-                  fontSize:       '0.72rem',
-                  letterSpacing:  '0.08em',
-                  textTransform:  'uppercase',
-                  color:          '#0A0A0A',
-                  textDecoration: 'none',
-                }}
-              >
-                CV ↗
-              </a>
-            </div>
           </section>
 
         </div>
