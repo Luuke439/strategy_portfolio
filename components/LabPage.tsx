@@ -155,7 +155,7 @@ function EmotionVideoCard({
       key={study.slug}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      style={{ backgroundColor: '#FAFAFA', display: 'flex', flexDirection: 'column', cursor: 'default' }}
+      style={{ backgroundColor: '#FAFAFA', display: 'flex', flexDirection: 'row', alignItems: 'flex-start', cursor: 'default' }}
     >
       <video
         ref={videoRef}
@@ -164,9 +164,9 @@ function EmotionVideoCard({
         muted
         playsInline
         preload="metadata"
-        style={{ width: '100%', height: 'auto', display: 'block' }}
+        style={{ flex: '0 0 auto', width: '60%', height: 'auto', display: 'block' }}
       />
-      <div style={{ padding: '1rem 1.25rem 1.25rem' }}>
+      <div style={{ padding: '1.25rem 1.5rem', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', alignSelf: 'flex-end' }}>
         <span
           style={{
             fontFamily: "'TWK Lausanne Pan', system-ui, sans-serif",
@@ -223,8 +223,8 @@ function EmotionStudies({ accentColor }: { accentColor: string }) {
       </span>
       <div
         style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(4, 1fr)',
+          display: 'flex',
+          flexDirection: 'column',
           gap: '1px',
           backgroundColor: '#E5E5E5',
         }}
