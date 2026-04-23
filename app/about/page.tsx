@@ -1,6 +1,11 @@
 'use client'
 
+import { useState } from 'react'
+
 const FONT = "'TWK Lausanne Pan', system-ui, sans-serif"
+
+// Portrait path — drop the actual file at this location in public/
+const PORTRAIT_SRC = '/images/about/portrait.jpg'
 
 const EXPERIENCE = [
   {
@@ -44,7 +49,6 @@ const EDUCATION = [
   },
 ]
 
-// Left-aligned label + 1px underline — same treatment used on case study pages.
 function SectionLabel({ children }: { children: string }) {
   return (
     <div style={{ marginBottom: '1.5rem' }}>
@@ -60,6 +64,29 @@ function SectionLabel({ children }: { children: string }) {
       </span>
       <div style={{ height: '1px', background: '#E5E5E5', marginTop: '0.5rem' }} />
     </div>
+  )
+}
+
+function Portrait() {
+  const [failed, setFailed] = useState(false)
+  const frame: React.CSSProperties = {
+    width:       '160px',
+    aspectRatio: '3 / 4',
+    flexShrink:  0,
+    objectFit:   'cover',
+    display:     'block',
+  }
+  if (failed) {
+    return <div style={{ ...frame, backgroundColor: '#E0E0E0' }} aria-hidden />
+  }
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={PORTRAIT_SRC}
+      alt="Luke Caporelli"
+      onError={() => setFailed(true)}
+      style={frame}
+    />
   )
 }
 
@@ -135,50 +162,53 @@ export default function AboutPage() {
           style={{ paddingLeft: '2rem', paddingRight: '2rem' }}
         >
 
-          {/* ── Portrait (left, top) ──────────────────────────────────── */}
+          {/* ── Header row: heading block (left) + portrait (right) ───── */}
           <div
             style={{
-              width:           '220px',
-              aspectRatio:     '3 / 4',
-              backgroundColor: '#E0E0E0',
-              marginBottom:    '3rem',
+              display:      'flex',
+              alignItems:   'flex-start',
+              gap:          '3rem',
+              marginBottom: '4rem',
             }}
-          />
-
-          {/* ── Title + subtitle + meta ───────────────────────────────── */}
-          <div style={{ marginBottom: '4rem' }}>
-            <h1 style={{
-              fontFamily:    FONT,
-              fontWeight:    500,
-              fontSize:      'clamp(2.8rem, 6vw, 5.5rem)',
-              lineHeight:    0.95,
-              letterSpacing: '-0.03em',
-              color:         '#0A0A0A',
-              margin:        '0 0 1.5rem',
-            }}>
-              Strategic Designer
-            </h1>
-            <h2 style={{
-              fontFamily:    FONT,
-              fontWeight:    300,
-              fontSize:      'clamp(1.1rem, 1.8vw, 1.5rem)',
-              lineHeight:    1.45,
-              letterSpacing: '-0.01em',
-              color:         '#6B6B6B',
-              margin:        '0 0 1.75rem',
-            }}>
-              I lead disruptive transformation across industrial systems.
-            </h2>
-            <div style={{
-              fontFamily:    FONT,
-              fontWeight:    400,
-              fontSize:      '0.78rem',
-              letterSpacing: '0.08em',
-              textTransform: 'uppercase',
-              color:         '#A0A0A0',
-            }}>
-              Germany · US Citizen · Open to relocate
+          >
+            {/* Left: compact heading block */}
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <h1 style={{
+                fontFamily:    FONT,
+                fontWeight:    500,
+                fontSize:      'clamp(2rem, 3.5vw, 3.5rem)',
+                lineHeight:    1.05,
+                letterSpacing: '-0.02em',
+                color:         '#0A0A0A',
+                margin:        '0 0 1rem',
+              }}>
+                Strategic Designer
+              </h1>
+              <h2 style={{
+                fontFamily:    FONT,
+                fontWeight:    300,
+                fontSize:      'clamp(1rem, 1.4vw, 1.2rem)',
+                lineHeight:    1.5,
+                letterSpacing: '-0.01em',
+                color:         '#6B6B6B',
+                margin:        '0 0 1.25rem',
+              }}>
+                I lead disruptive transformation across industrial systems.
+              </h2>
+              <div style={{
+                fontFamily:    FONT,
+                fontWeight:    400,
+                fontSize:      '0.72rem',
+                letterSpacing: '0.08em',
+                textTransform: 'uppercase',
+                color:         '#A0A0A0',
+              }}>
+                Germany · US Citizen · Open to relocate
+              </div>
             </div>
+
+            {/* Right: portrait */}
+            <Portrait />
           </div>
 
           {/* ── Experience ────────────────────────────────────────────── */}
@@ -232,7 +262,7 @@ export default function AboutPage() {
             </p>
           </section>
 
-          {/* ── Contact — email only; LinkedIn + CV live in the header ─ */}
+          {/* ── Contact — LinkedIn + CV live in the header ───────────── */}
           <section>
             <SectionLabel>Contact</SectionLabel>
             <a
