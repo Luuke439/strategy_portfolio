@@ -91,11 +91,15 @@ export default function PersistentHeader() {
         }}
       >
         <motion.div style={{ ...PILL, opacity: isHome ? homeOpacity : 1 }}>
-          {/* Invisible name target — the 3D text renders on top via canvas z:110 */}
+          {/* Invisible name target — the 3D text renders on top via canvas z:110.
+              Pointer events mirror navVisible so the pill is not clickable
+              while it is faded out above the hero. */}
           <Link
             href="/"
             id="nav-name-span"
             onClick={handleNameClick}
+            tabIndex={navVisible ? 0 : -1}
+            aria-hidden={!navVisible}
             style={{
               fontFamily:     FONT,
               fontWeight:     500,
@@ -108,7 +112,7 @@ export default function PersistentHeader() {
               minWidth:       '330px',
               cursor:         'pointer',
               userSelect:     'none',
-              pointerEvents:  'auto',
+              pointerEvents:  navVisible ? 'auto' : 'none',
               textDecoration: 'none',
               color:          '#0A0A0A',
             }}
@@ -118,7 +122,10 @@ export default function PersistentHeader() {
 
           <div style={{ width: '1px', height: '14px', background: 'rgba(0,0,0,0.10)', flexShrink: 0 }} />
 
-          <div style={{ pointerEvents: 'auto' }}>
+          <div
+            aria-hidden={!navVisible}
+            style={{ pointerEvents: navVisible ? 'auto' : 'none' }}
+          >
             {/* `animated` only on home, so off-home nav flips snap instantly
                 — no re-staggering of items when switching between routes. */}
             <GlassNav isVisible={navVisible} animated={isHome} />

@@ -98,7 +98,8 @@ export default function ProjectCard({
 
   // ── Interaction handlers ──────────────────────────────────────────────────
   const handleMouseMove = (e: React.MouseEvent<HTMLElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect()
+    const target = e.currentTarget
+    const rect = target.getBoundingClientRect()
     const nx = (e.clientX - rect.left) / rect.width - 0.5
     const ny = (e.clientY - rect.top) / rect.height - 0.5
     pointerRef.current = { nx, ny }
@@ -109,14 +110,13 @@ export default function ProjectCard({
       if (!p) return
       mx.set(p.nx)
       my.set(p.ny)
-      if (sheenRef.current) {
-        const sx = (p.nx + 0.5) * 100
-        const sy = (p.ny + 0.5) * 100
-        // CSS custom properties are cheaper to update than re-parsing a full
-        // background-image string on every frame; the gradient reads them live.
-        sheenRef.current.style.setProperty('--sx', `${sx}%`)
-        sheenRef.current.style.setProperty('--sy', `${sy}%`)
-      }
+      // Write CSS vars on the tilt wrapper so both the sheen overlay and
+      // the metallic glint ring inherit them. Cheaper than re-parsing a
+      // background-image string per frame.
+      const sx = (p.nx + 0.5) * 100
+      const sy = (p.ny + 0.5) * 100
+      target.style.setProperty('--sx', `${sx}%`)
+      target.style.setProperty('--sy', `${sy}%`)
     })
   }
 
@@ -196,10 +196,8 @@ export default function ProjectCard({
                 style={{
                   position: 'absolute', inset: 0, opacity: 0, pointerEvents: 'none',
                   transition: 'opacity 0.18s ease', zIndex: 2,
-                  ['--sx' as string]: '50%',
-                  ['--sy' as string]: '50%',
                   backgroundImage:
-                    'radial-gradient(ellipse 72% 62% at var(--sx) var(--sy), rgba(255,255,255,0.09) 0%, rgba(255,255,255,0.035) 42%, transparent 68%)',
+                    'radial-gradient(ellipse 72% 62% at var(--sx, 50%) var(--sy, 50%), rgba(255,255,255,0.09) 0%, rgba(255,255,255,0.035) 42%, transparent 68%)',
                   willChange: 'opacity',
                 }}
               />
@@ -284,12 +282,17 @@ export default function ProjectCard({
                     style={{
                       position: 'absolute', inset: 0, opacity: 0, pointerEvents: 'none',
                       transition: 'opacity 0.18s ease', zIndex: 2,
-                      ['--sx' as string]: '50%',
-                      ['--sy' as string]: '50%',
                       backgroundImage:
-                        'radial-gradient(ellipse 72% 62% at var(--sx) var(--sy), rgba(255,255,255,0.09) 0%, rgba(255,255,255,0.035) 42%, transparent 68%)',
+                        'radial-gradient(ellipse 72% 62% at var(--sx, 50%) var(--sy, 50%), rgba(255,255,255,0.09) 0%, rgba(255,255,255,0.035) 42%, transparent 68%)',
                       willChange: 'opacity',
                     }}
+                  />
+
+                  {/* Metallic glint ring — a bright chrome highlight on the
+                      accent-colored hover stroke that follows the cursor. Only
+                      the border ring is visible via mask-composite. */}
+                  <div
+                    className={`tile-glint-ring${hovered ? ' is-hovered' : ''}`}
                   />
 
                   {/* Image-only hover stroke */}

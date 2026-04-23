@@ -218,6 +218,40 @@ body {
   display: none;
 }
 
+/* ── Metallic glint ring on project tile hover ─────────────────────
+   A thin ring painted on top of each card's hover stroke. Only the
+   border area is visible thanks to a mask-composite:exclude setup
+   (outer mask minus content-box mask = ring). A radial gradient
+   positioned at the cursor (via --sx/--sy set on the tile wrapper)
+   creates a bright chrome highlight that slides along the edge as
+   the cursor moves. */
+.tile-glint-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 8px;
+  padding: 1.5px;
+  pointer-events: none;
+  background: radial-gradient(
+    circle 180px at var(--sx, 50%) var(--sy, 50%),
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(255, 255, 255, 0.55) 20%,
+    rgba(255, 255, 255, 0) 55%
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.22s ease;
+  z-index: 11;
+  will-change: opacity;
+}
+.tile-glint-ring.is-hovered { opacity: 1; }
+@media (prefers-reduced-motion: reduce) {
+  .tile-glint-ring { transition: none; }
+}
+
 /* ── Stagger reveal (StaggerText) ────────────────────────────────── */
 /* Pure-CSS per-character stagger. Composited on the GPU — cheaper than
    driving a framer-motion spring per character. */
