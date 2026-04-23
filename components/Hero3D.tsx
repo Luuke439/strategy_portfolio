@@ -327,10 +327,11 @@ interface NameMeshProps {
 
 function NameMesh({ scrollRef, navRef, accentHoverRef, mousePosRef, onReady, geo, mat, anim, navOnly }: NameMeshProps) {
   const groupRef = useRef<THREE.Group>(null!)
-  // Tracks the last navOnly value we committed inside useFrame. Initial undefined
-  // means "snap on the first valid frame". Any flip afterwards snaps that same
-  // frame — zero lerp across a pathname boundary.
-  const prevNavOnly = useRef<boolean | undefined>(undefined)
+  // Snaps only on the very first frame (once the nav target is measurable)
+  // to avoid the initial flash from the default position to the real target.
+  // Route changes after that just lerp, so the text smoothly continues from
+  // wherever it was — same behaviour as if the user had kept scrolling.
+  const hasSnapped = useRef(false)
   const textWidthRef = useRef<number>(0)
   const recomputeNavRef = useRef<() => void>(() => { })
   // Sun beam light + material emissive for tile color
@@ -398,11 +399,6 @@ function NameMesh({ scrollRef, navRef, accentHoverRef, mousePosRef, onReady, geo
     const time = clock.elapsedTime
     const ease = 1 - p
 
-    // Flip of navOnly (or the very first frame) forces a direct set instead
-    // of the usual 0.075-lerp, so route changes never animate the 3D name.
-    const isFirstFrame = prevNavOnly.current === undefined
-    const navOnlyFlipped = !isFirstFrame && prevNavOnly.current !== navOnly
-
     // Idle float (fades to zero as text leaves hero)
     const floatY = Math.sin((time / 4.5) * Math.PI * 2) * anim.floatAmp * ease
     const idleRotY = Math.sin((time / 7.0) * Math.PI * 2) * (3.2 * Math.PI / 180) * ease
@@ -417,22 +413,22 @@ function NameMesh({ scrollRef, navRef, accentHoverRef, mousePosRef, onReady, geo
     const tY = anim.heroY + ((nav?.y ?? anim.heroY) - anim.heroY) * p + floatY
     const tS = 1 + (effectiveNavScale - 1) * p
 
-    // Snap on initial mount and on every navOnly flip, provided we either
-    // are in hero mode (nav not needed) or already have a nav target. This
-    // replaces the previous setState-based snapTick that raced with scroll
-    // events during route transitions.
-    const wantsSnap = isFirstFrame || navOnlyFlipped
-    const canSnap   = p === 0 || nav !== null
+    // Initial-mount snap: once nav target exists (or we're in hero mode),
+    // set the transform directly so the text doesn't flash from (0,0) to
+    // its real target in the first frame. Subsequent frames always lerp —
+    // including route changes, which then smoothly continue from wherever
+    // the text currently is to the new target.
+    const canSnap = p === 0 || nav !== null
 
-    if (wantsSnap && canSnap) {
+    if (!hasSnapped.current && canSnap) {
       groupRef.current.position.x = tX
       groupRef.current.position.y = tY
       groupRef.current.rotation.x = flipRotX
       groupRef.current.rotation.y = idleRotY + flipRotY
       groupRef.current.rotation.z = 0
       groupRef.current.scale.setScalar(tS)
-      prevNavOnly.current = navOnly
-    } else if (!wantsSnap) {
+      hasSnapped.current = true
+    } else if (hasSnapped.current) {
       const s = 0.075
       groupRef.current.position.x = THREE.MathUtils.lerp(groupRef.current.position.x, tX, s)
       groupRef.current.position.y = THREE.MathUtils.lerp(groupRef.current.position.y, tY, s)
@@ -441,8 +437,7 @@ function NameMesh({ scrollRef, navRef, accentHoverRef, mousePosRef, onReady, geo
       groupRef.current.rotation.z = THREE.MathUtils.lerp(groupRef.current.rotation.z, 0, s)
       groupRef.current.scale.setScalar(THREE.MathUtils.lerp(groupRef.current.scale.x, tS, s))
     }
-    // else: wantsSnap but nav target isn't ready yet. Hold current position
-    // and retry next frame — prevNavOnly stays behind so navOnlyFlipped stays true.
+    // else: first frame without a nav target yet — hold position and retry.
 
     // Sun beam — always follows mouse, turns tile-colored on hover
     const hover = accentHoverRef.current
