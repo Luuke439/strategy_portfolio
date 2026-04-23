@@ -255,10 +255,13 @@ interface SceneProps {
   accentHoverRef: React.MutableRefObject<TileHover | null>
   mousePosRef: React.MutableRefObject<{ x: number; y: number }>
   onReady: () => void
+  /** Bumps on every pathname change — NameMesh snaps directly to its new
+   *  target on the next frame instead of lerping. */
+  snapTick: number
 }
 
 export function SceneBody({
-  scrollRef, navRef, accentHoverRef, mousePosRef, onReady,
+  scrollRef, navRef, accentHoverRef, mousePosRef, onReady, snapTick,
   geo, mat, lights, anim,
 }: SceneProps & {
   geo: typeof DEFAULT_GEO | Record<string, number>
@@ -285,6 +288,7 @@ export function SceneBody({
           geo={geo}
           mat={mat}
           anim={anim}
+          snapTick={snapTick}
         />
       </Suspense>
     </>
@@ -318,11 +322,15 @@ interface NameMeshProps {
   mat: Record<string, any>
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   anim: Record<string, any>
+  snapTick: number
 }
 
-function NameMesh({ scrollRef, navRef, accentHoverRef, mousePosRef, onReady, geo, mat, anim }: NameMeshProps) {
+function NameMesh({ scrollRef, navRef, accentHoverRef, mousePosRef, onReady, geo, mat, anim, snapTick }: NameMeshProps) {
   const groupRef = useRef<THREE.Group>(null!)
-  const hasSnapped = useRef(false)
+  // Every time snapTick increments (pathname change), the next valid frame
+  // sets the text transform directly — no lerp — so there is no animation
+  // across route boundaries. Initial mount also starts in "snap next" state.
+  const lastSnapTick = useRef<number>(-1)
   const textWidthRef = useRef<number>(0)
   const recomputeNavRef = useRef<() => void>(() => { })
   // Sun beam light + material emissive for tile color
@@ -373,20 +381,6 @@ function NameMesh({ scrollRef, navRef, accentHoverRef, mousePosRef, onReady, geo
     const time = clock.elapsedTime
     const ease = 1 - p
 
-    // On first frame where nav target is known: if already scrolled to the end
-    // (e.g. page refresh while at the bottom) snap directly to final pose so
-    // the text never visibly lerps from the hero center to the header.
-    if (!hasSnapped.current && nav) {
-      if (p >= 1) {
-        groupRef.current.position.set(nav.x, nav.y, 0)
-        groupRef.current.scale.setScalar(anim.navScale)
-        groupRef.current.rotation.x = Math.PI * 2 * anim.flipX
-        groupRef.current.rotation.y = Math.PI * 2 * anim.flipSpins
-        groupRef.current.rotation.z = 0
-      }
-      hasSnapped.current = true
-    }
-
     // Idle float (fades to zero as text leaves hero)
     const floatY = Math.sin((time / 4.5) * Math.PI * 2) * anim.floatAmp * ease
     const idleRotY = Math.sin((time / 7.0) * Math.PI * 2) * (3.2 * Math.PI / 180) * ease
@@ -401,13 +395,29 @@ function NameMesh({ scrollRef, navRef, accentHoverRef, mousePosRef, onReady, geo
     const tY = anim.heroY + ((nav?.y ?? anim.heroY) - anim.heroY) * p + floatY
     const tS = 1 + (anim.navScale - 1) * p
 
-    const s = 0.075
-    groupRef.current.position.x = THREE.MathUtils.lerp(groupRef.current.position.x, tX, s)
-    groupRef.current.position.y = THREE.MathUtils.lerp(groupRef.current.position.y, tY, s)
-    groupRef.current.rotation.x = THREE.MathUtils.lerp(groupRef.current.rotation.x, flipRotX, s)
-    groupRef.current.rotation.y = THREE.MathUtils.lerp(groupRef.current.rotation.y, idleRotY + flipRotY, s)
-    groupRef.current.rotation.z = THREE.MathUtils.lerp(groupRef.current.rotation.z, 0, s)
-    groupRef.current.scale.setScalar(THREE.MathUtils.lerp(groupRef.current.scale.x, tS, s))
+    // If the pathname just changed (snapTick bumped) and nav target is known
+    // for the p=1 case, set the transform directly — no lerp, no visible
+    // cross-route animation. For p=0 we can snap too since nav isn't needed.
+    const shouldSnap =
+      lastSnapTick.current !== snapTick && (p === 0 || nav !== null)
+
+    if (shouldSnap) {
+      groupRef.current.position.x = tX
+      groupRef.current.position.y = tY
+      groupRef.current.rotation.x = flipRotX
+      groupRef.current.rotation.y = idleRotY + flipRotY
+      groupRef.current.rotation.z = 0
+      groupRef.current.scale.setScalar(tS)
+      lastSnapTick.current = snapTick
+    } else {
+      const s = 0.075
+      groupRef.current.position.x = THREE.MathUtils.lerp(groupRef.current.position.x, tX, s)
+      groupRef.current.position.y = THREE.MathUtils.lerp(groupRef.current.position.y, tY, s)
+      groupRef.current.rotation.x = THREE.MathUtils.lerp(groupRef.current.rotation.x, flipRotX, s)
+      groupRef.current.rotation.y = THREE.MathUtils.lerp(groupRef.current.rotation.y, idleRotY + flipRotY, s)
+      groupRef.current.rotation.z = THREE.MathUtils.lerp(groupRef.current.rotation.z, 0, s)
+      groupRef.current.scale.setScalar(THREE.MathUtils.lerp(groupRef.current.scale.x, tS, s))
+    }
 
     // Sun beam — always follows mouse, turns tile-colored on hover
     const hover = accentHoverRef.current
@@ -500,6 +510,9 @@ interface Hero3DProps {
 export default function Hero3D({ hoverInfo, navOnly }: Hero3DProps) {
   const [isMounted, setIsMounted] = useState(false)
   const [fontLoaded, setFontLoaded] = useState(false)
+  // Bumps every time navOnly flips — NameMesh sees this via the snapTick prop
+  // and sets its transform directly on the next frame instead of lerping.
+  const [snapTick, setSnapTick] = useState(0)
 
   const scrollRef = useRef<number>(navOnly ? 1 : 0)
   const navRef = useRef<{ x: number; y: number } | null>(null)
@@ -528,6 +541,8 @@ export default function Hero3D({ hoverInfo, navOnly }: Hero3DProps) {
   useEffect(() => { accentHoverRef.current = hoverInfo ?? null }, [hoverInfo])
 
   useEffect(() => {
+    // Force a snap on the next frame — no lerp across a pathname boundary.
+    setSnapTick(t => t + 1)
     if (navOnly) {
       scrollRef.current = 1
       return
@@ -584,6 +599,7 @@ export default function Hero3D({ hoverInfo, navOnly }: Hero3DProps) {
               accentHoverRef={accentHoverRef}
               mousePosRef={mousePosRef}
               onReady={handleReady}
+              snapTick={snapTick}
             />
           </Suspense>
         ) : (
@@ -592,6 +608,7 @@ export default function Hero3D({ hoverInfo, navOnly }: Hero3DProps) {
             navRef={navRef}
             accentHoverRef={accentHoverRef}
             mousePosRef={mousePosRef}
+            snapTick={snapTick}
             onReady={handleReady}
           />
         )}
