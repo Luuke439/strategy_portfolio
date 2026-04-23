@@ -281,7 +281,7 @@ export default function AboutPage() {
                     LinkedIn ↗
                   </a>
                   <a
-                    href="/Luke_Caporelli_CV.pdf"
+                    href="/Resume_Luke_Caporelli.pdf"
                     target="_blank"
                     rel="noopener noreferrer"
                     style={{

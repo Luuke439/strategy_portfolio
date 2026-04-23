@@ -45,7 +45,7 @@ export default function NavBar({ visible }: NavBarProps) {
           About
         </Link>
         <a
-          href="/Luke_Caporelli_CV.pdf"
+          href="/Resume_Luke_Caporelli.pdf"
           target="_blank"
           rel="noopener noreferrer"
           className="hover:opacity-60 transition-opacity duration-200 no-underline"
