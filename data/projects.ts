@@ -54,7 +54,7 @@ export const projects: Project[] = [
     problemStatement:
       "Every route planner gives you a path. None of them know what kind of ride you're in the mood for.",
     role: 'Product design · Research · Prototype engineering',
-    team: 'Luke Caporelli, Luca M. Ziegler, Félix',
+    team: 'Luke Caporelli, Luca M. Ziegler Félix',
     tools: 'Figma · Next.js · OpenRouteService · Shademap API',
     scope: 'B.A. Thesis · HfG Schwäbisch Gmünd · 2025',
     challenge:
