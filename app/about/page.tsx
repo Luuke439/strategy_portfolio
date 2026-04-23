@@ -146,7 +146,8 @@ export default function AboutPage() {
             {/* ── Right column: all text ───────────────────────────────── */}
             <div>
 
-              {/* Title + subtitle — name lives in the persistent header */}
+              {/* Title + subtitle — matches the h1 + problem statement
+                  treatment from CaseStudyPage. Name lives in the header. */}
               <div style={{ marginBottom: '2.5rem' }}>
                 <h1 style={{
                   fontFamily:    FONT,
@@ -155,21 +156,21 @@ export default function AboutPage() {
                   lineHeight:    0.95,
                   letterSpacing: '-0.03em',
                   color:         '#0A0A0A',
-                  marginBottom:  '1.25rem',
+                  margin:        '0 0 1.5rem',
                 }}>
                   Strategic Designer
                 </h1>
-                <p style={{
-                  fontFamily: FONT,
-                  fontWeight: 300,
-                  fontSize:   'clamp(1.1rem, 1.7vw, 1.5rem)',
-                  lineHeight: 1.35,
-                  color:      '#3A3A3A',
-                  maxWidth:   '28ch',
-                  marginBottom: '1.25rem',
+                <h2 style={{
+                  fontFamily:    FONT,
+                  fontWeight:    300,
+                  fontSize:      'clamp(1.1rem, 1.8vw, 1.5rem)',
+                  lineHeight:    1.45,
+                  letterSpacing: '-0.01em',
+                  color:         '#6B6B6B',
+                  margin:        '0 0 1.75rem',
                 }}>
                   I lead disruptive transformation across industrial systems.
-                </p>
+                </h2>
                 <div style={{
                   fontFamily:    FONT,
                   fontWeight:    400,
