@@ -15,7 +15,7 @@ const rows = (challenge: string, strategy: string, results: string) => [
   { label: 'Results',   text: results   },
 ]
 
-function ChallengeBlock({ challenge, strategy, results, accentColor }: ChallengeBlockProps) {
+function ChallengeBlock({ challenge, strategy, results }: ChallengeBlockProps) {
   return (
     <div style={{ marginTop: '3rem', marginBottom: '3rem' }}>
       {rows(challenge, strategy, results).map((row, i) => (
@@ -37,7 +37,7 @@ function ChallengeBlock({ challenge, strategy, results, accentColor }: Challenge
               fontSize: '0.72rem',
               letterSpacing: '0.1em',
               textTransform: 'uppercase',
-              color: accentColor,
+              color: '#A0A0A0',
               paddingTop: '0.15rem',
               minWidth: '80px',
             }}

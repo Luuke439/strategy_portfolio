@@ -72,15 +72,14 @@ export default function CaseStudyNav({ chapters, accentColor }: CaseStudyNavProp
           <motion.span
             animate={{
               color: activeChapter === i ? accentColor : '#A0A0A0',
-              opacity: activeChapter === i ? 1 : 0.6,
+              opacity: activeChapter === i ? 1 : 0.65,
             }}
             transition={{ duration: 0.25 }}
             style={{
               fontFamily: "'TWK Lausanne Pan', system-ui, sans-serif",
               fontWeight: 400,
-              fontSize: '0.65rem',
-              letterSpacing: '0.08em',
-              textTransform: 'uppercase',
+              fontSize: '0.78rem',
+              letterSpacing: 0,
               whiteSpace: 'nowrap',
             }}
           >

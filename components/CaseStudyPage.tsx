@@ -6,7 +6,7 @@ import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import { motion } from 'framer-motion'
 import { useLenis } from 'lenis/react'
-import type { Project } from '@/data/projects'
+import { caseStudies, type Project } from '@/data/projects'
 import { caseStudyContent, type CaseStudyContent, type CsImage } from '@/data/case-study-content'
 import CaseStudyNav from './CaseStudyNav'
 import ChallengeBlock from './ChallengeBlock'
@@ -191,7 +191,7 @@ function Para({ children }: { children: string }) {
   )
 }
 
-function ChapterLabel({ label, accentColor }: { label: string; accentColor: string }) {
+function ChapterLabel({ label }: { label: string; accentColor: string }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.1rem' }}>
       <span
@@ -201,13 +201,13 @@ function ChapterLabel({ label, accentColor }: { label: string; accentColor: stri
           fontSize: '0.68rem',
           letterSpacing: '0.12em',
           textTransform: 'uppercase',
-          color: accentColor,
+          color: '#A0A0A0',
           whiteSpace: 'nowrap',
         }}
       >
         {label}
       </span>
-      <div style={{ flex: 1, height: '1px', backgroundColor: accentColor, opacity: 0.2 }} />
+      <div style={{ flex: 1, height: '1px', backgroundColor: '#E5E5E5' }} />
     </div>
   )
 }
@@ -302,21 +302,21 @@ function ToggleButton({ isOpen, onToggle }: { isOpen: boolean; onToggle: () => v
   return (
     <button
       onClick={onToggle}
+      aria-label={isOpen ? 'Collapse' : 'Expand'}
       style={{
         fontFamily: FONT,
-        fontWeight: 400,
-        fontSize: '0.7rem',
-        letterSpacing: '0.1em',
-        textTransform: 'uppercase',
+        fontWeight: 300,
+        fontSize: '1.4rem',
+        lineHeight: 1,
         color: '#A0A0A0',
         background: 'none',
         border: 'none',
-        padding: '0.6rem 0 0',
+        padding: '0.85rem 0 0',
         cursor: 'pointer',
         display: 'block',
       }}
     >
-      {isOpen ? '↑ close' : '↓ read more'}
+      {isOpen ? '−' : '+'}
     </button>
   )
 }
@@ -517,18 +517,18 @@ export default function CaseStudyPage({ project }: CaseStudyPageProps) {
       <section style={{ paddingTop: 'clamp(10rem, 20vh, 16rem)' }}>
         <div className="editorial-width" style={{ paddingLeft: '2rem', paddingRight: '2rem' }}>
 
-          {/* Label in brackets */}
+          {/* Label */}
           <span
             style={{
               fontFamily: FONT,
-              fontWeight: 300,
+              fontWeight: 400,
               fontSize: '0.78rem',
               color: '#6B6B6B',
               display: 'block',
               marginBottom: '1.5rem',
             }}
           >
-            [ {project.label} ]
+            {project.label}
           </span>
 
           {/* Project name */}
@@ -555,7 +555,7 @@ export default function CaseStudyPage({ project }: CaseStudyPageProps) {
               lineHeight: 1.45,
               letterSpacing: '-0.01em',
               color: '#6B6B6B',
-              margin: '0 0 1.75rem',
+              margin: '0 0 2.25rem',
             }}
           >
             {project.problemStatement}
@@ -784,10 +784,18 @@ export default function CaseStudyPage({ project }: CaseStudyPageProps) {
         </div>
       </main>
 
+      {/* ── Next case study ──────────────────────────────────────────── */}
+      {(() => {
+        const idx = caseStudies.findIndex((p) => p.slug === project.slug)
+        if (idx === -1) return null
+        const next = caseStudies[(idx + 1) % caseStudies.length]
+        if (!next || next.slug === project.slug) return null
+        return <NextCaseBlock next={next} currentAccent={accent} />
+      })()}
+
       {/* ── Footer ────────────────────────────────────────────────────── */}
       <footer
         style={{
-          borderTop: '1px solid #E5E5E5',
           padding: '1.75rem 2rem',
         }}
       >
@@ -796,5 +804,97 @@ export default function CaseStudyPage({ project }: CaseStudyPageProps) {
         </span>
       </footer>
     </div>
+  )
+}
+
+// ── Next case block ──────────────────────────────────────────────────────────
+function NextCaseBlock({ next, currentAccent }: { next: Project; currentAccent: string }) {
+  const [hovered, setHovered] = useState(false)
+  return (
+    <Link
+      href={`/projects/${next.slug}`}
+      style={{
+        display: 'block',
+        textDecoration: 'none',
+      }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
+      <div
+        style={{
+          padding: 'clamp(2.5rem, 6vw, 4rem) 2rem',
+          maxWidth: '760px',
+          margin: '0 auto',
+        }}
+      >
+        <span
+          style={{
+            fontFamily: FONT,
+            fontWeight: 400,
+            fontSize: '0.68rem',
+            letterSpacing: '0.12em',
+            textTransform: 'uppercase',
+            color: currentAccent,
+            display: 'block',
+            marginBottom: '1rem',
+          }}
+        >
+          Next case
+        </span>
+
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'baseline',
+            justifyContent: 'space-between',
+            gap: '1.5rem',
+            flexWrap: 'wrap',
+          }}
+        >
+          <h3
+            style={{
+              fontFamily: FONT,
+              fontWeight: 500,
+              fontSize: 'clamp(1.8rem, 4vw, 3rem)',
+              lineHeight: 1,
+              letterSpacing: '-0.02em',
+              color: '#0A0A0A',
+              margin: 0,
+            }}
+          >
+            {next.name}
+          </h3>
+          <motion.span
+            animate={{ x: hovered ? 6 : 0 }}
+            transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+            style={{
+              fontFamily: FONT,
+              fontWeight: 300,
+              fontSize: 'clamp(1.6rem, 3vw, 2.4rem)',
+              lineHeight: 1,
+              color: '#0A0A0A',
+            }}
+          >
+            →
+          </motion.span>
+        </div>
+
+        {next.problemStatement && (
+          <p
+            style={{
+              fontFamily: FONT,
+              fontWeight: 300,
+              fontSize: '0.95rem',
+              lineHeight: 1.55,
+              color: '#6B6B6B',
+              margin: '0.85rem 0 0',
+              maxWidth: '52ch',
+            }}
+          >
+            {next.problemStatement}
+          </p>
+        )}
+      </div>
+    </Link>
   )
 }
