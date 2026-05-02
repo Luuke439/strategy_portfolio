@@ -439,26 +439,31 @@ function NameMesh({ scrollRef, navRef, accentHoverRef, mousePosRef, onReady, geo
     }
     // else: first frame without a nav target yet — hold position and retry.
 
-    // Sun beam — always follows mouse, turns tile-colored on hover
+    // Sun beam — parked at a stable upper-right offset when no tile is
+    // hovered (the chrome surface is busy enough thanks to the env map +
+    // idle float — chasing the cursor on top of that read as a flicker
+    // when the mouse crossed the text's horizontal axis). Only follows
+    // the cursor while a tile is actually hovered, where the colored
+    // beam effect is the whole point.
     const hover = accentHoverRef.current
     const mp = mousePosRef.current
-
-    // Offset from the text's current world position so it works in
-    // both hero (center) and nav (top-left) positions
     const tx = groupRef.current.position.x
     const ty = groupRef.current.position.y
-    tgtLightPos.current.set(
-      tx + (mp.x * 2 - 1) * 10,   // orbit left/right of text
-      ty - (mp.y * 2 - 1) * 7,    // orbit above/below text
-      8
-    )
 
     if (hover) {
+      tgtLightPos.current.set(
+        tx + (mp.x * 2 - 1) * 10,
+        ty - (mp.y * 2 - 1) * 7,
+        8,
+      )
       tgtColor.current.set(hover.color)
       tgtIntensity.current = anim.accentIntensity
       tgtEmissive.current.set(hover.color)
       tgtEmissiveInt.current = 0.45
     } else {
+      // Stable parked position — slight upper-right, gives chrome a
+      // consistent highlight without reacting to cursor movement.
+      tgtLightPos.current.set(tx + 3, ty + 2, 8)
       tgtColor.current.set('#ffffff')
       tgtIntensity.current = anim.sunIntensity
       tgtEmissiveInt.current = 0

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useMemo } from 'react'
 import Link from 'next/link'
 import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion'
 import type { Project } from '@/data/projects'
@@ -19,6 +19,62 @@ const TILT_NORMAL = 5.0
 const SPRING = { stiffness: 180, damping: 24, mass: 0.55 }
 const RADIUS = '8px'
 
+// Some project accents are very dark (e.g. #00363A, #3D2F5C, #5A1A4F).
+// Against the cover photography they read as "just a darker border"
+// instead of identity color. We lift those to a readable lightness for
+// the *stroke + 3D beam* only — editorial uses of accentColor on the
+// white case-study page stay untouched.
+//
+// We only touch colors that need it (lightness < TRIGGER) and we mute
+// saturation alongside the lift so a saturated dark color (#088559)
+// doesn't snap to a neon mint. The result is a softer, jewel-toned
+// stroke that reads as the same identity color, just brighter.
+const STROKE_TRIGGER  = 0.45
+const STROKE_LIGHTNESS = 0.55
+const STROKE_MAX_SAT   = 0.55
+function brightenForUI(hex: string): string {
+  const m = hex.match(/^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i)
+  if (!m) return hex
+  const r = parseInt(m[1], 16) / 255
+  const g = parseInt(m[2], 16) / 255
+  const b = parseInt(m[3], 16) / 255
+  const max = Math.max(r, g, b), min = Math.min(r, g, b)
+  let h = 0, s = 0
+  const l = (max + min) / 2
+  if (max !== min) {
+    const d = max - min
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min)
+    switch (max) {
+      case r: h = (g - b) / d + (g < b ? 6 : 0); break
+      case g: h = (b - r) / d + 2; break
+      case b: h = (r - g) / d + 4; break
+    }
+    h /= 6
+  }
+  if (l >= STROKE_TRIGGER) return hex
+  const newL = STROKE_LIGHTNESS
+  const newS = Math.min(s, STROKE_MAX_SAT)
+  const hue2rgb = (p: number, q: number, t: number) => {
+    if (t < 0) t += 1
+    if (t > 1) t -= 1
+    if (t < 1/6) return p + (q - p) * 6 * t
+    if (t < 1/2) return q
+    if (t < 2/3) return p + (q - p) * (2/3 - t) * 6
+    return p
+  }
+  let r2: number, g2: number, b2: number
+  if (newS === 0) { r2 = g2 = b2 = newL }
+  else {
+    const q = newL < 0.5 ? newL * (1 + newS) : newL + newS - newL * newS
+    const p = 2 * newL - q
+    r2 = hue2rgb(p, q, h + 1/3)
+    g2 = hue2rgb(p, q, h)
+    b2 = hue2rgb(p, q, h - 1/3)
+  }
+  const toHex = (n: number) => Math.round(n * 255).toString(16).padStart(2, '0')
+  return `#${toHex(r2)}${toHex(g2)}${toHex(b2)}`
+}
+
 export default function ProjectCard({
   project,
   onHoverChange,
@@ -26,12 +82,12 @@ export default function ProjectCard({
 }: ProjectCardProps) {
   const isPlaceholder = project.type === 'placeholder'
   const maxTilt = project.size === 'large' ? TILT_LARGE : TILT_NORMAL
+  const strokeColor = useMemo(() => brightenForUI(project.accentColor), [project.accentColor])
 
   const [hovered, setHovered] = useState(false)
   const [videoReady, setVideoReady] = useState(false)
   const [revealed, setRevealed] = useState(false)
   const videoRef  = useRef<HTMLVideoElement>(null)
-  const sheenRef  = useRef<HTMLDivElement>(null)
   const cardRef   = useRef<HTMLDivElement>(null)
   const startTime = project.coverVideoStart ?? 0
 
@@ -122,10 +178,9 @@ export default function ProjectCard({
 
   const handleMouseEnter = (e: React.MouseEvent<HTMLElement>) => {
     setHovered(true)
-    if (sheenRef.current) sheenRef.current.style.opacity = '1'
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
     onHoverChange?.({
-      color: project.accentColor,
+      color: strokeColor,
       x: (rect.left + rect.width / 2) / window.innerWidth,
       y: (rect.top + rect.height / 2) / window.innerHeight,
     })
@@ -135,7 +190,6 @@ export default function ProjectCard({
     setHovered(false)
     mx.set(0)
     my.set(0)
-    if (sheenRef.current) sheenRef.current.style.opacity = '0'
     onHoverChange?.(null)
   }
 
@@ -191,16 +245,6 @@ export default function ProjectCard({
                   {project.name}
                 </span>
               </div>
-              <div
-                ref={sheenRef}
-                style={{
-                  position: 'absolute', inset: 0, opacity: 0, pointerEvents: 'none',
-                  transition: 'opacity 0.18s ease', zIndex: 2,
-                  backgroundImage:
-                    'radial-gradient(ellipse 72% 62% at var(--sx, 50%) var(--sy, 50%), rgba(255,255,255,0.09) 0%, rgba(255,255,255,0.035) 42%, transparent 68%)',
-                  willChange: 'opacity',
-                }}
-              />
             </div>
             <div style={{ height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#FAFAFA', flexShrink: 0, padding: '0 8px', borderRadius: `0 0 ${RADIUS} ${RADIUS}` }}>
               <span style={{ fontFamily: "'TWK Lausanne Pan', system-ui, sans-serif", fontWeight: 400, fontSize: '0.76rem', letterSpacing: '-0.01em', color: '#B8B0A8' }}>
@@ -242,7 +286,7 @@ export default function ProjectCard({
 
                   {/* Accent fallback — hidden for contain mode */}
                   {project.coverFit !== 'contain' && (
-                    <div style={{ position: 'absolute', inset: 0, backgroundColor: project.accentColor, opacity: 0.55 }} />
+                    <div style={{ position: 'absolute', inset: 0, backgroundColor: strokeColor, opacity: 0.55 }} />
                   )}
 
                   {/* Media — subtle zoom on hover */}
@@ -276,18 +320,6 @@ export default function ProjectCard({
                     )}
                   </motion.div>
 
-                  {/* Reflective sheen */}
-                  <div
-                    ref={sheenRef}
-                    style={{
-                      position: 'absolute', inset: 0, opacity: 0, pointerEvents: 'none',
-                      transition: 'opacity 0.18s ease', zIndex: 2,
-                      backgroundImage:
-                        'radial-gradient(ellipse 72% 62% at var(--sx, 50%) var(--sy, 50%), rgba(255,255,255,0.09) 0%, rgba(255,255,255,0.035) 42%, transparent 68%)',
-                      willChange: 'opacity',
-                    }}
-                  />
-
                   {/* Metallic glint ring — a bright chrome highlight on the
                       accent-colored hover stroke that follows the cursor. Only
                       the border ring is visible via mask-composite. */}
@@ -299,7 +331,7 @@ export default function ProjectCard({
                   <motion.div
                     animate={{
                       boxShadow: hovered
-                        ? `inset 0 0 0 2px ${project.accentColor}`
+                        ? `inset 0 0 0 2px ${strokeColor}`
                         : `inset 0 0 0 0px transparent`,
                     }}
                     transition={{ duration: 0.18, ease: 'easeOut' }}

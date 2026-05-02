@@ -16,7 +16,7 @@ function MetaRow({ label, value }: MetaRowProps) {
           fontFamily: FONT,
           fontWeight: 400,
           fontSize: '0.78rem',
-          color: '#A0A0A0',
+          color: '#6B6B6B',
           minWidth: '64px',
           flexShrink: 0,
         }}
