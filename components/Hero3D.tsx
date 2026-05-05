@@ -135,8 +135,12 @@ function buildNeutralEnv(gl: THREE.WebGLRenderer): THREE.Texture {
   return envMap
 }
 
-function ImageEnv({ intensity }: { intensity: number }) {
+function ImageEnv({ intensity, onReady }: { intensity: number; onReady?: () => void }) {
   const { scene, gl } = useThree()
+  // Latest callback in a ref — keeps the load effect dependency-stable so we
+  // don't re-trigger PMREM generation when the parent re-renders.
+  const onReadyRef = useRef(onReady)
+  onReadyRef.current = onReady
 
   useEffect(() => {
     // Apply neutral studio env synchronously — guarantees the chrome is lit
@@ -146,6 +150,12 @@ function ImageEnv({ intensity }: { intensity: number }) {
 
     let hdriMap: THREE.Texture | null = null
     let cancelled = false
+    let fired = false
+    const fireReady = () => {
+      if (fired || cancelled) return
+      fired = true
+      onReadyRef.current?.()
+    }
 
     const loader = new THREE.TextureLoader()
     loader.load(
@@ -176,13 +186,25 @@ function ImageEnv({ intensity }: { intensity: number }) {
         if (cancelled) { hdriMap.dispose(); hdriMap = null; return }
         scene.environment = hdriMap
         neutral.dispose()
+        // Wait two frames before signalling ready: one for R3F to render
+        // with the new envMap, one for the browser to paint it. Then the
+        // canvas opacity gate flips and the user's first visible frame
+        // already shows the cloud reflection — no gray flash.
+        requestAnimationFrame(() => requestAnimationFrame(fireReady))
       },
       undefined,
-      () => { /* keep neutral — day.jpg failed to load */ },
+      // Network failure / 404 — keep the neutral env (chrome still lit) and
+      // signal ready so the canvas doesn't sit hidden forever.
+      () => fireReady(),
     )
+
+    // Last-resort safety: if loader never resolves (e.g. browser cache hung),
+    // still lift the gate after 4s so the user sees *something*.
+    const safety = window.setTimeout(fireReady, 4000)
 
     return () => {
       cancelled = true
+      window.clearTimeout(safety)
       if (hdriMap) { hdriMap.dispose(); if (scene.environment === hdriMap) scene.environment = null }
       else { neutral.dispose(); if (scene.environment === neutral) scene.environment = null }
     }
@@ -255,13 +277,18 @@ interface SceneProps {
   accentHoverRef: React.MutableRefObject<TileHover | null>
   mousePosRef: React.MutableRefObject<{ x: number; y: number }>
   onReady: () => void
+  /** Fires once the day.jpg HDRI has been applied as the scene env map
+   *  (or after a load failure / safety timeout). The parent uses this
+   *  together with `onReady` to gate the canvas fade-in so the first
+   *  visible frame already shows the cloud reflection. */
+  onEnvReady: () => void
   /** When true: text is always at nav position, regardless of scroll.
    *  NameMesh also snaps on every flip of this flag. */
   navOnly: boolean
 }
 
 export function SceneBody({
-  scrollRef, navRef, accentHoverRef, mousePosRef, onReady, navOnly,
+  scrollRef, navRef, accentHoverRef, mousePosRef, onReady, onEnvReady, navOnly,
   geo, mat, lights, anim,
 }: SceneProps & {
   geo: typeof DEFAULT_GEO | Record<string, number>
@@ -276,7 +303,7 @@ export function SceneBody({
       <directionalLight color="#FFFFFF" intensity={lights.rim as number} position={[0, 1.5, -6]} />
       <directionalLight color="#FFD0A0" intensity={lights.kicker as number} position={[3, -2, -4]} />
       <ambientLight intensity={lights.ambient as number} />
-      <ImageEnv intensity={lights.envIntensity as number} />
+      <ImageEnv intensity={lights.envIntensity as number} onReady={onEnvReady} />
 
       <Suspense fallback={null}>
         <NameMesh
@@ -535,6 +562,13 @@ interface Hero3DProps {
 export default function Hero3D({ hoverInfo, navOnly }: Hero3DProps) {
   const [isMounted, setIsMounted] = useState(false)
   const [fontLoaded, setFontLoaded] = useState(false)
+  // The envMap (day.jpg → PMREM cube) takes a tick or two to be applied
+  // after mount. Without gating on this, the first painted frame shows
+  // a metallic-but-unreflective gray, then pops to chrome once the env
+  // texture is wired up. We fade the canvas in only once both font AND
+  // env are ready so the chrome is fully formed on the first visible
+  // frame — no gray flash.
+  const [envReady, setEnvReady] = useState(false)
 
   const scrollRef = useRef<number>(navOnly ? 1 : 0)
   const navRef = useRef<{ x: number; y: number } | null>(null)
@@ -591,6 +625,7 @@ export default function Hero3D({ hoverInfo, navOnly }: Hero3DProps) {
   useEffect(() => { setIsMounted(true) }, [])
 
   const handleReady = useCallback(() => setFontLoaded(true), [])
+  const handleEnvReady = useCallback(() => setEnvReady(true), [])
 
   if (!isMounted) return null
 
@@ -607,7 +642,7 @@ export default function Hero3D({ hoverInfo, navOnly }: Hero3DProps) {
           inset: 0,
           zIndex: 110,  // above header (z:100) so 3D name stays visible
           pointerEvents: 'none',
-          opacity: fontLoaded ? 1 : 0,
+          opacity: (fontLoaded && envReady) ? 1 : 0,
           transition: 'opacity 0.9s ease',
         }}
       >
@@ -632,6 +667,7 @@ export default function Hero3D({ hoverInfo, navOnly }: Hero3DProps) {
               accentHoverRef={accentHoverRef}
               mousePosRef={mousePosRef}
               onReady={handleReady}
+              onEnvReady={handleEnvReady}
               navOnly={!!navOnly}
             />
           </Suspense>
@@ -643,6 +679,7 @@ export default function Hero3D({ hoverInfo, navOnly }: Hero3DProps) {
             mousePosRef={mousePosRef}
             navOnly={!!navOnly}
             onReady={handleReady}
+            onEnvReady={handleEnvReady}
           />
         )}
         </Canvas>

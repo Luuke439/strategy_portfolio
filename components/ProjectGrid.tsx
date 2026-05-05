@@ -46,7 +46,7 @@ export default function ProjectGrid({ onProjectHover }: ProjectGridProps) {
   if (bp === 'mobile') {
     const order = [
       'odo', 'packyourride', 'spotify-dashboard', 'maya',
-      'expressive-messaging', 'blend-it', 'brand-communication', 'remarkt',
+      'expressive-messaging', 'blend-it', 'resaga', 'remarkt',
     ]
     return (
       <div style={{ padding: '4.5rem 1rem 2.5rem', display: 'flex', flexDirection: 'column', gap: '8px' }}>
@@ -85,7 +85,7 @@ export default function ProjectGrid({ onProjectHover }: ProjectGridProps) {
             </div>
           ))}
           <div style={{ gridColumn: '1 / 3', height: '180px' }}>
-            <ProjectCard project={find('brand-communication')} onHoverChange={onProjectHover} revealIndex={2} />
+            <ProjectCard project={find('resaga')} onHoverChange={onProjectHover} revealIndex={2} />
           </div>
           <div style={{ gridColumn: '1 / 3', height: '320px' }}>
             <ProjectCard project={find('remarkt')} onHoverChange={onProjectHover} revealIndex={0} />
@@ -144,7 +144,7 @@ export default function ProjectGrid({ onProjectHover }: ProjectGridProps) {
           </div>
 
           <div style={{ gridColumn: '4 / 7', gridRow: '2 / 3' }}>
-            <ProjectCard project={find('brand-communication')} onHoverChange={onProjectHover} revealIndex={3} />
+            <ProjectCard project={find('resaga')} onHoverChange={onProjectHover} revealIndex={3} />
           </div>
 
           <div style={{ gridColumn: '7 / 13', gridRow: '1 / 3' }}>
