@@ -10,7 +10,7 @@ const FONT = "'TWK Lausanne Pan', system-ui, sans-serif"
 
 function MetaRow({ label, value }: MetaRowProps) {
   return (
-    <div style={{ display: 'flex', gap: '1.5rem', marginBottom: '0.35rem' }}>
+    <div style={{ display: 'flex', gap: '1.5rem', marginBottom: '0.5rem' }}>
       <span
         style={{
           fontFamily: FONT,

@@ -35,7 +35,7 @@ function CsImageSlot({
   const isWide = image.layout === 'wide'
 
   const outerStyle: React.CSSProperties = {
-    margin: '1.5rem 0',
+    margin: '2rem 0',
     ...(isPhone ? { display: 'flex', justifyContent: 'center' } : {}),
     ...(fadeIn
       ? {
@@ -116,7 +116,7 @@ function FullWidthImageSlot({
   const ar = image.aspectRatio ?? '16/9'
 
   const wrapStyle: React.CSSProperties = {
-    margin: '2rem -2rem',
+    margin: '2.5rem -2rem',
     position: 'relative',
     aspectRatio: ar,
     overflow: 'hidden',
@@ -183,7 +183,7 @@ function Para({ children }: { children: string }) {
         fontSize: '0.95rem',
         lineHeight: 1.75,
         color: '#0A0A0A',
-        margin: '0 0 1.1rem',
+        margin: '0 0 1.25rem',
       }}
     >
       {children}
@@ -193,7 +193,7 @@ function Para({ children }: { children: string }) {
 
 function ChapterLabel({ label }: { label: string; accentColor: string }) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.1rem' }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem' }}>
       <span
         style={{
           fontFamily: FONT,
@@ -222,7 +222,7 @@ function ChapterHeadline({ children }: { children: string }) {
         lineHeight: 1.25,
         letterSpacing: '-0.01em',
         color: '#0A0A0A',
-        margin: '0 0 0.9rem',
+        margin: '0 0 1.1rem',
       }}
     >
       {children}
@@ -232,7 +232,7 @@ function ChapterHeadline({ children }: { children: string }) {
 
 function PullQuote({ text, attribution, accentColor }: { text: string; attribution?: string; accentColor: string }) {
   return (
-    <blockquote style={{ borderLeft: `2px solid ${accentColor}`, paddingLeft: '1.25rem', margin: '1.25rem 0' }}>
+    <blockquote style={{ borderLeft: `2px solid ${accentColor}`, paddingLeft: '1.5rem', margin: '1.75rem 0' }}>
       <p style={{ fontFamily: FONT, fontWeight: 300, fontStyle: 'italic', fontSize: '0.95rem', lineHeight: 1.65, color: '#0A0A0A', margin: 0 }}>
         "{text}"
       </p>
@@ -251,8 +251,8 @@ function Callout({ title, body, accentColor }: { title: string; body: string; ac
       style={{
         backgroundColor: `${accentColor}0D`,
         borderLeft: `2px solid ${accentColor}`,
-        padding: '0.9rem 1.1rem',
-        margin: '1.25rem 0',
+        padding: '1rem 1.25rem',
+        margin: '1.75rem 0',
       }}
     >
       <p style={{ fontFamily: FONT, fontWeight: 500, fontSize: '0.8rem', color: accentColor, margin: '0 0 0.3rem' }}>
@@ -267,7 +267,7 @@ function Callout({ title, body, accentColor }: { title: string; body: string; ac
 
 function KeyTakeaway({ title, body, accentColor }: { title: string; body: string; accentColor: string }) {
   return (
-    <div style={{ backgroundColor: accentColor, padding: '1.1rem 1.4rem', margin: '1.5rem 0 0' }}>
+    <div style={{ backgroundColor: accentColor, padding: '1.4rem 1.6rem', margin: '2.25rem 0 0' }}>
       <p style={{ fontFamily: FONT, fontWeight: 500, fontSize: '0.85rem', color: '#FAFAFA', margin: '0 0 0.3rem' }}>
         {title}
       </p>
@@ -311,7 +311,7 @@ function ToggleButton({ isOpen, onToggle }: { isOpen: boolean; onToggle: () => v
         color: '#A0A0A0',
         background: 'none',
         border: 'none',
-        padding: '0.85rem 0 0',
+        padding: '1.25rem 0 0',
         cursor: 'pointer',
         display: 'block',
       }}
@@ -331,7 +331,7 @@ function ImpactGrid({ stats, accentColor }: { stats: { number: string; descripti
         gridTemplateColumns: 'repeat(2, 1fr)',
         gap: '1px',
         backgroundColor: '#E5E5E5',
-        margin: '1.25rem 0',
+        margin: '1.75rem 0',
       }}
     >
       {stats.map((s, i) => (
@@ -368,7 +368,7 @@ function PhoneRowSlot({ images, accentColor }: { images: CsImage[]; accentColor:
       style={{
         display: 'flex',
         gap: '14px',
-        margin: '1.75rem 0',
+        margin: '2.25rem 0',
         overflowX: 'auto',
         paddingBottom: '2px',
       }}
@@ -420,7 +420,7 @@ function PhoneRowSlot({ images, accentColor }: { images: CsImage[]; accentColor:
 
 function ChapterVideoSlot({ src }: { src: string }) {
   return (
-    <div style={{ margin: '1.5rem 0' }}>
+    <div style={{ margin: '2rem 0' }}>
       <video
         src={src}
         autoPlay
@@ -443,7 +443,7 @@ function FadeSection({ id, children }: { id: string; children: React.ReactNode }
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-60px' }}
       transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-      style={{ paddingTop: '3.5rem', paddingBottom: '0.5rem' }}
+      style={{ paddingTop: '4.5rem', paddingBottom: 0 }}
     >
       {children}
     </motion.section>
@@ -525,7 +525,7 @@ export default function CaseStudyPage({ project }: CaseStudyPageProps) {
               fontSize: '0.78rem',
               color: '#6B6B6B',
               display: 'block',
-              marginBottom: '1.5rem',
+              marginBottom: '1rem',
             }}
           >
             {project.label}
@@ -540,7 +540,7 @@ export default function CaseStudyPage({ project }: CaseStudyPageProps) {
               lineHeight: 0.95,
               letterSpacing: '-0.03em',
               color: '#0A0A0A',
-              margin: '0 0 1.5rem',
+              margin: '0 0 1.75rem',
             }}
           >
             {project.name}
@@ -555,14 +555,14 @@ export default function CaseStudyPage({ project }: CaseStudyPageProps) {
               lineHeight: 1.45,
               letterSpacing: '-0.01em',
               color: '#6B6B6B',
-              margin: '0 0 2.25rem',
+              margin: '0 0 2.5rem',
             }}
           >
             {project.problemStatement}
           </h2>
 
           {/* Metadata */}
-          <div style={{ marginBottom: '2.5rem' }}>
+          <div style={{ marginBottom: '4rem' }}>
             {meta.map((m) => (
               <MetaRow key={m.label} label={m.label} value={m.value} accentColor={accent} />
             ))}
@@ -637,7 +637,7 @@ export default function CaseStudyPage({ project }: CaseStudyPageProps) {
                   letterSpacing: '0.12em',
                   textTransform: 'uppercase',
                   color: '#6B6B6B',
-                  margin: '0 0 1.1rem',
+                  margin: '0 0 1.5rem',
                 }}
               >
                 What this project is really about
