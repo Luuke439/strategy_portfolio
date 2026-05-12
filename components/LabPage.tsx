@@ -261,7 +261,7 @@ export default function LabPage({ project }: LabPageProps) {
                 textTransform: 'uppercase',
                 color: accent,
                 display: 'block',
-                marginBottom: '1.5rem',
+                marginBottom: '1rem',
               }}
             >
               Lab — {project.label}
@@ -275,7 +275,7 @@ export default function LabPage({ project }: LabPageProps) {
                 lineHeight: 0.95,
                 color: '#0A0A0A',
                 letterSpacing: '-0.03em',
-                marginBottom: '1.5rem',
+                marginBottom: '1.75rem',
               }}
             >
               {project.name}
@@ -295,7 +295,7 @@ export default function LabPage({ project }: LabPageProps) {
             </p>
 
             {/* Tags */}
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '3rem' }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '4rem' }}>
               {project.tools.split(' · ').map((tool) => (
                 <span
                   key={tool}
@@ -403,7 +403,7 @@ export default function LabPage({ project }: LabPageProps) {
           {/* Collaborators */}
           <div
             style={{
-              paddingTop: '2rem',
+              paddingTop: '3rem',
               borderTop: '1px solid #E5E5E5',
             }}
           >
@@ -425,7 +425,7 @@ export default function LabPage({ project }: LabPageProps) {
                 fontWeight: 300,
                 fontSize: '0.9rem',
                 color: '#6B6B6B',
-                marginTop: '0.5rem',
+                marginTop: '0.75rem',
               }}
             >
               {project.team}
@@ -436,8 +436,7 @@ export default function LabPage({ project }: LabPageProps) {
 
       <footer
         style={{
-          borderTop: '1px solid #E5E5E5',
-          padding: '2rem',
+          padding: '1.75rem 2rem',
         }}
       >
         <span

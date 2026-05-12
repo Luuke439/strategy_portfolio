@@ -17,16 +17,16 @@ const rows = (challenge: string, strategy: string, results: string) => [
 
 function ChallengeBlock({ challenge, strategy, results }: ChallengeBlockProps) {
   return (
-    <div style={{ marginTop: '3rem', marginBottom: '3rem' }}>
+    <div style={{ marginTop: '3.5rem', marginBottom: '3rem' }}>
       {rows(challenge, strategy, results).map((row, i) => (
         <div
           key={i}
           style={{
             display: 'grid',
             gridTemplateColumns: 'auto 1fr',
-            gap: '2rem',
+            gap: '2.5rem',
             alignItems: 'start',
-            padding: '1.5rem 0',
+            padding: '1.75rem 0',
             borderTop: '1px solid #E5E5E5',
           }}
         >
