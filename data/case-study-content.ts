@@ -341,7 +341,7 @@ const maya: CaseStudyContent = {
     {
       label: '06 · The Result',
       headline: 'Three prototypes, one coherent system.',
-      beforeVideo: '/videos/maya/cover.mov',
+      beforeVideo: '/videos/maya/cover.mp4',
       paragraphs: [
         'We delivered three linked prototypes as the semester outcome.',
         'The shared-living matching dashboard is a provider-facing tool for HR. It visualizes current housing compositions, flags imbalances, and surfaces the matching questionnaire flow for incoming trainees. The questionnaire captures language level, country of origin, time already spent in Germany, and a small number of compatibility preferences. From these inputs, the system generates balanced household proposals.',
