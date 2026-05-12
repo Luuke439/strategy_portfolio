@@ -112,7 +112,7 @@ export const projects: Project[] = [
     name: 'maya',
     shortName: 'maya',
     type: 'case-study',
-    coverVideo: 'cover.mov',
+    coverVideo: 'cover.mp4',
     coverVideoStart: 0,
     year: '2025',
     tags: ['AI Integration', 'Enterprise', 'Language & Inclusion'],

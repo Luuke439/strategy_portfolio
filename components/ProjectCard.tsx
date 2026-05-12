@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useEffect, useMemo } from 'react'
+import { memo, useState, useRef, useEffect, useMemo } from 'react'
 import Link from 'next/link'
 import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion'
 import type { Project } from '@/data/projects'
@@ -75,7 +75,7 @@ function brightenForUI(hex: string): string {
   return `#${toHex(r2)}${toHex(g2)}${toHex(b2)}`
 }
 
-export default function ProjectCard({
+function ProjectCardImpl({
   project,
   onHoverChange,
   revealIndex = 0,
@@ -384,3 +384,10 @@ export default function ProjectCard({
     </motion.div>
   )
 }
+
+// Memoize the whole tile — props are stable (project from the static data
+// array, onHoverChange is a useCallback-wrapped setter from context, and
+// revealIndex is a number). Without this, every hoverInfo state change in
+// the context provider would re-render all 8 tiles on the home page.
+const ProjectCard = memo(ProjectCardImpl)
+export default ProjectCard
