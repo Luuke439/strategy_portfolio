@@ -344,14 +344,10 @@ const maya: CaseStudyContent = {
       ],
       expandImages: [
         {
-          src: '/images/maya/ch04-matrix.jpg',
-          alt: 'Language integration matrix — Level 1–6 (time in Germany × language level)',
-          aspectRatio: '4/3',
-        },
-        {
-          src: '/images/maya/ch04-wg.jpg',
-          alt: 'WG constellation sizes — 3, 4, 5, and 6-person household compositions',
-          aspectRatio: '4/3',
+          src: '/images/maya/ch04-matrix.png',
+          alt: 'Language integration matrix and WG constellations. Left panel: six-level scale from Level 6 (German apprentice already in their second training year, dark green) to Level 1 (new apprentice just arrived in Germany, dark red). Right panel: example 4-, 5-, and 6-person flat configurations showing balanced mixes of levels across each household composition.',
+          aspectRatio: '2736/1149',
+          fullWidth: true,
         },
       ],
     },
@@ -467,7 +463,7 @@ const remarkt: CaseStudyContent = {
   chapters: [
     {
       label: '01 · The Situation',
-      headline: 'A system optimized for stability, not resilience.',
+      headline: 'A system optimized for stability, not adaptability.',
       paragraphs: [
         'Supermarkets are essential infrastructure but not designed for failure. In normal conditions, they are extraordinarily efficient — lean inventory, just-in-time logistics, optimized shelf space. That efficiency is the problem. It leaves no slack for disruption.',
         'Power loss, supply chain interruption, or panic purchasing can break operations within hours. In Germany, 89% of households rely on supermarkets as their primary food source. When those stores stop functioning — even temporarily — the social consequences are immediate and disproportionate.',
