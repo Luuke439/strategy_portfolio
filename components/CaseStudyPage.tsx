@@ -925,8 +925,9 @@ export default function CaseStudyPage({ project }: CaseStudyPageProps) {
             const isReflection = i === 7
             const open = isOpen(i)
 
+            const visibleCount = Math.max(1, chapter.visibleParagraphs ?? 1)
             const hasExpandContent =
-              chapter.paragraphs.length > 1 ||
+              chapter.paragraphs.length > visibleCount ||
               chapter.pullQuote ||
               chapter.callout ||
               (chapter.expandImages && chapter.expandImages.length > 0) ||
@@ -964,6 +965,13 @@ export default function CaseStudyPage({ project }: CaseStudyPageProps) {
                     )}
                   </>
                 )}
+
+                {/* Additional always-visible paragraphs (after the split or
+                    inline media), used when visibleParagraphs > 1. */}
+                {visibleCount > 1 &&
+                  chapter.paragraphs.slice(1, visibleCount).map((p, j) => (
+                    <Para key={`vis-${j}`}>{p}</Para>
+                  ))}
 
                 {/* Before-expand image — always visible, max 1 */}
                 {/* (Skipped when image is the one consumed by the split) */}

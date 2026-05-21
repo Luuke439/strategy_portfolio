@@ -45,7 +45,8 @@ export interface CsCallout {
 export interface CsChapter {
   label: string
   headline: string
-  paragraphs: string[]         // [0] always visible, rest in expandable
+  paragraphs: string[]         // [0..visibleParagraphs) always visible, rest in expandable
+  visibleParagraphs?: number   // how many paragraphs render before the expand (default 1)
   beforeImage?: CsImage        // shown before the expand toggle (max 1 per chapter)
   beforeVideo?: CsVideo        // video shown before the expand toggle (always visible)
   beforeChart?: CsBarChart     // inline bar chart, always visible, uses project accent
@@ -174,9 +175,10 @@ const odo: CaseStudyContent = {
     {
       label: '05 · The Idea',
       headline: 'Two flows, real data, live APIs.',
+      visibleParagraphs: 2,
       paragraphs: [
         'We designed two entry flows based on a consistent finding in the interviews: the difference between a rider who has 15 minutes and a rider who wants to spend an hour planning.',
-        'Quick Start generates a loop immediately from the rider\'s saved profile and current location. It surfaces the three most differentiated options for today — based on conditions at the current time, not generic recommendations — and allows comparison without reconfiguration. For the commuter cyclist who wants to ride after work and has five minutes to decide, this is the flow.',
+        'Quick Start opens the app on three loop routes — one for each profile the rider configured during onboarding. The profiles are not interchangeable: each is built around a different set of metrics (scenery weighting, surface preference, gradient tier, traffic exposure), and every day each one regenerates a fresh route against the current conditions. Three profiles produce three meaningfully different rides every morning. For the commuter cyclist with five minutes to decide, this is the flow.',
         'Custom Ride offers full preference control. Onboarding in this flow captures rider type, bike type, specific preferences and avoidances, a time window, and a starting point. From these inputs, odo generates profiles and allows deep comparison before committing. For a cyclist planning a long weekend route in an unfamiliar region, this is the flow.',
         'The functional prototype validated both flows using live API calls. We were not mocking data or using placeholder responses. Routes were generated from real OpenRouteService queries. Shade coverage was computed by Shademap against real topographic data for the query time. The prototype behaved as a real product would — including edge cases where API constraints produced unexpected route geometries that we had to design around.',
         'This was the most important form of validation: the pipeline works with real signals, in real places, with real environmental variation. The concept is not theoretical.',
