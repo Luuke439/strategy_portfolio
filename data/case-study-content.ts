@@ -526,12 +526,6 @@ const remarkt: CaseStudyContent = {
         'Token-based issuance replaces "first come, first served." Each household receives a QR or NFC token and a time window for pickup. This converts the store from a place where speed determines access to a place where everyone with a token has guaranteed access during their window. Queue dynamics collapse — there is no advantage to arriving early. Staff can control throughput predictably.',
         'Store zoning divides the space into four operational zones — entry, waiting, handoff, and exit — with controlled transitions between them. This protects staff by separating them from the full crowd pressure, allows throughput to be measured and managed, and prevents the compression that leads to conflict. Zoning is marked physically with tape and signage that can be deployed in under thirty minutes.',
       ],
-      beforeImage: {
-        src: '/images/remarkt/ch05-flow.jpg',
-        alt: 'End-to-end distribution flow — Farmer → Warehouse → re:markt → five channels → Customer',
-        aspectRatio: '21/9',
-        layout: 'wide',
-      },
     },
     {
       label: '06 · The Result',
@@ -544,9 +538,9 @@ const remarkt: CaseStudyContent = {
         'The five channels are designed to be activated selectively, not simultaneously. A localized power outage might only require Hub + Click & Collect. A regional infrastructure failure would activate all five.',
       ],
       beforeImage: {
-        src: '/images/remarkt/ch06-channels.jpg',
-        alt: 'Five distribution channels — Hub, Click & Collect, Delivery, Pop-Up, DHL Station',
-        aspectRatio: '3/2',
+        src: '/images/remarkt/ch06-channels.png',
+        alt: 'Five distribution channels arranged around re:markt Hub at the center: Click & Collect (pre-ordered pickup), Delivery (mobile delivery vehicles), Pop-Up Store (vehicle-based station for areas without a Hub), and DHL Station (using existing Packstation infrastructure). The Hub handles central distribution, storage, and coordination across all channels.',
+        aspectRatio: '1300/2067',
         fullWidth: true,
       },
     },
