@@ -559,11 +559,11 @@ function ChapterBarChart({
 // dominating the column. Toggle + expanded content render normally below.
 
 function ChapterMediaSplit({
-  text,
+  paragraphs,
   video,
   image,
 }: {
-  text: string
+  paragraphs: string[]
   video?: CsVideo
   image?: CsImage
 }) {
@@ -610,7 +610,9 @@ function ChapterMediaSplit({
   return (
     <div className="chapter-media-split">
       <div className="chapter-media-split__text">
-        <Para>{text}</Para>
+        {paragraphs.map((p, i) => (
+          <Para key={i}>{p}</Para>
+        ))}
       </div>
       <div className="chapter-media-split__media">{media}</div>
     </div>
@@ -947,10 +949,13 @@ export default function CaseStudyPage({ project }: CaseStudyPageProps) {
                 <ChapterLabel label={chapter.label} accentColor={accent} />
                 <ChapterHeadline>{chapter.headline}</ChapterHeadline>
 
-                {/* Split layout: Para 1 + phone-layout media side-by-side */}
+                {/* Split layout: visible paragraphs stack in the text column
+                    next to the phone-layout media. Keeps the prose-and-video
+                    pair tightly bound instead of letting the second paragraph
+                    drift below the whole split. */}
                 {isSplit ? (
                   <ChapterMediaSplit
-                    text={chapter.paragraphs[0]}
+                    paragraphs={chapter.paragraphs.slice(0, visibleCount)}
                     video={splitVideo}
                     image={splitImage}
                   />
@@ -963,15 +968,15 @@ export default function CaseStudyPage({ project }: CaseStudyPageProps) {
                     {chapter.beforeVideo && (
                       <ChapterVideoSlot video={chapter.beforeVideo} />
                     )}
+
+                    {/* Additional visible paragraphs render after the media
+                        when we're NOT in split mode. */}
+                    {visibleCount > 1 &&
+                      chapter.paragraphs.slice(1, visibleCount).map((p, j) => (
+                        <Para key={`vis-${j}`}>{p}</Para>
+                      ))}
                   </>
                 )}
-
-                {/* Additional always-visible paragraphs (after the split or
-                    inline media), used when visibleParagraphs > 1. */}
-                {visibleCount > 1 &&
-                  chapter.paragraphs.slice(1, visibleCount).map((p, j) => (
-                    <Para key={`vis-${j}`}>{p}</Para>
-                  ))}
 
                 {/* Before-expand image — always visible, max 1 */}
                 {/* (Skipped when image is the one consumed by the split) */}
