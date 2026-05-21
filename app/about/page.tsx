@@ -69,10 +69,12 @@ function SectionLabel({ children }: { children: string }) {
 
 function Portrait() {
   const [failed, setFailed] = useState(false)
+  // Bottom-of-page portrait — wider than the old header-corner version
+  // so it reads as a deliberate page closer instead of a thumbnail.
   const frame: React.CSSProperties = {
-    width:       '260px',
+    width:       '100%',
+    maxWidth:    '380px',
     aspectRatio: '3 / 4',
-    flexShrink:  0,
     objectFit:   'cover',
     display:     'block',
   }
@@ -162,57 +164,43 @@ export default function AboutPage() {
           style={{ paddingLeft: '2rem', paddingRight: '2rem' }}
         >
 
-          {/* ── Header row: heading block (left) + portrait (right) ───── */}
-          <div
-            style={{
-              display:        'flex',
-              alignItems:     'flex-start',
-              justifyContent: 'space-between',
-              gap:            '3rem',
-              marginBottom:   '4rem',
-            }}
-          >
-            {/* Left: compact heading block. Fixed column width keeps the
-                title, subtitle and meta aligned to the same measure. */}
-            <div style={{ width: '260px', flexShrink: 0 }}>
-              <h1 style={{
-                fontFamily:    FONT,
-                fontWeight:    500,
-                fontSize:      'clamp(2rem, 3.5vw, 3.5rem)',
-                lineHeight:    1.0,
-                letterSpacing: '-0.02em',
-                color:         '#0A0A0A',
-                margin:        '0 0 1.25rem',
-              }}>
-                Strategic<br />Designer
-              </h1>
-              <h2 style={{
-                fontFamily:    FONT,
-                fontWeight:    300,
-                fontSize:      'clamp(1rem, 1.4vw, 1.2rem)',
-                lineHeight:    1.4,
-                letterSpacing: '-0.01em',
-                color:         '#6B6B6B',
-                margin:        '0 0 1.5rem',
-              }}>
-                I lead disruptive transformation across industrial systems.
-              </h2>
-              <div style={{
-                fontFamily:    FONT,
-                fontWeight:    400,
-                fontSize:      '0.72rem',
-                letterSpacing: '0.08em',
-                textTransform: 'uppercase',
-                color:         '#A0A0A0',
-                lineHeight:    1.5,
-              }}>
-                Germany · US Citizen · Open to relocate
-              </div>
+          {/* ── Header: single editorial pillar ────────────────────────── */}
+          <header style={{ marginBottom: '4rem' }}>
+            <h1 style={{
+              fontFamily:    FONT,
+              fontWeight:    500,
+              fontSize:      'clamp(2.25rem, 4vw, 4rem)',
+              lineHeight:    1.0,
+              letterSpacing: '-0.02em',
+              color:         '#0A0A0A',
+              margin:        '0 0 1.25rem',
+            }}>
+              Strategic Designer
+            </h1>
+            <h2 style={{
+              fontFamily:    FONT,
+              fontWeight:    300,
+              fontSize:      'clamp(1.05rem, 1.5vw, 1.35rem)',
+              lineHeight:    1.4,
+              letterSpacing: '-0.01em',
+              color:         '#6B6B6B',
+              margin:        '0 0 1.5rem',
+              maxWidth:      '40ch',
+            }}>
+              I lead disruptive transformation across industrial systems.
+            </h2>
+            <div style={{
+              fontFamily:    FONT,
+              fontWeight:    400,
+              fontSize:      '0.72rem',
+              letterSpacing: '0.08em',
+              textTransform: 'uppercase',
+              color:         '#A0A0A0',
+              lineHeight:    1.5,
+            }}>
+              Germany · US Citizen · Open to relocate
             </div>
-
-            {/* Right: portrait */}
-            <Portrait />
-          </div>
+          </header>
 
           {/* ── Experience ────────────────────────────────────────────── */}
           <section style={{ marginBottom: '3.5rem' }}>
@@ -266,7 +254,7 @@ export default function AboutPage() {
           </section>
 
           {/* ── Contact — LinkedIn + CV live in the header ───────────── */}
-          <section>
+          <section style={{ marginBottom: '4.5rem' }}>
             <SectionLabel>Contact</SectionLabel>
             <a
               href="mailto:hello@lukecaporelli.com"
@@ -281,6 +269,11 @@ export default function AboutPage() {
               hello@lukecaporelli.com
             </a>
           </section>
+
+          {/* ── Portrait — page closer ───────────────────────────────── */}
+          <div style={{ marginTop: '1rem' }}>
+            <Portrait />
+          </div>
 
         </div>
       </main>
