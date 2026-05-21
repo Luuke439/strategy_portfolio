@@ -181,6 +181,12 @@ const odo: CaseStudyContent = {
         'The functional prototype validated both flows using live API calls. We were not mocking data or using placeholder responses. Routes were generated from real OpenRouteService queries. Shade coverage was computed by Shademap against real topographic data for the query time. The prototype behaved as a real product would — including edge cases where API constraints produced unexpected route geometries that we had to design around.',
         'This was the most important form of validation: the pipeline works with real signals, in real places, with real environmental variation. The concept is not theoretical.',
       ],
+      beforeVideo: {
+        src: '/videos/odo/ch05-profiles.mp4',
+        aspectRatio: '524/1060',
+        layout: 'phone',
+        alt: 'Quick Start flow in action — swiping between the three most differentiated route options for the current moment. Switching profiles regenerates the route from a different premise instead of reconfiguring filters.',
+      },
       expandImages: [
         {
           src: '/images/odo/ch05-elevation.jpg',
