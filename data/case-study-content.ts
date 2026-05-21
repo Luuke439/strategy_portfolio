@@ -511,9 +511,9 @@ const remarkt: CaseStudyContent = {
         'The transition is not an emergency response. It is a mode change — like a building switching between normal and fire evacuation protocols. Except this one can sustain for days, not minutes.',
       ],
       beforeImage: {
-        src: '/images/remarkt/ch04-floorplan.jpg',
-        alt: 'Normal → Crisis mode floor plan — community expands, sales floor shrinks, storage grows',
-        aspectRatio: '16/9',
+        src: '/images/remarkt/ch04-floorplan.png',
+        alt: 'Normal → Crisis mode floor plan. Two stacked bar diagrams: in normal mode the sales floor dominates the middle, with community area on top and storage at the bottom. In crisis mode the proportions invert — community area expands, sales floor shrinks to a thin sliver, and storage expands to accommodate incoming re:boxes.',
+        aspectRatio: '5478/2400',
         fullWidth: true,
       },
     },
