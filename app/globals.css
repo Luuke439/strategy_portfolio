@@ -198,6 +198,35 @@ body {
   margin-right: auto;
 }
 
+/* ── Chapter media split ─────────────────────────────────────────── */
+/* Used when a chapter has phone-layout beforeVideo or beforeImage.
+   Para 1 sits on the left, the phone-shaped media on the right, so the
+   vertical media doesn't dominate the editorial column. On mobile the
+   layout stacks (text first, then media centered). */
+.chapter-media-split {
+  display: grid;
+  grid-template-columns: 1fr 280px;
+  gap: 2rem;
+  align-items: start;
+  margin: 0 0 0.5rem;
+}
+
+.chapter-media-split__text > p:last-child {
+  margin-bottom: 0;
+}
+
+@media (max-width: 720px) {
+  .chapter-media-split {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  .chapter-media-split__media {
+    max-width: 280px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
 /* ── Selection ───────────────────────────────────────────────────── */
 ::selection {
   background: #0A0A0A;

@@ -7,7 +7,7 @@ import dynamic from 'next/dynamic'
 import { motion } from 'framer-motion'
 import { useLenis } from 'lenis/react'
 import type { Project } from '@/data/projects'
-import { caseStudyContent, type CaseStudyContent, type CsImage } from '@/data/case-study-content'
+import { caseStudyContent, type CaseStudyContent, type CsImage, type CsVideo, type CsBarChart } from '@/data/case-study-content'
 import CaseStudyNav from './CaseStudyNav'
 import ChallengeBlock from './ChallengeBlock'
 import MetaRow from './MetaRow'
@@ -48,7 +48,7 @@ function CsImageSlot({
   }
 
   const containerStyle: React.CSSProperties = isPhone
-    ? { width: 320, position: 'relative', aspectRatio: ar, borderRadius: 4, overflow: 'hidden' }
+    ? { width: 320, position: 'relative', aspectRatio: ar, borderRadius: 18, overflow: 'hidden' }
     : isWide
     ? { position: 'relative', aspectRatio: ar, overflowX: 'auto', overflowY: 'hidden' }
     : { position: 'relative', aspectRatio: ar, overflow: 'hidden' }
@@ -92,6 +92,7 @@ function CsImageSlot({
           fill
           alt={image.alt}
           loading={fadeIn ? 'lazy' : 'eager'}
+          sizes={isPhone ? '320px' : '(max-width: 760px) 100vw, 760px'}
           style={{ objectFit: 'cover', objectPosition: 'center top' }}
           onError={() => setFailed(true)}
         />
@@ -166,6 +167,7 @@ function FullWidthImageSlot({
         fill
         alt={image.alt}
         loading={fadeIn ? 'lazy' : 'eager'}
+        sizes="(max-width: 760px) 100vw, 760px"
         style={{ objectFit: 'cover' }}
         onError={() => setFailed(true)}
       />
@@ -406,6 +408,7 @@ function PhoneRowSlot({ images, accentColor }: { images: CsImage[]; accentColor:
                 src={img.src}
                 fill
                 alt={img.alt}
+                sizes="(max-width: 720px) 33vw, 232px"
                 style={{ objectFit: 'cover', objectPosition: 'center top' }}
                 onError={() => setFailedMap((prev) => ({ ...prev, [i]: true }))}
               />
@@ -417,19 +420,253 @@ function PhoneRowSlot({ images, accentColor }: { images: CsImage[]; accentColor:
   )
 }
 
-// ── Chapter video slot ────────────────────────────────────────────────────────
+// ── Inline editorial bar chart ────────────────────────────────────────────────
+// Horizontal bars rendered as CSS using the site typography and project accent
+// color. Animates in on scroll. Replaces the previous PNG export approach so
+// the chart inherits site fonts, scales crisply, and remains accessible.
 
-function ChapterVideoSlot({ src }: { src: string }) {
+function ChapterBarChart({
+  chart,
+  accentColor,
+}: {
+  chart: CsBarChart
+  accentColor: string
+}) {
+  const max = Math.max(...chart.data.map((d) => d.value))
+
   return (
-    <div style={{ margin: '1.5rem 0' }}>
+    <figure
+      style={{
+        margin: '2.5rem 0 2rem',
+        fontFamily: FONT,
+      }}
+      aria-label={
+        chart.title
+          ? `${chart.title}${chart.subtitle ? ' — ' + chart.subtitle : ''}: ` +
+            chart.data.map((d) => `${d.label} ${d.value}`).join(', ')
+          : undefined
+      }
+    >
+      {(chart.title || chart.subtitle) && (
+        <figcaption style={{ marginBottom: '2rem' }}>
+          {chart.title && (
+            <div
+              style={{
+                fontFamily: FONT,
+                fontWeight: 500,
+                fontSize: '1.05rem',
+                lineHeight: 1.35,
+                color: '#0A0A0A',
+                letterSpacing: '-0.005em',
+              }}
+            >
+              {chart.title}
+            </div>
+          )}
+          {chart.subtitle && (
+            <div
+              style={{
+                fontFamily: FONT,
+                fontWeight: 400,
+                fontSize: '0.88rem',
+                lineHeight: 1.4,
+                color: '#6B6B6B',
+                marginTop: '0.3rem',
+              }}
+            >
+              {chart.subtitle}
+            </div>
+          )}
+        </figcaption>
+      )}
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+        {chart.data.map((d, i) => {
+          const pct = (d.value / max) * 100
+          return (
+            <div
+              key={d.label}
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'minmax(96px, 150px) 1fr auto',
+                gap: '1.25rem',
+                alignItems: 'center',
+              }}
+            >
+              <div
+                style={{
+                  fontFamily: FONT,
+                  fontSize: '0.95rem',
+                  fontWeight: 400,
+                  color: '#0A0A0A',
+                  textAlign: 'right',
+                  lineHeight: 1.3,
+                }}
+              >
+                {d.label}
+              </div>
+              <div
+                style={{
+                  position: 'relative',
+                  height: '34px',
+                  display: 'flex',
+                  alignItems: 'center',
+                }}
+              >
+                <motion.div
+                  initial={{ width: 0 }}
+                  whileInView={{ width: `${pct}%` }}
+                  viewport={{ once: true, margin: '-80px' }}
+                  transition={{
+                    duration: 0.9,
+                    ease: [0.16, 1, 0.3, 1],
+                    delay: i * 0.08,
+                  }}
+                  style={{
+                    height: '100%',
+                    backgroundColor: accentColor,
+                    borderRadius: 2,
+                  }}
+                />
+              </div>
+              <div
+                style={{
+                  fontFamily: FONT,
+                  fontSize: '1.45rem',
+                  fontWeight: 300,
+                  color: '#0A0A0A',
+                  minWidth: '2.5rem',
+                  lineHeight: 1,
+                }}
+              >
+                {d.value}
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </figure>
+  )
+}
+
+// ── Chapter media split (Para 1 + phone-layout media side-by-side) ────────────
+// Activates automatically for chapters with phone-layout beforeVideo or
+// beforeImage so vertical media gets an editorial layout instead of
+// dominating the column. Toggle + expanded content render normally below.
+
+function ChapterMediaSplit({
+  text,
+  video,
+  image,
+}: {
+  text: string
+  video?: CsVideo
+  image?: CsImage
+}) {
+  const media = video ? (
+    <div
+      style={{
+        position: 'relative',
+        width: '100%',
+        aspectRatio: video.aspectRatio ?? '9/16',
+        borderRadius: 18,
+        overflow: 'hidden',
+      }}
+    >
       <video
-        src={src}
+        src={video.src}
         autoPlay
         muted
         loop
         playsInline
-        style={{ width: '100%', height: 'auto', display: 'block', borderRadius: '4px' }}
+        aria-label={video.alt}
+        style={{ width: '100%', height: '100%', display: 'block', objectFit: 'cover' }}
       />
+    </div>
+  ) : image ? (
+    <div
+      style={{
+        position: 'relative',
+        width: '100%',
+        aspectRatio: image.aspectRatio ?? '9/16',
+        borderRadius: 18,
+        overflow: 'hidden',
+      }}
+    >
+      <Image
+        src={image.src}
+        fill
+        alt={image.alt}
+        style={{ objectFit: 'cover', objectPosition: 'center top' }}
+        sizes="280px"
+      />
+    </div>
+  ) : null
+
+  return (
+    <div className="chapter-media-split">
+      <div className="chapter-media-split__text">
+        <Para>{text}</Para>
+      </div>
+      <div className="chapter-media-split__media">{media}</div>
+    </div>
+  )
+}
+
+// ── Chapter video slot ────────────────────────────────────────────────────────
+// Mirrors CsImageSlot's layout semantics so vertical videos get the same
+// editorial treatment as vertical screenshots: layout='phone' caps at 320px
+// and centers (instead of letting a tall video dominate the column).
+
+function ChapterVideoSlot({ video }: { video: CsVideo }) {
+  const isPhone = video.layout === 'phone'
+  const isWide = video.layout === 'wide'
+  const ar = video.aspectRatio
+
+  const outerStyle: React.CSSProperties = {
+    margin: '1.5rem 0',
+    ...(isPhone ? { display: 'flex', justifyContent: 'center' } : {}),
+  }
+
+  const containerStyle: React.CSSProperties = isPhone
+    ? { width: 320, position: 'relative', aspectRatio: ar ?? '9/16', borderRadius: 18, overflow: 'hidden' }
+    : isWide
+    ? { position: 'relative', aspectRatio: ar, overflowX: 'auto', overflowY: 'hidden' }
+    : { position: 'relative', aspectRatio: ar, overflow: 'hidden', borderRadius: 4 }
+
+  // For non-phone, non-wide cases without aspectRatio, fall back to natural sizing
+  // to preserve the original behavior for any existing horizontal videos.
+  const useNaturalSizing = !isPhone && !isWide && !ar
+
+  if (useNaturalSizing) {
+    return (
+      <div style={outerStyle}>
+        <video
+          src={video.src}
+          autoPlay
+          muted
+          loop
+          playsInline
+          aria-label={video.alt}
+          style={{ width: '100%', height: 'auto', display: 'block', borderRadius: '4px' }}
+        />
+      </div>
+    )
+  }
+
+  return (
+    <div style={outerStyle}>
+      <div style={containerStyle}>
+        <video
+          src={video.src}
+          autoPlay
+          muted
+          loop
+          playsInline
+          aria-label={video.alt}
+          style={{ width: '100%', height: '100%', display: 'block', objectFit: 'cover' }}
+        />
+      </div>
     </div>
   )
 }
@@ -585,8 +822,11 @@ export default function CaseStudyPage({ project }: CaseStudyPageProps) {
       </section>
 
       {/* ── re:markt ministry quote block — editorial width, dark bg ────── */}
+      {/* Bottom margin is 0 because <main> paddingTop + FadeSection paddingTop
+          already provide the same 80–96px transition that odo/maya have between
+          hero image and opening — keeps all three case studies visually aligned. */}
       {content?.ministryQuoteBlock && (
-        <div style={{ padding: '0 2rem', margin: 'clamp(3rem, 8vw, 5rem) 0' }}>
+        <div style={{ padding: '0 2rem', margin: 'clamp(3rem, 8vw, 5rem) 0 0' }}>
           <div
             style={{
               maxWidth: '760px',
@@ -626,7 +866,7 @@ export default function CaseStudyPage({ project }: CaseStudyPageProps) {
       )}
 
       {/* ── Body content ──────────────────────────────────────────────── */}
-      <main style={{ paddingTop: 'clamp(4rem, 8vh, 7rem)', paddingBottom: '8rem' }}>
+      <main style={{ paddingTop: 'clamp(1.5rem, 3vh, 2.5rem)', paddingBottom: '8rem' }}>
         <div className="editorial-width" style={{ paddingLeft: '2rem', paddingRight: '2rem' }}>
 
           {/* Opening — "What this project is really about" */}
@@ -690,26 +930,52 @@ export default function CaseStudyPage({ project }: CaseStudyPageProps) {
               (chapter.expandImages && chapter.expandImages.length > 0) ||
               (isImpact && chapter.impactText && chapter.impactText.length > 0)
 
+            // Phone-layout media gets a side-by-side split with Para 1 instead
+            // of stacking below it. Video takes priority over image when both
+            // are phone-layout. Other slots (non-phone beforeImage, phoneRow,
+            // impactStats) still render in their normal positions below.
+            const splitVideo = chapter.beforeVideo?.layout === 'phone' ? chapter.beforeVideo : undefined
+            const splitImage =
+              !splitVideo && chapter.beforeImage?.layout === 'phone' ? chapter.beforeImage : undefined
+            const isSplit = Boolean(splitVideo || splitImage)
+
             return (
               <FadeSection key={i} id={`chapter-${i}`}>
                 <ChapterLabel label={chapter.label} accentColor={accent} />
                 <ChapterHeadline>{chapter.headline}</ChapterHeadline>
 
-                {/* First paragraph — always visible */}
-                <Para>{chapter.paragraphs[0]}</Para>
+                {/* Split layout: Para 1 + phone-layout media side-by-side */}
+                {isSplit ? (
+                  <ChapterMediaSplit
+                    text={chapter.paragraphs[0]}
+                    video={splitVideo}
+                    image={splitImage}
+                  />
+                ) : (
+                  <>
+                    {/* First paragraph — always visible */}
+                    <Para>{chapter.paragraphs[0]}</Para>
 
-                {/* Before-expand video — always visible */}
-                {chapter.beforeVideo && (
-                  <ChapterVideoSlot src={chapter.beforeVideo} />
+                    {/* Before-expand video — always visible */}
+                    {chapter.beforeVideo && (
+                      <ChapterVideoSlot video={chapter.beforeVideo} />
+                    )}
+                  </>
                 )}
 
                 {/* Before-expand image — always visible, max 1 */}
-                {chapter.beforeImage && (
+                {/* (Skipped when image is the one consumed by the split) */}
+                {chapter.beforeImage && chapter.beforeImage !== splitImage && (
                   chapter.beforeImage.fullWidth ? (
                     <FullWidthImageSlot image={chapter.beforeImage} accentColor={accent} />
                   ) : (
                     <CsImageSlot image={chapter.beforeImage} accentColor={accent} />
                   )
+                )}
+
+                {/* Inline editorial bar chart — always visible */}
+                {chapter.beforeChart && (
+                  <ChapterBarChart chart={chapter.beforeChart} accentColor={accent} />
                 )}
 
                 {/* Phone row — always visible, side-by-side with accent border */}

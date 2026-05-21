@@ -7,6 +7,26 @@ export interface CsImage {
   fullWidth?: boolean           // breaks out of editorial-width to span full container
 }
 
+// ── Video slot type ───────────────────────────────────────────────────────────
+// Symmetric with CsImage so vertical videos get the same treatment as vertical
+// screenshots: layout='phone' caps at 320px and centers, default takes full
+// editorial column width.
+export interface CsVideo {
+  src: string
+  aspectRatio?: string          // CSS aspect-ratio value; required when layout='phone' to reserve space
+  layout?: 'default' | 'phone' | 'wide'
+  alt?: string                  // for accessibility / fallback caption
+}
+
+// ── Inline bar chart ──────────────────────────────────────────────────────────
+// Editorial horizontal bar chart rendered as SVG/CSS inline in the chapter.
+// Uses the site typography and the project accent color — no PNG export needed.
+export interface CsBarChart {
+  title?: string
+  subtitle?: string
+  data: Array<{ label: string; value: number }>
+}
+
 export interface CsImpactStat {
   number: string
   description: string
@@ -27,7 +47,8 @@ export interface CsChapter {
   headline: string
   paragraphs: string[]         // [0] always visible, rest in expandable
   beforeImage?: CsImage        // shown before the expand toggle (max 1 per chapter)
-  beforeVideo?: string         // video src shown before the expand toggle (always visible)
+  beforeVideo?: CsVideo        // video shown before the expand toggle (always visible)
+  beforeChart?: CsBarChart     // inline bar chart, always visible, uses project accent
   phoneRow?: CsImage[]         // row of phone screenshots shown always-visible, with accent border
   pullQuote?: CsPullQuote      // inside expandable
   callout?: CsCallout          // inside expandable
@@ -89,16 +110,21 @@ const odo: CaseStudyContent = {
         'The survey also showed clear hierarchy in what cyclists prioritize: scenery and safety were consistently the top two factors, well above surface type and distance. This held across casual riders, regular athletes, and touring cyclists. The insight was that scenery — something almost no existing tool addresses meaningfully — is not a nice-to-have for cyclists. It is often the reason they ride.',
         'The nine in-depth interviews added texture to the numbers. Friction points clustered around three moments: before the ride (uncertainty about route quality, gradient, and conditions), during planning (inability to compare routes on the dimensions that actually matter), and route switching (the inability to quickly see how a different intent would change the output without reconfiguring everything from scratch).',
       ],
-      beforeImage: {
-        src: '/images/odo/ch02-survey.jpg',
-        alt: 'Loop vs. point-to-point preference survey results',
-        aspectRatio: '3/2',
+      beforeChart: {
+        title: 'Preferred route format',
+        subtitle: 'Survey of 116 cyclists',
+        data: [
+          { label: 'Loop', value: 82 },
+          { label: 'Point-to-point', value: 16 },
+          { label: 'Multi-destination', value: 14 },
+          { label: 'Other', value: 4 },
+        ],
       },
       expandImages: [
         {
-          src: '/images/odo/ch02-brainstorm.jpg',
-          alt: 'Concept brainstorming session',
-          aspectRatio: '4/3',
+          src: '/images/odo/ch02-brainstorm.png',
+          alt: 'Early concept brainstorming — handwritten exploration of phone UI states spanning emotional registers (Verlangen / desire, Sarkasmus / sarcasm, Frechheit / cheekiness, Schmerzen / pain) and interaction patterns like flipping the phone to symbolize meaning inversion. Wide ideation before narrowing to route-planning.',
+          aspectRatio: '1708/1104',
         },
       ],
     },
@@ -123,10 +149,10 @@ const odo: CaseStudyContent = {
         'Wind is the most behaviorally interesting signal. Cyclists care about wind direction relative to their route, not absolute wind speed. A strong tailwind on the outbound leg and a headwind on the return is a very different experience than the reverse. odo processes wind direction and route geometry together to produce a per-segment visualization: green above the axis for tailwind assistance, red below for headwind resistance. A rider can see, before starting, which sections will feel easy and which will be hard.',
         'The output of all this processing is not a score. It is a set of labeled, segmented data that the interface displays in plain terms. The system is explaining itself continuously — not as a disclaimer, but as the product.',
       ],
-      beforeImage: {
-        src: '/images/odo/ch04-shademap.jpg',
-        alt: 'Shademap API — shade coverage on real route geometry',
-        aspectRatio: '16/9',
+      beforeVideo: {
+        src: '/videos/odo/ch04-shademap.mp4',
+        aspectRatio: '1440/864',
+        alt: 'Shademap demo — shadow progression across Lake Constance / Liechtenstein region over a simulated day',
       },
       callout: {
         title: 'Stack',
@@ -173,12 +199,11 @@ const odo: CaseStudyContent = {
         'The navigate phase is designed for bike computer handoff. odo is a planning tool, not a turn-by-turn navigation tool — a deliberate scope decision. Cyclists navigate with dedicated devices. odo generates the route; the device runs the ride. This keeps odo focused on what it does well and avoids competing with the hardware category where Garmin and Wahoo have deep advantages.',
         'The feedback phase is the long-term value driver. Post-ride, the rider can rate segments and adjust preferences. Over time, the profile learns — not through opaque machine learning, but through explicit preference signals that the rider understands and controls. A rider who consistently rates gravel sections poorly will see those sections appear less in future scenic routes. The system shows its reasoning at every step, including in how it updates.',
       ],
-      beforeImage: {
-        src: '/images/odo/ch06-profiles.jpg',
-        alt: 'Four route profiles — Scenic, Safe, Challenging, Balanced — side by side',
-        aspectRatio: '3/1',
-        fullWidth: true,
-        layout: 'wide',
+      beforeVideo: {
+        src: '/videos/odo/ch06-profiles.mp4',
+        aspectRatio: '524/1060',
+        layout: 'phone',
+        alt: 'Plan phase in action — swiping between route profiles (Scenic, Safe, Challenging) regenerates the route from a different premise. The first step of the plan / navigate / improve loop.',
       },
       expandImages: [
         {
@@ -226,9 +251,9 @@ const odo: CaseStudyContent = {
       ],
       expandImages: [
         {
-          src: '/images/odo/ch08-blueocean.jpg',
-          alt: 'Blue Ocean Strategy Canvas — competitive differentiation',
-          aspectRatio: '16/9',
+          src: '/images/odo/ch08-blueocean.webp',
+          alt: 'Blue Ocean Strategy Canvas — odo (purple) compared against Garmin, Komoot, and Strava across six capability axes. odo dominates the Route Planning phase (user profiles, personalized routing, context adaptation) and intentionally scores low on the Navigating phase (live navigation, performance tracking) — a deliberate scope choice to leave hardware navigation to dedicated bike computers.',
+          aspectRatio: '2048/1255',
           fullWidth: true,
         },
       ],
@@ -341,7 +366,10 @@ const maya: CaseStudyContent = {
     {
       label: '06 · The Result',
       headline: 'Three prototypes, one coherent system.',
-      beforeVideo: '/videos/maya/cover.mov',
+      beforeVideo: {
+        src: '/videos/maya/cover.mov',
+        alt: 'Maya cover video',
+      },
       paragraphs: [
         'We delivered three linked prototypes as the semester outcome.',
         'The shared-living matching dashboard is a provider-facing tool for HR. It visualizes current housing compositions, flags imbalances, and surfaces the matching questionnaire flow for incoming trainees. The questionnaire captures language level, country of origin, time already spent in Germany, and a small number of compatibility preferences. From these inputs, the system generates balanced household proposals.',
