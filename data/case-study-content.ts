@@ -200,7 +200,7 @@ const odo: CaseStudyContent = {
         'The feedback phase is the long-term value driver. Post-ride, the rider can rate segments and adjust preferences. Over time, the profile learns — not through opaque machine learning, but through explicit preference signals that the rider understands and controls. A rider who consistently rates gravel sections poorly will see those sections appear less in future scenic routes. The system shows its reasoning at every step, including in how it updates.',
       ],
       beforeImage: {
-        src: '/images/odo/ch06-flow.avif',
+        src: '/images/odo/ch06-flow.webp',
         alt: 'Main user flow for odo — profile selection on the left, route detail view in the middle, segment-by-segment preview on the right. The three phases of the plan / navigate / improve loop laid out end-to-end.',
         aspectRatio: '2048/1041',
         fullWidth: true,
