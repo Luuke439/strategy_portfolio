@@ -167,7 +167,12 @@ function FullWidthImageSlot({
         alt={image.alt}
         loading={fadeIn ? 'lazy' : 'eager'}
         sizes="(max-width: 760px) 100vw, 760px"
-        style={{ objectFit: 'cover' }}
+        // contain (not cover) for full-width media so charts and diagrams
+        // with content flush against the canvas edge are never clipped.
+        // Aspect ratio is declared per-image, so matching aspects display
+        // edge-to-edge; mismatches letterbox into the page bg instead of
+        // cropping content.
+        style={{ objectFit: 'contain' }}
         onError={() => setFailed(true)}
       />
     </div>

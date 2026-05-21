@@ -234,6 +234,14 @@ const odo: CaseStudyContent = {
         title: 'Blue Ocean differentiation',
         body: 'odo differentiates on four dimensions that no existing tool addresses simultaneously: intent-based routing (not filter-based), explainability (visible signals, not opaque scores), loop specialization (built around circular routes, not paths), and adaptive profile logic (the system updates based on rider feedback over time).',
       },
+      expandImages: [
+        {
+          src: '/images/odo/ch08-blueocean.webp',
+          alt: 'Blue Ocean Strategy Canvas — odo (purple) compared against Garmin, Komoot, and Strava across six capability axes. odo dominates the Route Planning phase (user profiles, personalized routing, context adaptation) and intentionally scores low on the Navigating phase (live navigation, performance tracking) — a deliberate scope choice to leave hardware navigation to dedicated bike computers.',
+          aspectRatio: '2048/1255',
+          fullWidth: true,
+        },
+      ],
     },
     {
       label: '08 · What I Learned',
@@ -242,14 +250,6 @@ const odo: CaseStudyContent = {
         'The clearest finding from our research — confirmed repeatedly through interviews — was that cyclists do not want the system to decide for them. They want to understand what the system is doing, adjust it, and trust the output because they can trace it back to their own preferences.',
         'This pushed us toward explainability as a design principle, not just a feature. Every signal the system uses is visible. Every label is defined. Every recommendation comes with the reasoning behind it. This made the product harder to build — it is technically easier to produce an opaque score — but meaningfully more trustworthy.',
         'The second reflection is about scope. We made a deliberate decision to build a vertical slice rather than a broad prototype. One city, four profiles, two flows — but with real data, real APIs, and real edge cases. That depth of validation is more useful than a wide prototype that fakes its data.',
-      ],
-      expandImages: [
-        {
-          src: '/images/odo/ch08-blueocean.webp',
-          alt: 'Blue Ocean Strategy Canvas — odo (purple) compared against Garmin, Komoot, and Strava across six capability axes. odo dominates the Route Planning phase (user profiles, personalized routing, context adaptation) and intentionally scores low on the Navigating phase (live navigation, performance tracking) — a deliberate scope choice to leave hardware navigation to dedicated bike computers.',
-          aspectRatio: '2048/1255',
-          fullWidth: true,
-        },
       ],
       keyTakeaway: {
         title: 'Explainability is the feature.',
