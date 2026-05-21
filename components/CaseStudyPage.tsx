@@ -936,12 +936,18 @@ export default function CaseStudyPage({ project }: CaseStudyPageProps) {
               (isImpact && chapter.impactText && chapter.impactText.length > 0)
 
             // Phone-layout media gets a side-by-side split with Para 1 instead
-            // of stacking below it. Video takes priority over image when both
-            // are phone-layout. Other slots (non-phone beforeImage, phoneRow,
-            // impactStats) still render in their normal positions below.
+            // of stacking below it. Rules:
+            //  - phone-layout beforeVideo always triggers the split
+            //  - phone-layout beforeImage triggers the split ONLY when there
+            //    is no other non-phone beforeVideo competing for the slot
+            //    (otherwise the cover video would be hidden by the split)
             const splitVideo = chapter.beforeVideo?.layout === 'phone' ? chapter.beforeVideo : undefined
+            const hasNonPhoneVideo =
+              !!chapter.beforeVideo && chapter.beforeVideo.layout !== 'phone'
             const splitImage =
-              !splitVideo && chapter.beforeImage?.layout === 'phone' ? chapter.beforeImage : undefined
+              !splitVideo && !hasNonPhoneVideo && chapter.beforeImage?.layout === 'phone'
+                ? chapter.beforeImage
+                : undefined
             const isSplit = Boolean(splitVideo || splitImage)
 
             return (
