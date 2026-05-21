@@ -199,19 +199,13 @@ const odo: CaseStudyContent = {
         'The navigate phase is designed for bike computer handoff. odo is a planning tool, not a turn-by-turn navigation tool — a deliberate scope decision. Cyclists navigate with dedicated devices. odo generates the route; the device runs the ride. This keeps odo focused on what it does well and avoids competing with the hardware category where Garmin and Wahoo have deep advantages.',
         'The feedback phase is the long-term value driver. Post-ride, the rider can rate segments and adjust preferences. Over time, the profile learns — not through opaque machine learning, but through explicit preference signals that the rider understands and controls. A rider who consistently rates gravel sections poorly will see those sections appear less in future scenic routes. The system shows its reasoning at every step, including in how it updates.',
       ],
-      beforeVideo: {
-        src: '/videos/odo/ch06-profiles.mp4',
-        aspectRatio: '524/1060',
-        layout: 'phone',
-        alt: 'Plan phase in action — swiping between route profiles (Scenic, Safe, Challenging) regenerates the route from a different premise. The first step of the plan / navigate / improve loop.',
+      beforeImage: {
+        src: '/images/odo/ch06-flow.avif',
+        alt: 'Main user flow for odo — profile selection on the left, route detail view in the middle, segment-by-segment preview on the right. The three phases of the plan / navigate / improve loop laid out end-to-end.',
+        aspectRatio: '2048/1041',
+        fullWidth: true,
       },
       expandImages: [
-        {
-          src: '/images/odo/ch06-flow.jpg',
-          alt: 'Main user flow — profile selection → detail view → segment preview',
-          aspectRatio: '16/7',
-          layout: 'wide',
-        },
         {
           src: '/images/odo/ch06-prepare.jpg',
           alt: 'Prepare screen — packing suggestion',
