@@ -15,10 +15,12 @@
     </linearGradient>
   </defs>
 
-  <!-- Dark rounded square — same #0A0A0A as the site text color -->
-  <rect width="64" height="64" rx="14" ry="14" fill="#0A0A0A"/>
-
   <!--
+    Transparent background — the chrome C floats on whatever the browser
+    tab paint is. The vertical gradient has enough internal contrast
+    (light top → silver mid → dark band → silver mid → warm bottom) that
+    the silhouette reads on both light and dark tab themes.
+
     The "C" — a stroked arc, opening ~56° on the right side.
     Endpoints at (52,21) and (52,43); radius 24 from center (32,32).
     Round line caps give the Fredoka-style soft terminals.
