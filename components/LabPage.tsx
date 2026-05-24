@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { useLenis } from 'lenis/react'
 import type { Project } from '@/data/projects'
@@ -42,9 +43,13 @@ function PrimaryVisual({ project }: { project: Project }) {
       }}
     >
       {!imgError ? (
-        <img
+        <Image
           src={`/images/${project.slug}/cover.jpg`}
           alt={project.name}
+          width={1920}
+          height={1080}
+          sizes="(max-width: 768px) 100vw, 1200px"
+          priority
           style={{ width: '100%', height: 'auto', display: 'block' }}
           onError={() => setImgError(true)}
         />
@@ -84,9 +89,12 @@ function SecondaryVisual({ project }: { project: Project }) {
       transition={{ duration: 0.6 }}
       style={{ width: '100%', marginBottom: '3rem', overflow: 'hidden' }}
     >
-      <img
+      <Image
         src={`/images/${project.slug}/closeup.jpg`}
         alt={`${project.name} closeup`}
+        width={2536}
+        height={1108}
+        sizes="(max-width: 768px) 100vw, 1200px"
         style={{ width: '100%', height: 'auto', display: 'block' }}
       />
     </motion.div>
@@ -387,16 +395,24 @@ export default function LabPage({ project }: LabPageProps) {
                 Technical prototype
               </span>
               <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'stretch', height: '420px' }}>
-                <img
-                  src="/images/blend-it/prototype.jpg"
-                  alt="Blend it prototype"
-                  style={{ width: '68%', height: '100%', objectFit: 'cover', display: 'block' }}
-                />
-                <img
-                  src="/images/blend-it/prototype2.jpg"
-                  alt="Blend it prototype detail"
-                  style={{ width: '32%', height: '100%', objectFit: 'cover', display: 'block' }}
-                />
+                <div style={{ width: '68%', height: '100%', position: 'relative' }}>
+                  <Image
+                    src="/images/blend-it/prototype.jpg"
+                    alt="Blend it prototype"
+                    fill
+                    sizes="(max-width: 768px) 68vw, 800px"
+                    style={{ objectFit: 'cover' }}
+                  />
+                </div>
+                <div style={{ width: '32%', height: '100%', position: 'relative' }}>
+                  <Image
+                    src="/images/blend-it/prototype2.jpg"
+                    alt="Blend it prototype detail"
+                    fill
+                    sizes="(max-width: 768px) 32vw, 400px"
+                    style={{ objectFit: 'cover' }}
+                  />
+                </div>
               </div>
             </motion.div>
           )}

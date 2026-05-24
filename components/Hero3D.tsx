@@ -1,5 +1,21 @@
 'use client'
 
+/* eslint-disable react-hooks/refs, react-hooks/immutability */
+// React 19's experimental react-hooks rules flag two patterns that
+// are *intentional* throughout this file:
+//   1. Mutating Three.js objects (scene, gl, materials, geometries) we got
+//      from useThree()/useFrame() — that's how @react-three/fiber bridges
+//      React state into the imperative Three.js scene graph. There is no
+//      declarative alternative for things like `scene.background = null`.
+//   2. Mirroring props into refs synchronously during render (e.g.
+//      `navOnlyRef.current = navOnly`) so the next useFrame tick — which
+//      runs outside React's commit phase — sees the latest value without
+//      a one-frame lag. Moving the assignment into useEffect re-introduces
+//      the visible jitter we're explicitly trying to prevent.
+// The rule is disabled file-wide rather than line-by-line because the same
+// pattern repeats in many places and the per-line noise would obscure the
+// code more than it would clarify.
+
 /**
  * Hero3D.tsx
  *
@@ -220,54 +236,6 @@ function ImageEnv({ intensity, onReady }: { intensity: number; onReady?: () => v
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SceneContent — all Leva controls live here so they share one Canvas context
-// ─────────────────────────────────────────────────────────────────────────────
-// ScrollArrow — geometric V-chevron at screen bottom, floats + fades on scroll
-// ─────────────────────────────────────────────────────────────────────────────
-function ScrollArrow({ scrollRef, mat }: {
-  scrollRef: React.MutableRefObject<number>
-  mat: Record<string, unknown>
-}) {
-  const groupRef = useRef<THREE.Group>(null!)
-  useFrame(({ clock }) => {
-    if (!groupRef.current) return
-    const p = scrollRef.current
-    const visibility = Math.max(0, 1 - p / 0.15)
-    const floatY = Math.sin((clock.elapsedTime / 1.8) * Math.PI * 2) * 0.06
-    groupRef.current.scale.setScalar(visibility)
-    groupRef.current.position.y = -2.3 + floatY
-  })
-
-  const armProps = {
-    color: mat.color as string,
-    metalness: mat.metalness as number,
-    roughness: mat.roughness as number,
-    clearcoat: mat.clearcoat as number,
-    clearcoatRoughness: mat.clearcoatRoughness as number,
-    reflectivity: mat.reflectivity as number,
-    envMapIntensity: mat.envMapIntensity as number,
-  }
-
-  return (
-    <group ref={groupRef} position={[0, -2.3, 0]}>
-      {/* Shaft */}
-      <mesh position={[0, 0.18, 0]}>
-        <boxGeometry args={[0.045, 0.38, 0.03]} />
-        <meshPhysicalMaterial {...armProps} />
-      </mesh>
-      {/* Arrowhead left */}
-      <mesh position={[-0.13, -0.08, 0]} rotation={[0, 0, Math.PI / 4]}>
-        <boxGeometry args={[0.045, 0.32, 0.03]} />
-        <meshPhysicalMaterial {...armProps} />
-      </mesh>
-      {/* Arrowhead right */}
-      <mesh position={[0.13, -0.08, 0]} rotation={[0, 0, -Math.PI / 4]}>
-        <boxGeometry args={[0.045, 0.32, 0.03]} />
-        <meshPhysicalMaterial {...armProps} />
-      </mesh>
-    </group>
-  )
-}
-
 // ─────────────────────────────────────────────────────────────────────────────
 interface TileHover { color: string; x: number; y: number }
 

@@ -42,27 +42,42 @@ export default function PersistentHeader() {
 
   // Viewport height drives the "nav fades in during the last 20% of the hero
   // scroll" transition on home. Other routes bypass this logic entirely.
-  const [vh, setVh] = useState(800)
-  // Once the nav has been shown (either by scrolling on home or by visiting a
-  // non-home route), it stays shown for the rest of the session. Route changes
-  // never flip this back to hidden, so the nav never replays its entrance.
-  const [navVisible, setNavVisible] = useState(false)
+  // Lazy init: read window.innerHeight directly on first client render so we
+  // never have to setState inside an effect just to seed the value. 800 is
+  // the SSR fallback — overwritten on the first paint when the resize effect
+  // (below) syncs in.
+  const [vh, setVh] = useState(() =>
+    typeof window !== 'undefined' ? window.innerHeight : 800,
+  )
 
+  // Keep vh in sync with the viewport when the user resizes/rotates.
   useEffect(() => {
-    setVh(window.innerHeight)
-    if (!isHome) {
-      setNavVisible(true)
-      return
-    }
-    if (window.scrollY > window.innerHeight * 0.8) setNavVisible(true)
-  }, [isHome])
+    const onResize = () => setVh(window.innerHeight)
+    window.addEventListener('resize', onResize, { passive: true })
+    return () => window.removeEventListener('resize', onResize)
+  }, [])
+
+  // Tracks whether the user has scrolled past the threshold ON HOME. Lazy
+  // init reads the current scroll position once on first render — so when
+  // someone lands on the page mid-scroll (e.g. via a hash anchor or scroll
+  // restoration), the nav is correctly shown without needing a setState in
+  // useEffect.
+  const [scrolledPastThreshold, setScrolledPastThreshold] = useState(() => {
+    if (typeof window === 'undefined') return false
+    return window.scrollY > window.innerHeight * 0.8
+  })
+
+  // Once shown, the nav stays shown for the rest of the session. Off-home
+  // routes always show the nav; on home, visibility is gated on the scroll
+  // threshold. Both conditions resolve at render time — no effect needed.
+  const navVisible = !isHome || scrolledPastThreshold
 
   // Home-page pill opacity animates with scroll; off-home is a flat 1.
   const homeOpacity = useTransform(scrollY, [vh * 0.8, vh], [0, 1])
 
   useMotionValueEvent(scrollY, 'change', (v) => {
     if (!isHome) return
-    if (!navVisible && v > vh * 0.8) setNavVisible(true)
+    if (!scrolledPastThreshold && v > vh * 0.8) setScrolledPastThreshold(true)
   })
 
   // Clicking the name: on home we Lenis-scroll back to the hero; off-home the

@@ -3,7 +3,6 @@
 import { useState, useEffect, useMemo, useRef } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import dynamic from 'next/dynamic'
 import { motion } from 'framer-motion'
 import { useLenis } from 'lenis/react'
 import { caseStudies, type Project } from '@/data/projects'
@@ -19,12 +18,13 @@ const FONT = "'TWK Lausanne Pan', system-ui, sans-serif"
 
 function CsImageSlot({
   image,
-  accentColor,
   fadeIn = false,
   isVisible = true,
 }: {
   image: CsImage
-  accentColor: string
+  // Reserved for future styling — kept in the interface so call sites
+  // don't need to be reshuffled when we wire it back in.
+  accentColor?: string
   fadeIn?: boolean
   isVisible?: boolean
 }) {
@@ -104,12 +104,13 @@ function CsImageSlot({
 
 function FullWidthImageSlot({
   image,
-  accentColor,
   fadeIn = false,
   isVisible = true,
 }: {
   image: CsImage
-  accentColor: string
+  // Reserved for future styling — kept in the interface so call sites
+  // don't need to be reshuffled when we wire it back in.
+  accentColor?: string
   fadeIn?: boolean
   isVisible?: boolean
 }) {
@@ -241,7 +242,7 @@ function PullQuote({ text, attribution, accentColor }: { text: string; attributi
   return (
     <blockquote style={{ borderLeft: `2px solid ${accentColor}`, paddingLeft: '1.5rem', margin: '1.75rem 0' }}>
       <p style={{ fontFamily: FONT, fontWeight: 300, fontStyle: 'italic', fontSize: '0.95rem', lineHeight: 1.65, color: '#0A0A0A', margin: 0 }}>
-        "{text}"
+        &ldquo;{text}&rdquo;
       </p>
       {attribution && (
         <p style={{ fontFamily: FONT, fontWeight: 400, fontSize: '0.68rem', letterSpacing: '0.06em', color: '#6B6B6B', margin: '0.4rem 0 0' }}>
@@ -895,7 +896,7 @@ export default function CaseStudyPage({ project }: CaseStudyPageProps) {
                 margin: '0 0 1.25rem',
               }}
             >
-              "{content.ministryQuoteBlock.text}"
+              &ldquo;{content.ministryQuoteBlock.text}&rdquo;
             </p>
             <p
               style={{

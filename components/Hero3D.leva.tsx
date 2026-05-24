@@ -1,5 +1,12 @@
 'use client'
 
+/* eslint-disable react-hooks/refs, react-hooks/immutability */
+// Same rationale as Hero3D.tsx: this Leva sidecar mirrors live geo/mat/
+// lights/anim into a ref synchronously during render so the Leva 'Copy
+// settings' button callback always reads the *latest* values when the
+// designer clicks it (otherwise the button captures stale values from the
+// render that registered it).
+
 /**
  * Hero3D.leva.tsx — opt-in Leva controls for the 3D hero.
  *

@@ -5,7 +5,13 @@ import PersistentHeader from '@/components/PersistentHeader'
 import PageTransition from '@/components/PageTransition'
 import { HoverInfoProvider } from '@/components/HoverInfoContext'
 
+// Production URL — override via NEXT_PUBLIC_SITE_URL at deploy time. Used
+// to resolve relative URLs in OpenGraph / Twitter card metadata (the auto-
+// generated /opengraph-image needs an absolute URL for social crawlers).
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://lukecaporelli.com'
+
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: 'Luke Caporelli — Strategic Design',
   description:
     'M.A. Strategic Design student at HfG Schwäbisch Gmünd. Product strategy and interaction design.',
@@ -20,6 +26,13 @@ export const metadata: Metadata = {
     title: 'Luke Caporelli',
     description: 'Strategic Design · Product Strategy · Interaction Design',
     type: 'website',
+    url: SITE_URL,
+    siteName: 'Luke Caporelli',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Luke Caporelli',
+    description: 'Strategic Design · Product Strategy · Interaction Design',
   },
 }
 
