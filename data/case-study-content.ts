@@ -364,7 +364,7 @@ const maya: CaseStudyContent = {
       impactStats: [
         { number: '€131', description: 'expected staff time savings per trainee / month' },
         { number: '3.75h', description: 'coordination time recovered per trainee per month' },
-        { number: '10%', description: 'expected reduction in dropout rate (conservative assumption)' },
+        { number: '10%', description: 'expected reduction in dropout rate (normal scenario)' },
         { number: '€6,826', description: 'direct net cost per apprenticeship dropout avoided' },
       ],
       impactText: [
