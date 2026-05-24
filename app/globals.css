@@ -183,6 +183,33 @@ body {
   margin-right: auto;
 }
 
+/* ── Chapter headline + video row ────────────────────────────────── */
+/* Used when a chapter sets headlineVideoSplit: true. 50/50 split:
+   headline + visible paragraphs on the left, video on the right at
+   full column width (its intrinsic aspect ratio drives its height). */
+.chapter-headline-video-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  align-items: start;
+  margin: 0 0 1.5rem;
+}
+.chapter-headline-video-row__text > p:last-child {
+  margin-bottom: 0;
+}
+
+@media (max-width: 720px) {
+  .chapter-headline-video-row {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  .chapter-headline-video-row__media {
+    max-width: 320px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
 /* ── Chapter media split ─────────────────────────────────────────── */
 /* Used when a chapter has phone-layout beforeVideo or beforeImage.
    Para 1 sits on the left, the phone-shaped media on the right, so the

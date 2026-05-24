@@ -274,7 +274,7 @@ function Callout({ title, body, accentColor }: { title: string; body: string; ac
 
 function KeyTakeaway({ title, body, accentColor }: { title: string; body: string; accentColor: string }) {
   return (
-    <div style={{ backgroundColor: accentColor, padding: '1.4rem 1.6rem', margin: '2.25rem 0 0' }}>
+    <div style={{ backgroundColor: accentColor, padding: '1.4rem 1.6rem', margin: '2.25rem 0 3rem' }}>
       <p style={{ fontFamily: FONT, fontWeight: 500, fontSize: '0.85rem', color: '#FAFAFA', margin: '0 0 0.3rem' }}>
         {title}
       </p>
@@ -550,6 +550,51 @@ function ChapterBarChart({
         })}
       </div>
     </figure>
+  )
+}
+
+// ── Headline + paragraphs on the left, video on the right (50/50 split) ──────
+// Used when a chapter sets headlineVideoSplit: true. The left column holds the
+// title and any always-visible paragraphs; the right column holds the video at
+// full column width with its intrinsic aspect ratio (no cropping).
+
+function HeadlineVideoRow({
+  headline,
+  paragraphs,
+  video,
+  accentColor,
+}: {
+  headline: string
+  paragraphs: string[]
+  video: CsVideo
+  accentColor: string
+}) {
+  return (
+    <div className="chapter-headline-video-row">
+      <div className="chapter-headline-video-row__text">
+        <ChapterHeadline>{headline}</ChapterHeadline>
+        {paragraphs.map((p, i) => (
+          <Para key={i}>{p}</Para>
+        ))}
+      </div>
+      <div className="chapter-headline-video-row__media">
+        <video
+          src={video.src}
+          autoPlay
+          muted
+          loop
+          playsInline
+          aria-label={video.alt}
+          style={{
+            width: '100%',
+            height: 'auto',
+            display: 'block',
+            borderRadius: 10,
+            border: `2px solid ${accentColor}`,
+          }}
+        />
+      </div>
+    </div>
   )
 }
 
@@ -928,12 +973,20 @@ export default function CaseStudyPage({ project }: CaseStudyPageProps) {
             const open = isOpen(i)
 
             const visibleCount = Math.max(1, chapter.visibleParagraphs ?? 1)
+            const pullQuoteHoisted = Boolean(chapter.pullQuote && chapter.pullQuoteVisible)
             const hasExpandContent =
               chapter.paragraphs.length > visibleCount ||
-              chapter.pullQuote ||
+              (chapter.pullQuote && !pullQuoteHoisted) ||
               chapter.callout ||
               (chapter.expandImages && chapter.expandImages.length > 0) ||
               (isImpact && chapter.impactText && chapter.impactText.length > 0)
+
+            // headlineVideoSplit: render headline + beforeVideo as a 2-col row
+            // (video height matches headline). Consumes the video, so the
+            // standard split / inline-video paths skip it.
+            const titleVideoActive = Boolean(
+              chapter.headlineVideoSplit && chapter.beforeVideo
+            )
 
             // Phone-layout media gets a side-by-side split with Para 1 instead
             // of stacking below it. Rules:
@@ -941,9 +994,14 @@ export default function CaseStudyPage({ project }: CaseStudyPageProps) {
             //  - phone-layout beforeImage triggers the split ONLY when there
             //    is no other non-phone beforeVideo competing for the slot
             //    (otherwise the cover video would be hidden by the split)
-            const splitVideo = chapter.beforeVideo?.layout === 'phone' ? chapter.beforeVideo : undefined
+            const splitVideo =
+              !titleVideoActive && chapter.beforeVideo?.layout === 'phone'
+                ? chapter.beforeVideo
+                : undefined
             const hasNonPhoneVideo =
-              !!chapter.beforeVideo && chapter.beforeVideo.layout !== 'phone'
+              !titleVideoActive &&
+              !!chapter.beforeVideo &&
+              chapter.beforeVideo.layout !== 'phone'
             const splitImage =
               !splitVideo && !hasNonPhoneVideo && chapter.beforeImage?.layout === 'phone'
                 ? chapter.beforeImage
@@ -953,35 +1011,55 @@ export default function CaseStudyPage({ project }: CaseStudyPageProps) {
             return (
               <FadeSection key={i} id={`chapter-${i}`}>
                 <ChapterLabel label={chapter.label} accentColor={accent} />
-                <ChapterHeadline>{chapter.headline}</ChapterHeadline>
-
-                {/* Split layout: visible paragraphs stack in the text column
-                    next to the phone-layout media. Keeps the prose-and-video
-                    pair tightly bound instead of letting the second paragraph
-                    drift below the whole split. */}
-                {isSplit ? (
-                  <ChapterMediaSplit
+                {titleVideoActive ? (
+                  <HeadlineVideoRow
+                    headline={chapter.headline}
                     paragraphs={chapter.paragraphs.slice(0, visibleCount)}
-                    video={splitVideo}
-                    image={splitImage}
+                    video={chapter.beforeVideo!}
+                    accentColor={accent}
                   />
                 ) : (
                   <>
-                    {/* First paragraph — always visible */}
-                    <Para>{chapter.paragraphs[0]}</Para>
+                    <ChapterHeadline>{chapter.headline}</ChapterHeadline>
 
-                    {/* Before-expand video — always visible */}
-                    {chapter.beforeVideo && (
-                      <ChapterVideoSlot video={chapter.beforeVideo} />
+                    {/* Split layout: visible paragraphs stack in the text column
+                        next to the phone-layout media. Keeps the prose-and-video
+                        pair tightly bound instead of letting the second paragraph
+                        drift below the whole split. */}
+                    {isSplit ? (
+                      <ChapterMediaSplit
+                        paragraphs={chapter.paragraphs.slice(0, visibleCount)}
+                        video={splitVideo}
+                        image={splitImage}
+                      />
+                    ) : (
+                      <>
+                        {/* First paragraph — always visible */}
+                        <Para>{chapter.paragraphs[0]}</Para>
+
+                        {/* Before-expand video — always visible */}
+                        {chapter.beforeVideo && (
+                          <ChapterVideoSlot video={chapter.beforeVideo} />
+                        )}
+
+                        {/* Additional visible paragraphs render after the media
+                            when we're NOT in split mode. */}
+                        {visibleCount > 1 &&
+                          chapter.paragraphs.slice(1, visibleCount).map((p, j) => (
+                            <Para key={`vis-${j}`}>{p}</Para>
+                          ))}
+                      </>
                     )}
-
-                    {/* Additional visible paragraphs render after the media
-                        when we're NOT in split mode. */}
-                    {visibleCount > 1 &&
-                      chapter.paragraphs.slice(1, visibleCount).map((p, j) => (
-                        <Para key={`vis-${j}`}>{p}</Para>
-                      ))}
                   </>
+                )}
+
+                {/* Always-visible pull quote — sits directly under the visible text */}
+                {pullQuoteHoisted && chapter.pullQuote && (
+                  <PullQuote
+                    text={chapter.pullQuote.text}
+                    attribution={chapter.pullQuote.attribution}
+                    accentColor={accent}
+                  />
                 )}
 
                 {/* Before-expand image — always visible, max 1 */}
@@ -1024,7 +1102,7 @@ export default function CaseStudyPage({ project }: CaseStudyPageProps) {
                     {chapter.paragraphs.slice(1).map((p, j) => (
                       <Para key={j}>{p}</Para>
                     ))}
-                    {chapter.pullQuote && (
+                    {chapter.pullQuote && !pullQuoteHoisted && (
                       <PullQuote
                         text={chapter.pullQuote.text}
                         attribution={chapter.pullQuote.attribution}

@@ -69,8 +69,12 @@ function PrimaryVisual({ project }: { project: Project }) {
   )
 }
 
+// Slugs that have a real /images/<slug>/closeup.jpg in /public.
+// Anything else: skip the secondary visual entirely (no 404, no empty box).
+const SLUGS_WITH_CLOSEUP = new Set(['spotify-dashboard'])
+
 function SecondaryVisual({ project }: { project: Project }) {
-  const [imgError, setImgError] = useState(false)
+  if (!SLUGS_WITH_CLOSEUP.has(project.slug)) return null
 
   return (
     <motion.div
@@ -80,14 +84,11 @@ function SecondaryVisual({ project }: { project: Project }) {
       transition={{ duration: 0.6 }}
       style={{ width: '100%', marginBottom: '3rem', overflow: 'hidden' }}
     >
-      {!imgError ? (
-        <img
-          src={`/images/${project.slug}/closeup.jpg`}
-          alt={`${project.name} closeup`}
-          style={{ width: '100%', height: 'auto', display: 'block' }}
-          onError={() => setImgError(true)}
-        />
-      ) : null}
+      <img
+        src={`/images/${project.slug}/closeup.jpg`}
+        alt={`${project.name} closeup`}
+        style={{ width: '100%', height: 'auto', display: 'block' }}
+      />
     </motion.div>
   )
 }

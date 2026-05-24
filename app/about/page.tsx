@@ -73,7 +73,7 @@ function Portrait() {
   // so it reads as a deliberate page closer instead of a thumbnail.
   const frame: React.CSSProperties = {
     width:       '100%',
-    maxWidth:    '380px',
+    maxWidth:    '260px',
     aspectRatio: '3 / 4',
     objectFit:   'cover',
     display:     'block',
@@ -187,7 +187,7 @@ export default function AboutPage() {
               margin:        '0 0 1.5rem',
               maxWidth:      '40ch',
             }}>
-              I lead disruptive transformation across industrial systems.
+              Designing what industrial systems should become next, not just the screens on top.
             </h2>
             <div style={{
               fontFamily:    FONT,
@@ -245,11 +245,12 @@ export default function AboutPage() {
               maxWidth:   '52ch',
               margin:     0,
             }}>
-              Long-distance cycling is where I do some of my best thinking —
-              planning a 200km route the night before and executing it alone
-              requires the same combination of system logic and improvisation
-              I try to bring to design. I also read a lot of history, which
-              is mostly just studying how systems fail over long time horizons.
+              Most of my real thinking happens on a gravel bike, seventy plus
+              kilometres at a time, alone and without a phone. The rest goes
+              into analog photography and into my own side projects. The
+              biggest one is Gravelwerk, a cycling brand I am building from
+              the ground up. It is the place where I get to apply strategy to
+              something I own, instead of advising someone else on theirs.
             </p>
           </section>
 

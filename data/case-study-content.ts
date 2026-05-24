@@ -44,14 +44,16 @@ export interface CsCallout {
 
 export interface CsChapter {
   label: string
-  headline: string
+  headline: string             // supports \n for forced line breaks
+  headlineVideoSplit?: boolean // headline + beforeVideo render in a 2-col row (video matches headline height)
   paragraphs: string[]         // [0..visibleParagraphs) always visible, rest in expandable
   visibleParagraphs?: number   // how many paragraphs render before the expand (default 1)
   beforeImage?: CsImage        // shown before the expand toggle (max 1 per chapter)
   beforeVideo?: CsVideo        // video shown before the expand toggle (always visible)
   beforeChart?: CsBarChart     // inline bar chart, always visible, uses project accent
   phoneRow?: CsImage[]         // row of phone screenshots shown always-visible, with accent border
-  pullQuote?: CsPullQuote      // inside expandable
+  pullQuote?: CsPullQuote      // inside expandable (or always-visible if pullQuoteVisible)
+  pullQuoteVisible?: boolean   // when true, pullQuote renders under the visible text
   callout?: CsCallout          // inside expandable
   expandImages?: CsImage[]     // inside expandable, fade in on open
   // Impact chapter only
@@ -159,18 +161,6 @@ const odo: CaseStudyContent = {
         title: 'Stack',
         body: 'Next.js · React-Leaflet / Leaflet · OpenRouteService (routing, surface) · Shademap (time-based shade) · Custom elevation processing (gradient, segment classification)',
       },
-      expandImages: [
-        {
-          src: '/images/odo/ch04-wind.jpg',
-          alt: 'Wind direction visualization — tailwind green, headwind red',
-          aspectRatio: '16/9',
-        },
-        {
-          src: '/images/odo/ch04-terrain.jpg',
-          alt: 'Surface type breakdown per segment',
-          aspectRatio: '4/3',
-        },
-      ],
     },
     {
       label: '05 · The Idea',
@@ -189,14 +179,6 @@ const odo: CaseStudyContent = {
         layout: 'phone',
         alt: 'Quick Start flow in action — swiping between the three most differentiated route options for the current moment. Switching profiles regenerates the route from a different premise instead of reconfiguring filters.',
       },
-      expandImages: [
-        {
-          src: '/images/odo/ch05-elevation.jpg',
-          alt: 'Elevation profile — segment analysis breakdown',
-          aspectRatio: '3/1',
-          layout: 'wide',
-        },
-      ],
     },
     {
       label: '06 · The Result',
@@ -213,14 +195,6 @@ const odo: CaseStudyContent = {
         aspectRatio: '2048/1041',
         fullWidth: true,
       },
-      expandImages: [
-        {
-          src: '/images/odo/ch06-prepare.jpg',
-          alt: 'Prepare screen — packing suggestion',
-          aspectRatio: '9/16',
-          layout: 'phone',
-        },
-      ],
     },
     {
       label: '07 · What Changed',
@@ -312,6 +286,7 @@ const maya: CaseStudyContent = {
         text: 'On paper the language level often fits. But in the daily work reality, you notice it\'s not enough.',
         attribution: 'Interview, Stiftung Liebenau care coordinator',
       },
+      pullQuoteVisible: true,
     },
     {
       label: '03 · The Real Problem',
@@ -330,6 +305,12 @@ const maya: CaseStudyContent = {
     {
       label: '04 · The Idea',
       headline: 'Shape the housing. Then shape the language.',
+      beforeImage: {
+        src: '/images/maya/ch04-matrix.png',
+        alt: 'Language integration matrix and WG constellations. Left panel: six-level scale from Level 6 (German apprentice already in their second training year, dark green) to Level 1 (new apprentice just arrived in Germany, dark red). Right panel: example 4-, 5-, and 6-person flat configurations showing balanced mixes of levels across each household composition.',
+        aspectRatio: '2736/1149',
+        fullWidth: true,
+      },
       paragraphs: [
         'maya is a two-part system. The parts are designed to work together, but each solves a distinct problem.',
         'The first is the shared-living matching system. Housing at Liebenau is managed centrally — this is both a constraint and a leverage point. By structuring who lives with whom, the organization can engineer daily language exposure without any additional program, class, or cost. A trainee who lives with a German-speaking second-year apprentice gets German practice at dinner, on the way to work, and in every small daily interaction. This is not language instruction. It is language immersion by design.',
@@ -337,23 +318,15 @@ const maya: CaseStudyContent = {
         'The second part is maya 1.0: an AI assistant that covers the first phase of a trainee\'s journey. It begins in the trainee\'s native language — because arriving in a foreign country is already overwhelming, and adding language pressure at that moment is counterproductive. Then, as the trainee gains confidence, the assistant gradually shifts toward German.',
         'In phase one, the assistant covers onboarding questions, local navigation, bureaucratic processes, and daily life basics. It is available before arrival, so a trainee can begin to understand their new context before they step off the plane. It is intentionally scoped away from medical and clinical content — trust must be established before scope can expand.',
       ],
-      phoneRow: [
-        { src: '/images/maya/onboarding1.jpg', alt: 'Onboarding screen 1 — language welcome', aspectRatio: '9/16' },
-        { src: '/images/maya/onboarding2.jpg', alt: 'Onboarding screen 2 — topic selection', aspectRatio: '9/16' },
-        { src: '/images/maya/onboarding3.jpg', alt: 'Onboarding screen 3 — language shift', aspectRatio: '9/16' },
-      ],
-      expandImages: [
-        {
-          src: '/images/maya/ch04-matrix.png',
-          alt: 'Language integration matrix and WG constellations. Left panel: six-level scale from Level 6 (German apprentice already in their second training year, dark green) to Level 1 (new apprentice just arrived in Germany, dark red). Right panel: example 4-, 5-, and 6-person flat configurations showing balanced mixes of levels across each household composition.',
-          aspectRatio: '2736/1149',
-          fullWidth: true,
-        },
-      ],
     },
     {
       label: '05 · How It Works',
       headline: 'One assistant, two phases, a gradual shift.',
+      headlineVideoSplit: true,
+      beforeVideo: {
+        src: '/videos/maya/cover.mp4',
+        alt: 'Maya cover video',
+      },
       paragraphs: [
         'The matching system and the assistant are connected by a shared logic: start where the person is, then shift gradually toward where they need to be. Neither system forces progress. Both systems make progress feel natural.',
         'The matching matrix runs on six levels, combining two dimensions — length of time in Germany and German language level. A Level 6 is a German-speaking apprentice in their second or third year who knows the routines, the local area, and the facility. A Level 1 is an international trainee who arrived last week. The matrix generates balanced household compositions: every group has at least one person who can informally answer the questions that don\'t get asked at work.',
@@ -364,10 +337,6 @@ const maya: CaseStudyContent = {
     {
       label: '06 · The Result',
       headline: 'Three prototypes, one coherent system.',
-      beforeVideo: {
-        src: '/videos/maya/cover.mp4',
-        alt: 'Maya cover video',
-      },
       paragraphs: [
         'We delivered three linked prototypes as the semester outcome.',
         'The shared-living matching dashboard is a provider-facing tool for HR. It visualizes current housing compositions, flags imbalances, and surfaces the matching questionnaire flow for incoming trainees. The questionnaire captures language level, country of origin, time already spent in Germany, and a small number of compatibility preferences. From these inputs, the system generates balanced household proposals.',
@@ -375,31 +344,10 @@ const maya: CaseStudyContent = {
         'The everyday assistant prototype shows the adaptive language shift in practice. The interface language changes incrementally — a German word here, a phrase there — embedded in responses that the user can already understand. The shift is smooth enough that it is never jarring, but deliberate enough that progress accumulates.',
         'All three prototypes were designed with Liebenau\'s operational constraints as primary constraints, not secondary considerations. Privacy scope is limited to the trainee\'s private context in phase one. The assistant does not touch clinical data, patient information, or medical workflows. Escalation paths to a human are always visible.',
       ],
-      beforeImage: {
-        src: '/images/maya/ch06-matching-flow.jpg',
-        alt: 'Matching questionnaire flow — mobile form sequence',
-        aspectRatio: '9/16',
-        layout: 'phone',
-      },
-      expandImages: [
-        {
-          src: '/images/maya/ch06-daily.jpg',
-          alt: 'Daily helper flow — everyday assistant interaction',
-          aspectRatio: '9/16',
-          layout: 'phone',
-        },
-        {
-          src: '/images/maya/ch06-composite.jpg',
-          alt: 'Full prototype composite — matching dashboard and daily helper side by side',
-          aspectRatio: '16/9',
-          fullWidth: true,
-        },
-        {
-          src: '/images/maya/ch06-dashboard.jpg',
-          alt: 'Liebenau Matching Übersicht — full dashboard',
-          aspectRatio: '16/9',
-          fullWidth: true,
-        },
+      phoneRow: [
+        { src: '/images/maya/onboarding1.jpg', alt: 'Onboarding screen 1 — language welcome', aspectRatio: '9/16' },
+        { src: '/images/maya/onboarding2.jpg', alt: 'Onboarding screen 2 — topic selection', aspectRatio: '9/16' },
+        { src: '/images/maya/onboarding3.jpg', alt: 'Onboarding screen 3 — language shift', aspectRatio: '9/16' },
       ],
     },
     {
@@ -537,7 +485,6 @@ const remarkt: CaseStudyContent = {
         src: '/images/remarkt/ch06-channels.png',
         alt: 'Five distribution channels arranged around re:markt Hub at the center: Click & Collect (pre-ordered pickup), Delivery (mobile delivery vehicles), Pop-Up Store (vehicle-based station for areas without a Hub), and DHL Station (using existing Packstation infrastructure). The Hub handles central distribution, storage, and coordination across all channels.',
         aspectRatio: '1300/2067',
-        fullWidth: true,
       },
     },
     {
