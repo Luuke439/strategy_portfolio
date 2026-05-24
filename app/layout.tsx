@@ -9,6 +9,13 @@ export const metadata: Metadata = {
   title: 'Luke Caporelli — Strategic Design',
   description:
     'M.A. Strategic Design student at HfG Schwäbisch Gmünd. Product strategy and interaction design.',
+  // app/icon.svg is picked up automatically as the browser-tab favicon.
+  // Apple's home-screen icon convention doesn't accept SVG via the file
+  // convention, so point apple-touch-icon at the same SVG here. Modern
+  // iOS Safari renders it; older iOS falls back to a page screenshot.
+  icons: {
+    apple: '/icon.svg',
+  },
   openGraph: {
     title: 'Luke Caporelli',
     description: 'Strategic Design · Product Strategy · Interaction Design',

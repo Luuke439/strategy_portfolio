@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <!--
+      Chrome gradient — silver-on-dark, echoing the hero's metallic
+      material (#c8c8c8 base, polished clearcoat). Highlights at top
+      from the warm key light (#FFE4C0), shadow band through the middle,
+      warm kicker glow rising from below (#FFD0A0).
+    -->
+    <linearGradient id="chrome" x1="32" y1="6" x2="32" y2="58" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#f8f3ea"/>
+      <stop offset="0.35" stop-color="#c8c8c8"/>
+      <stop offset="0.55" stop-color="#7a7a7a"/>
+      <stop offset="0.85" stop-color="#c8c8c8"/>
+      <stop offset="1" stop-color="#f0d6b0"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Dark rounded square — same #0A0A0A as the site text color -->
+  <rect width="64" height="64" rx="14" ry="14" fill="#0A0A0A"/>
+
+  <!--
+    The "C" — a stroked arc, opening ~56° on the right side.
+    Endpoints at (52,21) and (52,43); radius 24 from center (32,32).
+    Round line caps give the Fredoka-style soft terminals.
+  -->
+  <path d="M 52 21 A 24 24 0 1 0 52 43"
+        fill="none"
+        stroke="url(#chrome)"
+        stroke-width="13"
+        stroke-linecap="round"/>
+</svg>
