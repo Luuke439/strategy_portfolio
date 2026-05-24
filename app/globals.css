@@ -75,6 +75,23 @@
 :root {
   --page-px: 2rem;   /* horizontal edge inset — used by header, grid, all pages */
   --page-py: 1.4rem; /* vertical nav/header inset */
+
+  /* Editorial-page top inset (About, Lab, Projects). Desktop wants a generous
+     9rem so the page never feels crowded under the glass header pill; mobile
+     compresses since the WebGL hero re-anchors to a bottom dock instead. */
+  --page-top: 9rem;
+  --page-bottom: 8rem;
+
+  /* Editorial-column horizontal padding — tightens on mobile so the column
+     is closer to true edge-to-edge and small phones don't waste space. */
+  --editorial-px: 2rem;
+}
+@media (max-width: 640px) {
+  :root {
+    --page-top: 5rem;
+    --page-bottom: 7rem;
+    --editorial-px: 1.25rem;
+  }
 }
 
 /* ── Base reset ──────────────────────────────────────────────────── */
@@ -245,9 +262,135 @@ body {
   color: #FAFAFA;
 }
 
+/* ── Nav pill visibility ─────────────────────────────────────────── */
+/* Desktop top-pill AND mobile bottom-dock both fade in once the user has
+   scrolled past the hero (on home) or unconditionally (off-home). We use
+   a CSS class flip + transition instead of binding `opacity` to a Motion
+   value in the style prop — Motion's SSR serializer reports a different
+   opacity than the React-rendered inline style, causing a hydration
+   mismatch warning on every pageload. CSS class-based transition is
+   identical visually and SSR-safe. */
+.nav-pill {
+  opacity: 0;
+  transition: opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.nav-pill.is-visible { opacity: 1; }
+
+/* ── Viewport visibility helpers ─────────────────────────────────── */
+/* The persistent shell renders BOTH the desktop top-pill header and the
+   mobile bottom-dock unconditionally, then hides the wrong one with CSS.
+   This is necessary because:
+     - useViewport() returns 'desktop' during SSR (we can't read innerWidth
+       on the server), then flips to 'mobile' on the first client render.
+     - If we conditionally rendered, React would hit a hydration mismatch
+       on every mobile pageload (server says "show top pill", client
+       says "don't").
+   `!important` is intentional — both shells set their own inline
+   `display:` (flex, block, etc.) that would otherwise win specificity.
+   This class only needs to *hide* the wrong shell; we never use it to
+   override which display value the visible shell uses. */
+@media (min-width: 641px) {
+  .mobile-only  { display: none !important; }
+}
+@media (max-width: 640px) {
+  .desktop-only { display: none !important; }
+}
+
+/* ── Mobile paint budget ─────────────────────────────────────────── */
+/* The 4-layer text-shadow that makes the chrome NavLabel3D / ChromeLabel
+   pop on desktop is genuinely expensive on mobile GPUs (every glyph
+   composites four blurred copies on the text-clipped gradient layer).
+   We trim to two layers for the same visual register at half the cost. */
+@media (max-width: 640px) {
+  .chrome-label-mobile-paint {
+    text-shadow:
+      0px -0.5px 0 rgba(0,0,0,0.28),
+      0px -2px 4px rgba(0,0,0,0.11) !important;
+  }
+}
+
 /* ── Project section ─────────────────────────────────────────────── */
 .projects-section {
   background-color: #FAFAFA;
+}
+
+/* ── Hero spacer ─────────────────────────────────────────────────── */
+/* Desktop reserves 115vh of breathing room above the project grid so the
+   3D name has the stage to itself. On mobile that's 1.5 screens of empty
+   pixels — too much. We drop to 100svh (small viewport height — the
+   *minimum* viewport excluding the browser chrome, so the spacer
+   doesn't grow/shrink as the iOS address bar collapses). */
+.hero-spacer {
+  height: 115vh;
+}
+@media (max-width: 640px) {
+  .hero-spacer {
+    height: 100svh;
+  }
+}
+
+/* ── Emotion cards (Lab — expressive-messaging) ───────────────────
+   Desktop: 60% video / 40% text side-by-side, anchored bottom.
+   Mobile : stack — text reads below the video, full width. */
+.emotion-card {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+}
+.emotion-card__video { flex: 0 0 auto; width: 60%; height: auto; }
+.emotion-card__text { justify-content: flex-end; align-self: flex-end; }
+@media (max-width: 640px) {
+  .emotion-card { flex-direction: column; align-items: stretch; }
+  .emotion-card__video { width: 100%; }
+  .emotion-card__text { align-self: stretch; justify-content: flex-start; padding: 1rem 1rem 1.25rem !important; }
+}
+
+/* ── Prototype duo (Lab — blend-it) ──────────────────────────────── */
+.prototype-duo {
+  display: flex;
+  gap: 0.75rem;
+  align-items: stretch;
+  height: 420px;
+}
+.prototype-duo__primary,
+.prototype-duo__detail { position: relative; height: 100%; }
+.prototype-duo__primary { width: 68%; }
+.prototype-duo__detail  { width: 32%; }
+@media (max-width: 640px) {
+  .prototype-duo {
+    flex-direction: column;
+    height: auto;
+    gap: 0.5rem;
+  }
+  .prototype-duo__primary,
+  .prototype-duo__detail {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    height: auto;
+  }
+}
+
+/* ── Timeline rows (About) ───────────────────────────────────────── */
+/* Desktop: year label in a fixed 110px column, body in 1fr.
+   Mobile : stack — year becomes a small uppercase eyebrow above the body. */
+.timeline-row {
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  gap: 0 1.5rem;
+  margin-bottom: 1.5rem;
+}
+@media (max-width: 640px) {
+  .timeline-row {
+    grid-template-columns: 1fr;
+    gap: 0.15rem 0;
+    margin-bottom: 1.5rem;
+  }
+  .timeline-row__years {
+    font-size: 0.65rem !important;
+    letter-spacing: 0.12em !important;
+    text-transform: uppercase;
+    padding-top: 0 !important;
+  }
 }
 
 /* ── Scrollbar ───────────────────────────────────────────────────── */

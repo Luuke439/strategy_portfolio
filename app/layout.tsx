@@ -4,6 +4,7 @@ import LenisProvider from '@/components/LenisProvider'
 import PersistentHeader from '@/components/PersistentHeader'
 import PageTransition from '@/components/PageTransition'
 import { HoverInfoProvider } from '@/components/HoverInfoContext'
+import { ChapterProvider } from '@/components/ChapterContext'
 
 // Production URL — override via NEXT_PUBLIC_SITE_URL at deploy time. Used
 // to resolve relative URLs in OpenGraph / Twitter card metadata (the auto-
@@ -58,9 +59,11 @@ export default function RootLayout({
       <body>
         <LenisProvider>
           <HoverInfoProvider>
-            {/* Persistent across all routes — never remounts on navigation */}
-            <PersistentHeader />
-            <PageTransition>{children}</PageTransition>
+            <ChapterProvider>
+              {/* Persistent across all routes — never remounts on navigation */}
+              <PersistentHeader />
+              <PageTransition>{children}</PageTransition>
+            </ChapterProvider>
           </HoverInfoProvider>
         </LenisProvider>
       </body>

@@ -1,6 +1,6 @@
 'use client'
 
-/* eslint-disable react-hooks/refs, react-hooks/immutability */
+/* eslint-disable react-hooks/refs */
 // Same rationale as Hero3D.tsx: this Leva sidecar mirrors live geo/mat/
 // lights/anim into a ref synchronously during render so the Leva 'Copy
 // settings' button callback always reads the *latest* values when the
@@ -28,6 +28,8 @@ interface Props {
   onReady: () => void
   onEnvReady: () => void
   navOnly: boolean
+  /** Two-line stacked layout — propagated through SceneBody to NameMesh. */
+  stacked: boolean
 }
 
 export function LevaPanel() {
@@ -74,6 +76,7 @@ export function SceneLeva(props: Props) {
     floatAmp: { value: 0.04, min: 0, max: 0.2, step: 0.005 },
     sunIntensity:    { value: 14, min: 0, max: 40, step: 0.5, label: 'Sun beam' },
     accentIntensity: { value: 32, min: 0, max: 60, step: 0.5, label: 'Tile glow' },
+    stackedLineGap:  { value: 0.65, min: 0.2, max: 1.5, step: 0.01, label: 'Stack line gap' },
   })
 
   useControls('Save', {

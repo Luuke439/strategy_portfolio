@@ -1,57 +1,33 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
 import { projects } from '@/data/projects'
 import ProjectCard, { type TileHoverInfo } from './ProjectCard'
+import { useViewport } from '@/lib/useViewport'
 
 interface ProjectGridProps {
   onProjectHover?: (info: TileHoverInfo | null) => void
-}
-
-// ── Responsive breakpoints ────────────────────────────────────────────────────
-type Breakpoint = 'desktop' | 'tablet' | 'mobile'
-
-function useBreakpoint(): Breakpoint {
-  const [bp, setBp] = useState<Breakpoint>('desktop')
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-
-  useEffect(() => {
-    const update = () => {
-      const w = window.innerWidth
-      setBp(w < 640 ? 'mobile' : w < 1024 ? 'tablet' : 'desktop')
-    }
-    const onResize = () => {
-      if (timerRef.current) clearTimeout(timerRef.current)
-      timerRef.current = setTimeout(update, 150)
-    }
-    update()
-    window.addEventListener('resize', onResize, { passive: true })
-    return () => {
-      window.removeEventListener('resize', onResize)
-      if (timerRef.current) clearTimeout(timerRef.current)
-    }
-  }, [])
-
-  return bp
 }
 
 // ── Row height formula ────────────────────────────────────────────────────────
 const ROW = 'calc(20vw)'
 
 export default function ProjectGrid({ onProjectHover }: ProjectGridProps) {
-  const bp = useBreakpoint()
+  const bp = useViewport()
   const find = (slug: string) => projects.find((p) => p.slug === slug)!
 
   // ── Mobile: single-column stack ────────────────────────────────────────────
+  // Cards use aspect-ratio instead of a fixed 220px height so they scale with
+  // viewport width — feels right on 360px Galaxy as well as 430px Pro Max.
+  // Bottom padding leaves room for the BottomDock to float above content.
   if (bp === 'mobile') {
     const order = [
       'odo', 'packyourride', 'spotify-dashboard', 'maya',
       'expressive-messaging', 'blend-it', 'resaga', 'remarkt',
     ]
     return (
-      <div style={{ padding: '4.5rem 1rem 2.5rem', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+      <div style={{ padding: '3rem 1rem 7rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
         {order.map((slug, i) => (
-          <div key={slug} style={{ height: '220px' }}>
+          <div key={slug} style={{ aspectRatio: '4 / 5' }}>
             <ProjectCard
               project={find(slug)}
               onHoverChange={onProjectHover}

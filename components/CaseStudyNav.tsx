@@ -1,38 +1,29 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
+import { useChapterContext } from './ChapterContext'
 
 interface CaseStudyNavProps {
   chapters: string[]
   accentColor: string
 }
 
+/**
+ * CaseStudyNav — desktop sticky chapter rail.
+ *
+ * Hidden on viewports < lg (Tailwind 1024px) — mobile/tablet readers see the
+ * same chapter list inside the BottomDock sheet instead.
+ *
+ * Reads the active-chapter index from ChapterContext (populated by
+ * <ChapterTracker> in CaseStudyPage) so the desktop rail, the mobile sheet,
+ * and the top progress bar all share one scroll listener instead of three.
+ */
 export default function CaseStudyNav({ chapters, accentColor }: CaseStudyNavProps) {
-  const [activeChapter, setActiveChapter] = useState(0)
-  // Cache section elements once — avoids 8× getElementById on every scroll frame
-  const sectionRefs = useRef<(HTMLElement | null)[]>([])
-
-  useEffect(() => {
-    // Populate cache after mount (elements exist in DOM by then)
-    sectionRefs.current = chapters.map((_, i) => document.getElementById(`chapter-${i}`))
-
-    const handleScroll = () => {
-      let current = 0
-      const threshold = window.innerHeight * 0.4
-      for (let i = 0; i < sectionRefs.current.length; i++) {
-        const el = sectionRefs.current[i]
-        if (el && el.getBoundingClientRect().top <= threshold) current = i
-      }
-      setActiveChapter(current)
-    }
-
-    window.addEventListener('scroll', handleScroll, { passive: true })
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [chapters])
+  const { state } = useChapterContext()
+  const activeChapter = state?.activeChapter ?? 0
 
   const scrollToChapter = (index: number) => {
-    const el = sectionRefs.current[index] ?? document.getElementById(`chapter-${index}`)
+    const el = document.getElementById(`chapter-${index}`)
     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
 

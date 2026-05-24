@@ -95,8 +95,12 @@ export default function Home() {
       </motion.div>
 
       {/* ── Page flow ────────────────────────────────────────────────────── */}
+      {/* Hero spacer: desktop wants 115vh of breathing room above the grid;
+          mobile uses 100svh (small-viewport-height, immune to the iOS Safari
+          address-bar collapse double-count). The actual values live in
+          globals.css so we don't ship a second JS render on resize. */}
       <main>
-        <div style={{ height: '115vh' }} />
+        <div className="hero-spacer" />
         <div className="projects-section">
           <ProjectGrid onProjectHover={setHoverInfo} />
         </div>

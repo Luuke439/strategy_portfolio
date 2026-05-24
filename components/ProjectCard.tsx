@@ -4,6 +4,7 @@ import { memo, useState, useRef, useEffect, useMemo } from 'react'
 import Link from 'next/link'
 import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion'
 import type { Project } from '@/data/projects'
+import { useHoverCapable } from '@/lib/useViewport'
 
 export type TileHoverInfo = { color: string; x: number; y: number }
 
@@ -80,6 +81,7 @@ function ProjectCardImpl({
   onHoverChange,
   revealIndex = 0,
 }: ProjectCardProps) {
+  const hoverCapable = useHoverCapable()
   const isPlaceholder = project.type === 'placeholder'
   const maxTilt = project.size === 'large' ? TILT_LARGE : TILT_NORMAL
   const strokeColor = useMemo(() => brightenForUI(project.accentColor), [project.accentColor])
@@ -90,6 +92,11 @@ function ProjectCardImpl({
   const videoRef  = useRef<HTMLVideoElement>(null)
   const cardRef   = useRef<HTMLDivElement>(null)
   const startTime = project.coverVideoStart ?? 0
+
+  // ── Touch-state for tactile feedback ──────────────────────────────────────
+  // On touch devices we don't get hover; a brief pressed scale on touch gives
+  // the user a "tap registered" signal before the route transition fires.
+  const [pressed, setPressed] = useState(false)
 
   // ── Per-card scroll reveal ────────────────────────────────────────────────
   useEffect(() => {
@@ -153,7 +160,11 @@ function ProjectCardImpl({
   }, [hovered, startTime, isPlaceholder])
 
   // ── Interaction handlers ──────────────────────────────────────────────────
+  // All three are no-ops on touch — registering the listeners but skipping
+  // their bodies keeps the markup identical (avoids hydration mismatches)
+  // while costing nothing per render.
   const handleMouseMove = (e: React.MouseEvent<HTMLElement>) => {
+    if (!hoverCapable) return
     const target = e.currentTarget
     const rect = target.getBoundingClientRect()
     const nx = (e.clientX - rect.left) / rect.width - 0.5
@@ -177,6 +188,7 @@ function ProjectCardImpl({
   }
 
   const handleMouseEnter = (e: React.MouseEvent<HTMLElement>) => {
+    if (!hoverCapable) return
     setHovered(true)
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
     onHoverChange?.({
@@ -187,11 +199,16 @@ function ProjectCardImpl({
   }
 
   const handleMouseLeave = () => {
+    if (!hoverCapable) return
     setHovered(false)
     mx.set(0)
     my.set(0)
     onHoverChange?.(null)
   }
+
+  // ── Touch handlers (pressed-state feedback) ───────────────────────────────
+  const handleTouchStart = () => { if (!hoverCapable) setPressed(true) }
+  const handleTouchEnd   = () => { if (!hoverCapable) setPressed(false) }
 
   const revealDelay = revealIndex * 0.12
 
@@ -209,13 +226,17 @@ function ProjectCardImpl({
       }}
       style={{ height: '100%', borderRadius: RADIUS }}
     >
-      {/* ── Tilt wrapper — also hosts the full-card hover stroke ── */}
+      {/* ── Tilt wrapper — also hosts the full-card hover stroke ──
+           On touch devices the tilt springs are zeroed out and the wrapper
+           swaps to a press-scale transform so taps feel responsive. */}
       <motion.div
+        animate={hoverCapable ? undefined : { scale: pressed ? 0.985 : 1 }}
+        transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
         style={{
           position: 'relative',
           height: '100%',
-          rotateX,
-          rotateY,
+          rotateX: hoverCapable ? rotateX : 0,
+          rotateY: hoverCapable ? rotateY : 0,
           transformPerspective: 900,
           transformOrigin: 'center center',
           willChange: 'transform',
@@ -224,6 +245,9 @@ function ProjectCardImpl({
         onMouseMove={handleMouseMove}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+        onTouchCancel={handleTouchEnd}
       >
 
         {isPlaceholder ? (
@@ -320,19 +344,44 @@ function ProjectCardImpl({
                     )}
                   </motion.div>
 
-                  {/* Metallic glint ring — a bright chrome highlight on the
-                      accent-colored hover stroke that follows the cursor. Only
-                      the border ring is visible via mask-composite. */}
-                  <div
-                    className={`tile-glint-ring${hovered ? ' is-hovered' : ''}`}
-                  />
+                  {/* Metallic glint ring — cursor-driven chrome highlight on the
+                      accent-colored hover stroke. Touch devices skip it entirely
+                      (no cursor to track) — they get the static glint below. */}
+                  {hoverCapable && (
+                    <div
+                      className={`tile-glint-ring${hovered ? ' is-hovered' : ''}`}
+                    />
+                  )}
 
-                  {/* Image-only hover stroke */}
+                  {/* Static glint — touch fallback. A subtle top-edge sheen
+                      that's always visible, preserves the metallic visual
+                      language without needing pointer position. */}
+                  {!hoverCapable && (
+                    <div
+                      aria-hidden
+                      style={{
+                        position: 'absolute',
+                        top: 0, left: 0, right: 0,
+                        height: '38%',
+                        background: 'linear-gradient(180deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0) 100%)',
+                        pointerEvents: 'none',
+                        zIndex: 9,
+                        borderTopLeftRadius: RADIUS,
+                        borderTopRightRadius: RADIUS,
+                      }}
+                    />
+                  )}
+
+                  {/* Hover/touch stroke — desktop animates on hover, touch
+                      keeps it always-on but lighter so cards still read as
+                      tappable accent regions. */}
                   <motion.div
                     animate={{
-                      boxShadow: hovered
-                        ? `inset 0 0 0 2px ${strokeColor}`
-                        : `inset 0 0 0 0px transparent`,
+                      boxShadow: hoverCapable
+                        ? (hovered
+                            ? `inset 0 0 0 2px ${strokeColor}`
+                            : `inset 0 0 0 0px transparent`)
+                        : `inset 0 0 0 1px ${strokeColor}55`,
                     }}
                     transition={{ duration: 0.18, ease: 'easeOut' }}
                     style={{
@@ -343,14 +392,22 @@ function ProjectCardImpl({
                     }}
                   />
 
-                  {/* CTA label — snaps up quickly */}
+                  {/* CTA label — animates on hover (desktop) or sits always-on
+                      (touch). Touch label is slightly smaller and tucked into
+                      the corner so it doesn't compete with the cover image. */}
                   <motion.div
-                    animate={{ opacity: hovered ? 1 : 0, y: hovered ? 0 : 6 }}
+                    animate={
+                      hoverCapable
+                        ? { opacity: hovered ? 1 : 0, y: hovered ? 0 : 6 }
+                        : { opacity: 1, y: 0 }
+                    }
                     transition={{ duration: 0.13, ease: [0.22, 1, 0.36, 1] }}
                     style={{
                       position: 'absolute', bottom: 12, left: 12, zIndex: 3,
                       fontFamily: "'TWK Lausanne Pan', system-ui, sans-serif",
-                      fontWeight: 400, fontSize: '0.66rem', letterSpacing: '0.13em',
+                      fontWeight: 400,
+                      fontSize: hoverCapable ? '0.66rem' : '0.6rem',
+                      letterSpacing: '0.13em',
                       textTransform: 'uppercase' as const, color: '#FFFFFF',
                       backgroundColor: 'rgba(0,0,0,0.36)',
                       padding: '5px 10px', borderRadius: '2px', pointerEvents: 'none',

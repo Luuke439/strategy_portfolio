@@ -8,6 +8,7 @@ import { useLenis } from 'lenis/react'
 import { caseStudies, type Project } from '@/data/projects'
 import { caseStudyContent, type CaseStudyContent, type CsImage, type CsVideo, type CsBarChart } from '@/data/case-study-content'
 import CaseStudyNav from './CaseStudyNav'
+import { ChapterTracker } from './ChapterContext'
 import ChallengeBlock from './ChallengeBlock'
 import MetaRow from './MetaRow'
 
@@ -118,7 +119,10 @@ function FullWidthImageSlot({
   const ar = image.aspectRatio ?? '16/9'
 
   const wrapStyle: React.CSSProperties = {
-    margin: '2.5rem -2rem',
+    // Negative horizontal margins break the image out of the editorial
+    // column. We use the same token the column uses for its padding so
+    // this stays edge-to-edge regardless of viewport.
+    margin: '2.5rem calc(var(--editorial-px) * -1)',
     position: 'relative',
     aspectRatio: ar,
     overflow: 'hidden',
@@ -800,12 +804,18 @@ export default function CaseStudyPage({ project }: CaseStudyPageProps) {
   return (
     <div style={{ backgroundColor: '#FAFAFA', minHeight: '100vh' }}>
 
-      {/* ── Side chapter nav ──────────────────────────────────────────── */}
+      {/* ── Chapter state — feeds desktop CaseStudyNav AND mobile dock ─── */}
+      <ChapterTracker chapters={navChapters} accentColor={accent} />
+
+      {/* ── Side chapter nav (desktop only — `hidden lg:flex`) ────────── */}
       <CaseStudyNav chapters={navChapters} accentColor={accent} />
 
       {/* ── Hero — same editorial column as body, image below ───────────── */}
-      <section style={{ paddingTop: 'clamp(10rem, 20vh, 16rem)' }}>
-        <div className="editorial-width" style={{ paddingLeft: '2rem', paddingRight: '2rem' }}>
+      <section style={{ paddingTop: 'clamp(6rem, 18vh, 16rem)' }}>
+        <div
+          className="editorial-width"
+          style={{ paddingLeft: 'var(--editorial-px)', paddingRight: 'var(--editorial-px)' }}
+        >
 
           {/* Label */}
           <span
@@ -876,7 +886,12 @@ export default function CaseStudyPage({ project }: CaseStudyPageProps) {
           already provide the same 80–96px transition that odo/maya have between
           hero image and opening — keeps all three case studies visually aligned. */}
       {content?.ministryQuoteBlock && (
-        <div style={{ padding: '0 2rem', margin: 'clamp(3rem, 8vw, 5rem) 0 0' }}>
+        <div
+          style={{
+            padding: '0 var(--editorial-px)',
+            margin: 'clamp(3rem, 8vw, 5rem) 0 0',
+          }}
+        >
           <div
             style={{
               maxWidth: '760px',
@@ -916,8 +931,11 @@ export default function CaseStudyPage({ project }: CaseStudyPageProps) {
       )}
 
       {/* ── Body content ──────────────────────────────────────────────── */}
-      <main style={{ paddingTop: 'clamp(1.5rem, 3vh, 2.5rem)', paddingBottom: '8rem' }}>
-        <div className="editorial-width" style={{ paddingLeft: '2rem', paddingRight: '2rem' }}>
+      <main style={{ paddingTop: 'clamp(1.5rem, 3vh, 2.5rem)', paddingBottom: 'var(--page-bottom)' }}>
+        <div
+          className="editorial-width"
+          style={{ paddingLeft: 'var(--editorial-px)', paddingRight: 'var(--editorial-px)' }}
+        >
 
           {/* Opening — "What this project is really about" */}
           {content && (
@@ -1175,7 +1193,7 @@ export default function CaseStudyPage({ project }: CaseStudyPageProps) {
       {/* ── Footer ────────────────────────────────────────────────────── */}
       <footer
         style={{
-          padding: '1.75rem 2rem',
+          padding: '1.75rem var(--editorial-px)',
         }}
       >
         <span style={{ fontFamily: FONT, fontWeight: 300, fontSize: '0.78rem', color: '#A0A0A0' }}>
@@ -1201,7 +1219,7 @@ function NextCaseBlock({ next, currentAccent }: { next: Project; currentAccent: 
     >
       <div
         style={{
-          padding: 'clamp(2.5rem, 6vw, 4rem) 2rem',
+          padding: 'clamp(2.5rem, 6vw, 4rem) var(--editorial-px)',
           maxWidth: '760px',
           margin: '0 auto',
         }}

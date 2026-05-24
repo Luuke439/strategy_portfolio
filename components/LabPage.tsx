@@ -148,7 +148,8 @@ function EmotionVideoCard({
       key={study.slug}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      style={{ backgroundColor: '#FAFAFA', display: 'flex', flexDirection: 'row', alignItems: 'flex-start', cursor: 'default' }}
+      className="emotion-card"
+      style={{ backgroundColor: '#FAFAFA', cursor: 'default' }}
     >
       <video
         ref={videoRef}
@@ -157,9 +158,14 @@ function EmotionVideoCard({
         muted
         playsInline
         preload="metadata"
-        style={{ flex: '0 0 auto', width: '60%', height: 'auto', display: 'block' }}
+        autoPlay={typeof window !== 'undefined' && !window.matchMedia('(hover: hover) and (pointer: fine)').matches}
+        className="emotion-card__video"
+        style={{ display: 'block' }}
       />
-      <div style={{ padding: '1.25rem 1.5rem', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', alignSelf: 'flex-end' }}>
+      <div
+        className="emotion-card__text"
+        style={{ padding: '1.25rem 1.5rem', display: 'flex', flexDirection: 'column' }}
+      >
         <span
           style={{
             fontFamily: "'TWK Lausanne Pan', system-ui, sans-serif",
@@ -250,10 +256,10 @@ export default function LabPage({ project }: LabPageProps) {
   return (
     <div style={{ backgroundColor: '#FAFAFA', minHeight: '100vh' }}>
 
-      <main style={{ paddingTop: '7rem', paddingBottom: '8rem' }}>
+      <main style={{ paddingTop: 'var(--page-top)', paddingBottom: 'var(--page-bottom)' }}>
         <div
           className="editorial-width"
-          style={{ paddingLeft: '2rem', paddingRight: '2rem' }}
+          style={{ paddingLeft: 'var(--editorial-px)', paddingRight: 'var(--editorial-px)' }}
         >
           {/* Header */}
           <motion.div
@@ -394,22 +400,25 @@ export default function LabPage({ project }: LabPageProps) {
               >
                 Technical prototype
               </span>
-              <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'stretch', height: '420px' }}>
-                <div style={{ width: '68%', height: '100%', position: 'relative' }}>
+              {/* Prototype duo — 68/32 side-by-side on desktop, stacked on
+                  mobile so neither thumbnail gets squashed to ~125px wide
+                  on a 375px viewport. The CSS class lives in globals.css. */}
+              <div className="prototype-duo">
+                <div className="prototype-duo__primary">
                   <Image
                     src="/images/blend-it/prototype.jpg"
                     alt="Blend it prototype"
                     fill
-                    sizes="(max-width: 768px) 68vw, 800px"
+                    sizes="(max-width: 640px) 100vw, (max-width: 768px) 68vw, 800px"
                     style={{ objectFit: 'cover' }}
                   />
                 </div>
-                <div style={{ width: '32%', height: '100%', position: 'relative' }}>
+                <div className="prototype-duo__detail">
                   <Image
                     src="/images/blend-it/prototype2.jpg"
                     alt="Blend it prototype detail"
                     fill
-                    sizes="(max-width: 768px) 32vw, 400px"
+                    sizes="(max-width: 640px) 100vw, (max-width: 768px) 32vw, 400px"
                     style={{ objectFit: 'cover' }}
                   />
                 </div>
@@ -453,7 +462,7 @@ export default function LabPage({ project }: LabPageProps) {
 
       <footer
         style={{
-          padding: '1.75rem 2rem',
+          padding: '1.75rem var(--editorial-px)',
         }}
       >
         <span

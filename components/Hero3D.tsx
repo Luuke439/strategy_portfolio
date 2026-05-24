@@ -29,6 +29,7 @@ import { useRef, useState, useEffect, Suspense, useCallback, useMemo, lazy } fro
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { Center, Text3D } from '@react-three/drei'
 import * as THREE from 'three'
+import { useViewport } from '@/lib/useViewport'
 
 const FONT = '/fonts/Fredoka Expanded_Bold.json'
 
@@ -73,6 +74,37 @@ const DEFAULT_ANIM = {
   floatAmp:        0.04,
   sunIntensity:    14,
   accentIntensity: 32,
+} as const
+
+// ─── Mobile overrides ───────────────────────────────────────────────────────
+// On phones the text needs to be bigger (closer camera FOV), stacked over
+// two lines for portrait, and lerp toward a bottom-dock target instead of
+// the top header. The geo/anim values diverge enough from desktop that we
+// keep them in dedicated tables instead of branching mid-render.
+const MOBILE_GEO = {
+  // Same geometry tuning as desktop (verified to render correctly); the
+  // stacked layout itself shrinks visual size by splitting one wide
+  // "LUKE CAPORELLI" line into two shorter ones, so we don't need to
+  // also shrink the per-glyph size.
+  textSize:       DEFAULT_GEO.textSize,
+  depth:          DEFAULT_GEO.depth,
+  bevelSize:      DEFAULT_GEO.bevelSize,
+  bevelThickness: DEFAULT_GEO.bevelThickness,
+  bevelSegments:  5,      // fewer than desktop's 8 — meaningful GPU win on tile-deferred mobile GPUs
+  curveSegments:  DEFAULT_GEO.curveSegments,
+} as const
+
+const MOBILE_ANIM = {
+  heroX:           0.0,
+  heroY:           0.0,
+  navScale:        0.16,  // smaller — fits inside the bottom-dock pill
+  flipX:           1,
+  flipSpins:       0,
+  floatAmp:        0.05,
+  sunIntensity:    14,
+  accentIntensity: 32,
+  // Vertical spacing between LUKE and CAPORELLI (world units, scaled by textSize)
+  stackedLineGap:  0.65,
 } as const
 
 // Leva is only imported on demand (see SceneLeva below).
@@ -257,12 +289,14 @@ interface SceneProps {
 
 export function SceneBody({
   scrollRef, navRef, accentHoverRef, mousePosRef, onReady, onEnvReady, navOnly,
-  geo, mat, lights, anim,
+  geo, mat, lights, anim, stacked,
 }: SceneProps & {
   geo: typeof DEFAULT_GEO | Record<string, number>
   mat: typeof DEFAULT_MAT | Record<string, number | string>
   lights: typeof DEFAULT_LIGHTS | Record<string, number>
   anim: typeof DEFAULT_ANIM | Record<string, number>
+  /** Two-line stacked layout (LUKE over CAPORELLI). Used on mobile. */
+  stacked: boolean
 }) {
   return (
     <>
@@ -284,20 +318,26 @@ export function SceneBody({
           mat={mat}
           anim={anim}
           navOnly={navOnly}
+          stacked={stacked}
         />
       </Suspense>
     </>
   )
 }
 
-function SceneContent(props: SceneProps) {
+interface SceneContentProps extends SceneProps {
+  stacked: boolean
+}
+
+function SceneContent({ stacked, ...rest }: SceneContentProps) {
   return (
     <SceneBody
-      {...props}
-      geo={DEFAULT_GEO}
+      {...rest}
+      stacked={stacked}
+      geo={stacked ? MOBILE_GEO : DEFAULT_GEO}
       mat={DEFAULT_MAT}
       lights={DEFAULT_LIGHTS}
-      anim={DEFAULT_ANIM}
+      anim={stacked ? MOBILE_ANIM : DEFAULT_ANIM}
     />
   )
 }
@@ -318,20 +358,40 @@ interface NameMeshProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   anim: Record<string, any>
   navOnly: boolean
+  /** Two-line stacked layout (LUKE over CAPORELLI). Used on mobile. */
+  stacked: boolean
 }
 
-function NameMesh({ scrollRef, navRef, accentHoverRef, mousePosRef, onReady, geo, mat, anim, navOnly }: NameMeshProps) {
+function NameMesh({ scrollRef, navRef, accentHoverRef, mousePosRef, onReady, geo, mat, anim, navOnly, stacked }: NameMeshProps) {
   const groupRef = useRef<THREE.Group>(null!)
   // Snaps only on the very first frame (once the nav target is measurable)
   // to avoid the initial flash from the default position to the real target.
   // Route changes after that just lerp, so the text smoothly continues from
   // wherever it was — same behaviour as if the user had kept scrolling.
   const hasSnapped = useRef(false)
-  const textWidthRef = useRef<number>(0)
+  // Stacked layout tracks per-word widths so the nav-target halfW uses the
+  // wider of the two; inline layout uses the single composite width.
+  const word1WidthRef = useRef<number>(0)
+  const word2WidthRef = useRef<number>(0)
+  const textWidth = () => stacked
+    ? Math.max(word1WidthRef.current, word2WidthRef.current)
+    : word1WidthRef.current
   const recomputeNavRef = useRef<() => void>(() => { })
-  // Sun beam light + material emissive for tile color
+  // Sun beam light + materials (one per Text3D mesh — sharing a single
+  // material across two meshes works in Three.js but R3F's primitive
+  // child reconciliation is finicky, so we keep them separate and
+  // update both in lockstep each frame).
   const lAccent = useRef<THREE.PointLight>(null!)
-  const matRef  = useRef<THREE.MeshPhysicalMaterial>(null!)
+  const matRefs = useRef<(THREE.MeshPhysicalMaterial | null)[]>([])
+  // Stable ref callbacks — React calls a ref callback with null then the new
+  // element whenever the callback's identity changes. Inline-creating these
+  // on every render would thrash matRefs at 60fps. Memoised to mount-once.
+  const setMat0 = useCallback((el: THREE.MeshPhysicalMaterial | null) => {
+    matRefs.current[0] = el
+  }, [])
+  const setMat1 = useCallback((el: THREE.MeshPhysicalMaterial | null) => {
+    matRefs.current[1] = el
+  }, [])
   const curColor = useRef(new THREE.Color('#ffffff'))
   const tgtColor = useRef(new THREE.Color('#ffffff'))
   const tgtIntensity = useRef<number>(14)
@@ -356,12 +416,16 @@ function NameMesh({ scrollRef, navRef, accentHoverRef, mousePosRef, onReady, geo
   const effectiveNavScale = anim.navScale * navScaleFactor
 
   // Nav target from DOM span — uses LEFT edge of span + half text width so the
-  // text left-aligns correctly at every viewport size without a manual correction.
+  // text left-aligns correctly at every viewport size without a manual
+  // correction. Only the desktop top-pill span carries this id; mobile uses
+  // its own CSS chrome text in the BottomDock (no WebGL anchor needed).
   useEffect(() => {
     const compute = () => {
       const span = document.getElementById('nav-name-span')
-      if (!span || !textWidthRef.current) return
+      const w = textWidth()
+      if (!span || !w) return
       const r = span.getBoundingClientRect()
+      if (r.width === 0 && r.height === 0) return // desktop pill hidden (mobile vp)
       // Unproject the LEFT edge of the span (not its centre)
       const ndcX = (r.left / size.width) * 2 - 1
       const ndcY = -(((r.top + r.height * 0.5) / size.height) * 2 - 1)
@@ -371,14 +435,16 @@ function NameMesh({ scrollRef, navRef, accentHoverRef, mousePosRef, onReady, geo
       const t = -camera.position.z / dir.z
       const wp = camera.position.clone().addScaledVector(dir, t)
       // Shift center right so the text's left edge lands at the span's left edge
-      const halfW = (textWidthRef.current * effectiveNavScale) / 2
+      const halfW = (w * effectiveNavScale) / 2
       navRef.current = { x: wp.x + halfW, y: wp.y }
     }
     recomputeNavRef.current = compute
     compute()
     window.addEventListener('resize', compute)
     return () => window.removeEventListener('resize', compute)
-  }, [size, camera, navRef, effectiveNavScale])
+    // textWidth is read inside compute via the ref closure — no need in deps.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [size, camera, navRef, effectiveNavScale, stacked])
 
   useEffect(() => { onReady() }, [onReady])
 
@@ -474,46 +540,97 @@ function NameMesh({ scrollRef, navRef, accentHoverRef, mousePosRef, onReady, geo
       lAccent.current.color.copy(curColor.current)
       lAccent.current.intensity = THREE.MathUtils.lerp(lAccent.current.intensity, tgtIntensity.current, ls)
     }
-    if (matRef.current) {
-      matRef.current.emissive.copy(curEmissive.current)
-      matRef.current.emissiveIntensity = THREE.MathUtils.lerp(matRef.current.emissiveIntensity, tgtEmissiveInt.current, ls)
+    // Update every word-material in lockstep (1 mesh inline, 2 stacked).
+    for (let i = 0; i < matRefs.current.length; i++) {
+      const m = matRefs.current[i]
+      if (!m) continue
+      m.emissive.copy(curEmissive.current)
+      m.emissiveIntensity = THREE.MathUtils.lerp(m.emissiveIntensity, tgtEmissiveInt.current, ls)
     }
   })
+
+  // Shared Text3D + material props — extracted so the inline-vs-stacked
+  // branches don't drift apart over time.
+  const text3dProps = {
+    font: FONT,
+    size: geo.textSize,
+    height: geo.depth,
+    curveSegments: geo.curveSegments,
+    letterSpacing: 0.08,
+    bevelEnabled: true,
+    bevelThickness: geo.bevelThickness,
+    bevelSize: geo.bevelSize,
+    bevelSegments: geo.bevelSegments,
+  } as const
+
+  const chromeMaterial = (idx: 0 | 1) => (
+    <meshPhysicalMaterial
+      ref={idx === 0 ? setMat0 : setMat1}
+      color={mat.color}
+      metalness={mat.metalness}
+      roughness={mat.roughness}
+      clearcoat={mat.clearcoat}
+      clearcoatRoughness={mat.clearcoatRoughness}
+      reflectivity={mat.reflectivity}
+      envMapIntensity={mat.envMapIntensity}
+      emissive="#000000"
+      emissiveIntensity={0}
+    />
+  )
+
+  // Line gap scales with textSize so the stacked baseline distance
+  // stays visually consistent across mobile breakpoints.
+  const lineGap = (anim.stackedLineGap ?? 0.65) * (geo.textSize as number)
 
   return (
     <group ref={groupRef} position={[anim.heroX, anim.heroY, 0]}>
       {/* Surround accent rig — front, back, left, right, top, bottom */}
       <pointLight ref={lAccent} position={[0, 0, 8]} intensity={14} distance={35} color="#ffffff" />
-      <Center onCentered={({ width }) => {
-        textWidthRef.current = width
-        recomputeNavRef.current()
-      }}>
-        <Text3D
-          font={FONT}
-          size={geo.textSize}
-          height={geo.depth}
-          curveSegments={geo.curveSegments}
-          letterSpacing={0.08}
-          bevelEnabled
-          bevelThickness={geo.bevelThickness}
-          bevelSize={geo.bevelSize}
-          bevelSegments={geo.bevelSegments}
-        >
-          LUKE CAPORELLI
-          <meshPhysicalMaterial
-            ref={matRef}
-            color={mat.color}
-            metalness={mat.metalness}
-            roughness={mat.roughness}
-            clearcoat={mat.clearcoat}
-            clearcoatRoughness={mat.clearcoatRoughness}
-            reflectivity={mat.reflectivity}
-            envMapIntensity={mat.envMapIntensity}
-            emissive="#000000"
-            emissiveIntensity={0}
-          />
-        </Text3D>
-      </Center>
+
+      {stacked ? (
+        <>
+          {/* LUKE — top line. disableY so each Center only centers horizontally;
+              vertical position comes from the manual y offset. */}
+          <Center
+            disableY
+            position={[0, lineGap, 0]}
+            onCentered={({ width }) => {
+              word1WidthRef.current = width
+              recomputeNavRef.current()
+            }}
+          >
+            <Text3D {...text3dProps}>
+              LUKE
+              {chromeMaterial(0)}
+            </Text3D>
+          </Center>
+
+          {/* CAPORELLI — bottom line */}
+          <Center
+            disableY
+            position={[0, -lineGap, 0]}
+            onCentered={({ width }) => {
+              word2WidthRef.current = width
+              recomputeNavRef.current()
+            }}
+          >
+            <Text3D {...text3dProps}>
+              CAPORELLI
+              {chromeMaterial(1)}
+            </Text3D>
+          </Center>
+        </>
+      ) : (
+        <Center onCentered={({ width }) => {
+          word1WidthRef.current = width
+          recomputeNavRef.current()
+        }}>
+          <Text3D {...text3dProps}>
+            LUKE CAPORELLI
+            {chromeMaterial(0)}
+          </Text3D>
+        </Center>
+      )}
     </group>
   )
 }
@@ -525,9 +642,15 @@ interface Hero3DProps {
   hoverInfo?: { color: string; x: number; y: number } | null
   /** When true: skip hero animation, always render in nav position */
   navOnly?: boolean
+  /** Fires the moment the canvas becomes visible (font + env both ready) —
+   *  used by parents to cross-fade out a CSS chrome-text fallback so the
+   *  hero never paints empty during WebGL boot. */
+  onVisualReady?: () => void
 }
 
-export default function Hero3D({ hoverInfo, navOnly }: Hero3DProps) {
+export default function Hero3D({ hoverInfo, navOnly, onVisualReady }: Hero3DProps) {
+  const vp = useViewport()
+  const stacked = vp === 'mobile'
   const [isMounted, setIsMounted] = useState(false)
   const [fontLoaded, setFontLoaded] = useState(false)
   // The envMap (day.jpg → PMREM cube) takes a tick or two to be applied
@@ -560,6 +683,64 @@ export default function Hero3D({ hoverInfo, navOnly }: Hero3DProps) {
     window.addEventListener('mousemove', onMove, { passive: true })
     return () => window.removeEventListener('mousemove', onMove)
   }, [])
+
+  // ── Device-orientation tilt (mobile) ────────────────────────────────────
+  // Phones have no cursor — but they have a gyroscope. Map device tilt onto
+  // the same mousePosRef the hover-beam code reads from, so the chrome
+  // highlight tracks how the user holds the phone. Subtle, brand-coherent,
+  // and the kind of micro-interaction that justifies the cost of WebGL on
+  // mobile.
+  //
+  // iOS 13+ requires an explicit user-gesture permission grant before the
+  // gyroscope events fire. We don't ask preemptively (annoying); instead the
+  // first touch on the page triggers requestPermission() once.
+  useEffect(() => {
+    if (!stacked) return // only wired up on mobile pose
+    if (typeof window === 'undefined' || typeof DeviceOrientationEvent === 'undefined') return
+
+    let removed = false
+    let off: (() => void) | null = null
+
+    const handle = (e: DeviceOrientationEvent) => {
+      // gamma: left/right tilt (-90 to 90), beta: front/back tilt (-180 to 180).
+      // Clamp to a calm range and normalise into the 0..1 space the beam reads.
+      const g = Math.max(-30, Math.min(30, e.gamma ?? 0)) / 60 + 0.5
+      const b = Math.max(-30, Math.min(30, (e.beta ?? 0) - 45)) / 60 + 0.5
+      mousePosRef.current.x = g
+      mousePosRef.current.y = b
+    }
+
+    const attach = () => {
+      if (removed) return
+      window.addEventListener('deviceorientation', handle, { passive: true })
+      off = () => window.removeEventListener('deviceorientation', handle)
+    }
+
+    // iOS Safari (and some Android variants): permission gate via DeviceOrientationEvent.requestPermission.
+    interface DOEWithPermission {
+      requestPermission?: () => Promise<'granted' | 'denied'>
+    }
+    const DOE = DeviceOrientationEvent as unknown as DOEWithPermission
+
+    if (typeof DOE.requestPermission === 'function') {
+      const askOnce = () => {
+        window.removeEventListener('touchend', askOnce)
+        DOE.requestPermission!()
+          .then((state) => { if (state === 'granted') attach() })
+          .catch(() => { /* user denied or browser blocked — silent fail */ })
+      }
+      window.addEventListener('touchend', askOnce, { once: true, passive: true })
+      return () => {
+        removed = true
+        window.removeEventListener('touchend', askOnce)
+        off?.()
+      }
+    }
+
+    // Android / non-permission browsers: attach immediately.
+    attach()
+    return () => { removed = true; off?.() }
+  }, [stacked])
 
   // Leva is an opt-in design tool — only loads when ?leva is in the URL.
   // This keeps the leva bundle (and its per-render store updates) out of
@@ -595,6 +776,23 @@ export default function Hero3D({ hoverInfo, navOnly }: Hero3DProps) {
   const handleReady = useCallback(() => setFontLoaded(true), [])
   const handleEnvReady = useCallback(() => setEnvReady(true), [])
 
+  // Fire the cross-fade hook the moment both flips are true. Latest callback
+  // held in a ref so re-renders don't double-fire on parent re-renders.
+  const onVisualReadyRef = useRef(onVisualReady)
+  onVisualReadyRef.current = onVisualReady
+  const visualReadyFiredRef = useRef(false)
+  useEffect(() => {
+    if (fontLoaded && envReady && !visualReadyFiredRef.current) {
+      visualReadyFiredRef.current = true
+      // Wait two paints so the opacity transition is well underway before we
+      // tell the fallback to fade out — gives the two layers a brief overlap
+      // and no perceptible gap.
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        onVisualReadyRef.current?.()
+      }))
+    }
+  }, [fontLoaded, envReady])
+
   if (!isMounted) return null
 
   return (
@@ -616,7 +814,9 @@ export default function Hero3D({ hoverInfo, navOnly }: Hero3DProps) {
       >
         <Canvas
         camera={{ position: [0, 0, 6], fov: 50 }}
-        dpr={[1, 1.5]}
+        // Mobile clamps DPR tighter — chrome detail is forgiving and the
+        // shader cost on tile-deferred GPUs scales linearly with pixel count.
+        dpr={stacked ? [1, 1.25] : [1, 1.5]}
         gl={{
           alpha: true,
           antialias: true,
@@ -637,6 +837,7 @@ export default function Hero3D({ hoverInfo, navOnly }: Hero3DProps) {
               onReady={handleReady}
               onEnvReady={handleEnvReady}
               navOnly={!!navOnly}
+              stacked={stacked}
             />
           </Suspense>
         ) : (
@@ -648,6 +849,7 @@ export default function Hero3D({ hoverInfo, navOnly }: Hero3DProps) {
             navOnly={!!navOnly}
             onReady={handleReady}
             onEnvReady={handleEnvReady}
+            stacked={stacked}
           />
         )}
         </Canvas>

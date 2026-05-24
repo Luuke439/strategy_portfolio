@@ -2,10 +2,12 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { motion, useSpring, useMotionValue } from 'framer-motion'
+import { useHoverCapable } from '@/lib/useViewport'
 
 const springConfig = { stiffness: 400, damping: 28 }
 
 export default function CustomCursor() {
+  const hoverCapable = useHoverCapable()
   const cursorX = useMotionValue(-100)
   const cursorY = useMotionValue(-100)
   const [isHovering, setIsHovering] = useState(false)
@@ -17,6 +19,7 @@ export default function CustomCursor() {
   const springY = useSpring(cursorY, springConfig)
 
   useEffect(() => {
+    if (!hoverCapable) return // touch device — no cursor to track
     const move = (e: MouseEvent) => {
       cursorX.set(e.clientX)
       cursorY.set(e.clientY)
@@ -50,7 +53,11 @@ export default function CustomCursor() {
       document.removeEventListener('mouseover', handleEnter)
       document.removeEventListener('mouseout', handleLeave)
     }
-  }, [cursorX, cursorY]) // isVisible removed — tracked via ref to avoid re-registration
+  }, [cursorX, cursorY, hoverCapable]) // isVisible removed — tracked via ref to avoid re-registration
+
+  // Touch / coarse-pointer devices have no cursor — render nothing at all so
+  // the DOM stays clean and the fixed-position div doesn't sit dead in the tree.
+  if (!hoverCapable) return null
 
   return (
     <motion.div

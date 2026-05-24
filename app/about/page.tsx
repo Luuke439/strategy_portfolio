@@ -99,20 +99,18 @@ function TimelineRow({ years, org, role, detail }: {
   detail: string | null
 }) {
   return (
-    <div style={{
-      display:             'grid',
-      gridTemplateColumns: '110px 1fr',
-      gap:                 '0 1.5rem',
-      marginBottom:        '1.5rem',
-    }}>
-      <span style={{
-        fontFamily: FONT,
-        fontWeight: 300,
-        fontSize:   '0.78rem',
-        color:      '#A0A0A0',
-        paddingTop: '2px',
-        lineHeight: 1.5,
-      }}>
+    <div className="timeline-row">
+      <span
+        className="timeline-row__years"
+        style={{
+          fontFamily: FONT,
+          fontWeight: 300,
+          fontSize:   '0.78rem',
+          color:      '#A0A0A0',
+          paddingTop: '2px',
+          lineHeight: 1.5,
+        }}
+      >
         {years}
       </span>
       <div>
@@ -155,13 +153,16 @@ export default function AboutPage() {
     <div style={{ backgroundColor: '#FAFAFA', minHeight: '100vh' }}>
       <main
         style={{
-          paddingTop:    '9rem',
-          paddingBottom: '8rem',
+          paddingTop:    'var(--page-top)',
+          paddingBottom: 'var(--page-bottom)',
         }}
       >
         <div
           className="editorial-width"
-          style={{ paddingLeft: '2rem', paddingRight: '2rem' }}
+          style={{
+            paddingLeft:  'var(--editorial-px)',
+            paddingRight: 'var(--editorial-px)',
+          }}
         >
 
           {/* ── Header: single editorial pillar ────────────────────────── */}

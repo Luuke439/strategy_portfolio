@@ -4,10 +4,14 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import dynamic from 'next/dynamic'
-import { motion, useScroll, useTransform, useMotionValueEvent } from 'framer-motion'
+import { useScroll, useMotionValueEvent } from 'framer-motion'
 import { useLenis } from 'lenis/react'
 import GlassNav from './GlassNav'
+import BottomDock from './BottomDock'
+import HeroNameFallback from './HeroNameFallback'
 import { useHoverInfo } from './HoverInfoContext'
+import { useLowPowerDevice, useViewport } from '@/lib/useViewport'
+import ChapterProgressBar from './ChapterProgressBar'
 
 // Hero3D is WebGL — client only, no SSR. Lives in the persistent shell so the
 // <Canvas> and its PMREM env map are built once and reused across routes.
@@ -35,6 +39,14 @@ const PILL: React.CSSProperties = {
 export default function PersistentHeader() {
   const pathname = usePathname()
   const isHome = pathname === '/'
+  const lowPower = useLowPowerDevice()
+  const vp = useViewport()
+  const isMobile = vp === 'mobile'
+  // Note: the desktop pill and mobile dock both render unconditionally —
+  // CSS (`.desktop-only` / `.mobile-only` in globals.css) controls which
+  // one is visible. This avoids a hydration mismatch on mobile where
+  // server-rendered "desktop" tree wouldn't match the client's "mobile"
+  // tree on the first paint.
 
   const { hoverInfo } = useHoverInfo()
   const { scrollY } = useScroll()
@@ -72,9 +84,6 @@ export default function PersistentHeader() {
   // threshold. Both conditions resolve at render time — no effect needed.
   const navVisible = !isHome || scrolledPastThreshold
 
-  // Home-page pill opacity animates with scroll; off-home is a flat 1.
-  const homeOpacity = useTransform(scrollY, [vh * 0.8, vh], [0, 1])
-
   useMotionValueEvent(scrollY, 'change', (v) => {
     if (!isHome) return
     if (!scrolledPastThreshold && v > vh * 0.8) setScrolledPastThreshold(true)
@@ -89,9 +98,40 @@ export default function PersistentHeader() {
     else window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
+  // ── Hero-fallback cross-fade ───────────────────────────────────────────────
+  // The CSS chrome name renders immediately; the 3D mesh fades in on top once
+  // its env map is wired up. We flip this flag from Hero3D's onVisualReady so
+  // the fallback gets out of the way (otherwise we'd see ghosted double-text).
+  const [hero3DReady, setHero3DReady] = useState(false)
+
+  // WebGL hero is desktop-only:
+  //  - On mobile: phone GPUs strain on the chrome material + HDRI PMREM, and
+  //    the bottom-dock layout already uses a CSS chrome treatment for the pill
+  //    label, so the WebGL canvas adds visible cost without adding identity
+  //    that the CSS rendering can't match.
+  //  - On low-power devices (any viewport): same reasoning + the user has
+  //    asked or the heuristics suggest minimising work.
+  const renderHero3D = !lowPower && !isMobile
+
   return (
     <>
+      {/* ── CSS chrome hero ──────────────────────────────────────────────
+           Painted immediately so the home hero never flashes empty.
+           On desktop, the WebGL canvas fades in on top once Hero3D signals
+           ready; on mobile (or low-power), the fallback IS the hero and
+           stays put as the permanent visual.
+           Only rendered on home — non-home routes have the brand in the
+           dock pill, so a centered hero would duplicate it. */}
+      {isHome && (
+        <HeroNameFallback
+          permanent={!renderHero3D}
+          visible={!renderHero3D || !hero3DReady}
+        />
+      )}
+
+      {/* ── Desktop top-pill header ─ hidden via CSS on mobile viewports ── */}
       <header
+        className="desktop-only"
         style={{
           position:       'fixed',
           top:            0,
@@ -105,50 +145,72 @@ export default function PersistentHeader() {
           pointerEvents:  'none',
         }}
       >
-        <motion.div style={{ ...PILL, opacity: isHome ? homeOpacity : 1 }}>
-          {/* Invisible name target — the 3D text renders on top via canvas z:110.
-              Pointer events mirror navVisible so the pill is not clickable
-              while it is faded out above the hero. */}
-          <Link
-            href="/"
-            id="nav-name-span"
-            onClick={handleNameClick}
-            tabIndex={navVisible ? 0 : -1}
-            aria-hidden={!navVisible}
-            style={{
-              fontFamily:     FONT,
-              fontWeight:     500,
-              fontSize:       '0.95rem',
-              whiteSpace:     'nowrap',
-              opacity:        0,
-              background:     'none',
-              border:         'none',
-              padding:        '10px 20px 10px 0',
-              minWidth:       '330px',
-              cursor:         'pointer',
-              userSelect:     'none',
-              pointerEvents:  navVisible ? 'auto' : 'none',
-              textDecoration: 'none',
-              color:          '#0A0A0A',
-            }}
-          >
-            Luke Caporelli
-          </Link>
-
-          <div style={{ width: '1px', height: '14px', background: 'rgba(0,0,0,0.10)', flexShrink: 0 }} />
-
           <div
-            aria-hidden={!navVisible}
-            style={{ pointerEvents: navVisible ? 'auto' : 'none' }}
+            className={`nav-pill${navVisible ? ' is-visible' : ''}`}
+            style={PILL}
           >
-            {/* `animated` only on home, so off-home nav flips snap instantly
-                — no re-staggering of items when switching between routes. */}
-            <GlassNav isVisible={navVisible} animated={isHome} />
+            {/* Invisible name target — the 3D text renders on top via canvas z:110.
+                Pointer events mirror navVisible so the pill is not clickable
+                while it is faded out above the hero. */}
+            <Link
+              href="/"
+              id="nav-name-span"
+              onClick={handleNameClick}
+              tabIndex={navVisible ? 0 : -1}
+              aria-hidden={!navVisible}
+              style={{
+                fontFamily:     FONT,
+                fontWeight:     500,
+                fontSize:       '0.95rem',
+                whiteSpace:     'nowrap',
+                opacity:        0,
+                background:     'none',
+                border:         'none',
+                padding:        '10px 20px 10px 0',
+                minWidth:       '330px',
+                cursor:         'pointer',
+                userSelect:     'none',
+                pointerEvents:  navVisible ? 'auto' : 'none',
+                textDecoration: 'none',
+                color:          '#0A0A0A',
+              }}
+            >
+              Luke Caporelli
+            </Link>
+
+            <div style={{ width: '1px', height: '14px', background: 'rgba(0,0,0,0.10)', flexShrink: 0 }} />
+
+            <div
+              aria-hidden={!navVisible}
+              style={{ pointerEvents: navVisible ? 'auto' : 'none' }}
+            >
+              {/* `animated` only on home, so off-home nav flips snap instantly
+                  — no re-staggering of items when switching between routes. */}
+              <GlassNav isVisible={navVisible} animated={isHome} />
+            </div>
           </div>
-        </motion.div>
       </header>
 
-      <Hero3D hoverInfo={hoverInfo} navOnly={!isHome} />
+      {/* ── Mobile bottom-dock header + sheet + chapter progress bar ─────
+           Same DOM id (#nav-name-span) lives inside the dock, so the
+           Hero3D mesh's nav target naturally re-anchors to the bottom.
+           Both elements live in a CSS-gated wrapper so SSR and client
+           render the same tree (no hydration mismatch). */}
+      <div className="mobile-only">
+        <ChapterProgressBar />
+        <BottomDock />
+      </div>
+
+      {/* ── WebGL chrome name ─────────────────────────────────────────────
+           Skipped entirely on low-power devices to keep first-paint cheap
+           and avoid WebGL judder on budget phones. */}
+      {renderHero3D && (
+        <Hero3D
+          hoverInfo={hoverInfo}
+          navOnly={!isHome}
+          onVisualReady={() => setHero3DReady(true)}
+        />
+      )}
     </>
   )
 }
