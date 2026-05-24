@@ -974,10 +974,11 @@ export default function CaseStudyPage({ project }: CaseStudyPageProps) {
 
             const visibleCount = Math.max(1, chapter.visibleParagraphs ?? 1)
             const pullQuoteHoisted = Boolean(chapter.pullQuote && chapter.pullQuoteVisible)
+            const calloutHoisted = Boolean(chapter.callout && chapter.calloutVisible)
             const hasExpandContent =
               chapter.paragraphs.length > visibleCount ||
               (chapter.pullQuote && !pullQuoteHoisted) ||
-              chapter.callout ||
+              (chapter.callout && !calloutHoisted) ||
               (chapter.expandImages && chapter.expandImages.length > 0) ||
               (isImpact && chapter.impactText && chapter.impactText.length > 0)
 
@@ -1062,6 +1063,15 @@ export default function CaseStudyPage({ project }: CaseStudyPageProps) {
                   />
                 )}
 
+                {/* Always-visible callout — sits directly under the visible text */}
+                {calloutHoisted && chapter.callout && (
+                  <Callout
+                    title={chapter.callout.title}
+                    body={chapter.callout.body}
+                    accentColor={accent}
+                  />
+                )}
+
                 {/* Before-expand image — always visible, max 1 */}
                 {/* (Skipped when image is the one consumed by the split) */}
                 {chapter.beforeImage && chapter.beforeImage !== splitImage && (
@@ -1109,7 +1119,7 @@ export default function CaseStudyPage({ project }: CaseStudyPageProps) {
                         accentColor={accent}
                       />
                     )}
-                    {chapter.callout && (
+                    {chapter.callout && !calloutHoisted && (
                       <Callout
                         title={chapter.callout.title}
                         body={chapter.callout.body}

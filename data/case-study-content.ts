@@ -54,7 +54,8 @@ export interface CsChapter {
   phoneRow?: CsImage[]         // row of phone screenshots shown always-visible, with accent border
   pullQuote?: CsPullQuote      // inside expandable (or always-visible if pullQuoteVisible)
   pullQuoteVisible?: boolean   // when true, pullQuote renders under the visible text
-  callout?: CsCallout          // inside expandable
+  callout?: CsCallout          // inside expandable (or always-visible if calloutVisible)
+  calloutVisible?: boolean     // when true, callout renders under the visible text
   expandImages?: CsImage[]     // inside expandable, fade in on open
   // Impact chapter only
   impactStats?: CsImpactStat[]
@@ -336,14 +337,18 @@ const maya: CaseStudyContent = {
     },
     {
       label: '06 · The Result',
-      headline: 'Three prototypes, one coherent system.',
+      headline: 'Three prototypes, three phases, one financial case.',
       paragraphs: [
-        'We delivered three linked prototypes as the semester outcome.',
-        'The shared-living matching dashboard is a provider-facing tool for HR. It visualizes current housing compositions, flags imbalances, and surfaces the matching questionnaire flow for incoming trainees. The questionnaire captures language level, country of origin, time already spent in Germany, and a small number of compatibility preferences. From these inputs, the system generates balanced household proposals.',
-        'The maya 1.0 onboarding assistant handles the first phase of a trainee\'s journey — from the period before arrival through the first months of daily life and work. It greets the user by name, in their language. It offers suggested topics based on likely questions at that stage. It handles bureaucratic navigation without requiring the trainee to formulate the question in German.',
-        'The everyday assistant prototype shows the adaptive language shift in practice. The interface language changes incrementally — a German word here, a phrase there — embedded in responses that the user can already understand. The shift is smooth enough that it is never jarring, but deliberate enough that progress accumulates.',
-        'All three prototypes were designed with Liebenau\'s operational constraints as primary constraints, not secondary considerations. Privacy scope is limited to the trainee\'s private context in phase one. The assistant does not touch clinical data, patient information, or medical workflows. Escalation paths to a human are always visible.',
+        'The semester outcome is a three-phase rollout, costed end-to-end. Each phase is a working prototype with its own break-even logic — the deliverable is the case for why an organization should operate it, not just what it looks like.',
+        'Phase 01 is WG-Matching: a provider-facing dashboard that generates balanced household compositions from a six-level matrix of language proficiency and time-in-Germany. Operable on day one, no AI required. Phase 02 is maya 1.0, the onboarding assistant scoped strictly to private-life context — supermarket, transit, bureaucracy — in the trainee\'s native language. Phase 03 is maya 2.0, where the assistant shifts language incrementally toward German and opens a scoped workplace path, separated cleanly from private-life context.',
+        'The financial model resolves four inputs — 1h/week supervisory overhead per trainee, 45 effective working weeks, €35/h fully loaded care-worker cost, and BIBB\'s €6,826 direct cost per dropout — into a per-trainee monthly exposure of €160–€188. That is the price ceiling under which maya is economically additive.',
+        'Market sizing followed the same discipline. TAM: 250,000–300,000 international care workers in Germany. SAM: 80,000–120,000 employed by large Träger where centralized housing and HR systems exist. SOM: 100–300 trainees for the Liebenau pilot. Each phase scales on the same architecture.',
+        'The framing is a model, not a measured outcome. It exists to communicate order-of-magnitude — that the problem is large enough to justify investment at a defensible price point — not to overstate what a semester prototype can prove.',
       ],
+      pullQuote: {
+        text: 'Combined exposure per international trainee, per month: €160 (conservative) to €188 (normal). Anything maya costs to operate below that ceiling pays for itself in avoided cost alone — before any improvement in integration outcomes is counted.',
+      },
+      pullQuoteVisible: true,
       phoneRow: [
         { src: '/images/maya/onboarding1.jpg', alt: 'Onboarding screen 1 — language welcome', aspectRatio: '9/16' },
         { src: '/images/maya/onboarding2.jpg', alt: 'Onboarding screen 2 — topic selection', aspectRatio: '9/16' },
@@ -430,6 +435,7 @@ const remarkt: CaseStudyContent = {
       pullQuote: {
         text: 'Resilience is not improvisation. It is pre-defined operations that stay legible when infrastructure becomes unstable.',
       },
+      pullQuoteVisible: true,
     },
     {
       label: '03 · The Real Problem',
@@ -444,6 +450,7 @@ const remarkt: CaseStudyContent = {
         title: 'Infrastructure branding.',
         body: 'The visual system for re:markt is not designed for marketing — it is designed for orientation and trust. Signage, zoning, and communication in crisis mode must function like public infrastructure: legible at a distance, interpretable under stress, authoritative without being aggressive.',
       },
+      calloutVisible: true,
     },
     {
       label: '04 · The Idea',
