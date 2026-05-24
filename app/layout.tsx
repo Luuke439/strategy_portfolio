@@ -15,11 +15,13 @@ export const metadata: Metadata = {
   title: 'Luke Caporelli — Strategic Design',
   description:
     'M.A. Strategic Design student at HfG Schwäbisch Gmünd. Product strategy and interaction design.',
-  // app/icon.svg is picked up automatically as the browser-tab favicon.
-  // Apple's home-screen icon convention doesn't accept SVG via the file
-  // convention, so point apple-touch-icon at the same SVG here. Modern
-  // iOS Safari renders it; older iOS falls back to a page screenshot.
+  // app/icon.svg is the file-convention favicon. Specifying any key in
+  // metadata.icons (e.g. just `apple`) OVERRIDES the auto-discovery for
+  // the browser-tab <link rel="icon">, so we re-declare `icon` here to
+  // keep both tags present. Apple home-screen also uses the same SVG —
+  // recent iOS Safari renders it, older iOS falls back to a screenshot.
   icons: {
+    icon: '/icon.svg',
     apple: '/icon.svg',
   },
   openGraph: {
