@@ -127,17 +127,9 @@ export default function HeroNameFallback({
         willChange: permanent ? 'opacity' : 'auto',
       }}
     >
-      {/* Mobile: stacked two-line layout. NOT given the mobile-paint class
-          because the hero needs the full text-shadow stack — this is the
-          one element on the page where we trade paint cost for legibility. */}
-      <div className="mobile-only" style={{ textAlign: 'center' }}>
-        <div style={{ ...CHROME, fontSize: 'clamp(3.8rem, 20vw, 6.5rem)' }}>LUKE</div>
-        <div style={{ ...CHROME, fontSize: 'clamp(3rem, 16vw, 5.2rem)', marginTop: '0' }}>
-          CAPORELLI
-        </div>
-      </div>
-
-      {/* Desktop / tablet: single-line layout */}
+      {/* Desktop / tablet only — mobile skips the hero name entirely and
+          leads with the project grid. The wrapper still mounts so the
+          scroll-driven fade machinery doesn't need a viewport branch. */}
       <div
         className="desktop-only"
         style={{ ...CHROME, fontSize: 'clamp(2rem, 5.5vw, 4.5rem)', whiteSpace: 'nowrap' }}

@@ -16,16 +16,25 @@ export default function ProjectGrid({ onProjectHover }: ProjectGridProps) {
   const find = (slug: string) => projects.find((p) => p.slug === slug)!
 
   // ── Mobile: single-column stack ────────────────────────────────────────────
-  // Cards use aspect-ratio instead of a fixed 220px height so they scale with
-  // viewport width — feels right on 360px Galaxy as well as 430px Pro Max.
+  // The grid leads the page on mobile (no hero), so top padding only needs
+  // to clear the iOS notch/status-bar safe area + a small breathing margin.
   // Bottom padding leaves room for the BottomDock to float above content.
+  // Cards use aspect-ratio instead of a fixed 220px height so they scale
+  // with viewport width — feels right on 360px Galaxy as well as 430px Pro Max.
   if (bp === 'mobile') {
     const order = [
       'odo', 'packyourride', 'spotify-dashboard', 'maya',
       'expressive-messaging', 'blend-it', 'resaga', 'remarkt',
     ]
     return (
-      <div style={{ padding: '3rem 1rem 7rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      <div
+        style={{
+          padding: 'calc(env(safe-area-inset-top, 0px) + 1.25rem) 1rem 7rem',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '1rem',
+        }}
+      >
         {order.map((slug, i) => (
           <div key={slug} style={{ aspectRatio: '4 / 5' }}>
             <ProjectCard

@@ -1,9 +1,9 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useState, useCallback } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useMotionValue, useMotionValueEvent, useScroll } from 'framer-motion'
+import { useMotionValue } from 'framer-motion'
 import { useLenis } from 'lenis/react'
 import BottomSheet from './BottomSheet'
 import { useChapterContext } from './ChapterContext'
@@ -30,7 +30,6 @@ export default function BottomDock() {
   const pathname = usePathname()
   const isHome = pathname === '/'
   const lenis = useLenis()
-  const { scrollY } = useScroll()
 
   // ── Chapter data (case-study only) ───────────────────────────────────────
   // Populated by <ChapterTracker> inside CaseStudyPage. On other routes
@@ -40,29 +39,10 @@ export default function BottomDock() {
   const activeChapter = chapterState?.activeChapter ?? 0
   const accentColor = chapterState?.accentColor
 
-  // ── Visibility gating ─────────────────────────────────────────────────────
-  // Mirrors PersistentHeader's logic. On home, dock fades in during the last
-  // 20% of the hero scroll, then stays visible for the rest of the session.
-  // Off-home, dock is always visible.
-  const [vh, setVh] = useState(() =>
-    typeof window !== 'undefined' ? window.innerHeight : 800,
-  )
-  useEffect(() => {
-    const onResize = () => setVh(window.innerHeight)
-    window.addEventListener('resize', onResize, { passive: true })
-    return () => window.removeEventListener('resize', onResize)
-  }, [])
-
-  const [scrolledPast, setScrolledPast] = useState(() => {
-    if (typeof window === 'undefined') return false
-    return window.scrollY > window.innerHeight * 0.8
-  })
-  const dockVisible = !isHome || scrolledPast
-
-  useMotionValueEvent(scrollY, 'change', (v) => {
-    if (!isHome) return
-    if (!scrolledPast && v > vh * 0.8) setScrolledPast(true)
-  })
+  // Dock is always visible on mobile — there's no hero stage to defer to,
+  // so the brand pill and the open-nav affordance lead the page from the
+  // first paint.
+  const dockVisible = true
 
   // ── Pill scroll-to-top behaviour ─────────────────────────────────────────
   const handleNameClick = useCallback((e: React.MouseEvent) => {
@@ -101,11 +81,12 @@ export default function BottomDock() {
 
   return (
     <>
-      {/* ── Pill (State A + B) ───────────────────────────────────────────── */}
-      {/* Visibility is class-driven (`.nav-pill` + .is-visible) so the SSR
-          and client-first-render markup match exactly — Motion's opacity
-          serialization differs between server and client and triggers a
-          hydration mismatch warning otherwise. */}
+      {/* ── Pill (always-on) ─────────────────────────────────────────────── */}
+      {/* Mobile has no hero stage to defer to, so the dock leads the page
+          from first paint — no scroll-to-reveal animation. `.nav-pill` /
+          `.is-visible` remain in the class list so the transition machinery
+          stays available for future use, but with `is-visible` always
+          applied the pill is statically at opacity 1. */}
       <div
         className={`nav-pill${dockVisible ? ' is-visible' : ''}`}
         style={{

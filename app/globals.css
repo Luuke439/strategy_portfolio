@@ -316,16 +316,16 @@ body {
 
 /* ── Hero spacer ─────────────────────────────────────────────────── */
 /* Desktop reserves 115vh of breathing room above the project grid so the
-   3D name has the stage to itself. On mobile that's 1.5 screens of empty
-   pixels — too much. We drop to 100svh (small viewport height — the
-   *minimum* viewport excluding the browser chrome, so the spacer
-   doesn't grow/shrink as the iOS address bar collapses). */
+   3D name has the stage to itself.
+   On mobile we drop the spacer entirely — there's no hero on phones, the
+   project grid leads the page so visitors land directly on the work
+   instead of having to scroll through an empty screen. */
 .hero-spacer {
   height: 115vh;
 }
 @media (max-width: 640px) {
   .hero-spacer {
-    height: 100svh;
+    height: 0;
   }
 }
 
