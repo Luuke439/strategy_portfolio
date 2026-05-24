@@ -22,9 +22,13 @@ export default function ProjectGrid({ onProjectHover }: ProjectGridProps) {
   // Cards use aspect-ratio instead of a fixed 220px height so they scale
   // with viewport width — feels right on 360px Galaxy as well as 430px Pro Max.
   if (bp === 'mobile') {
+    // Mobile-specific order: the three case studies lead, smaller projects
+    // follow. (Desktop keeps its masonry order — that's tuned for the
+    // 12-col grid's visual balance, not for the linear flow of a phone.)
     const order = [
-      'odo', 'packyourride', 'spotify-dashboard', 'maya',
-      'expressive-messaging', 'blend-it', 'resaga', 'remarkt',
+      'odo', 'remarkt', 'maya',
+      'packyourride', 'spotify-dashboard',
+      'expressive-messaging', 'blend-it', 'resaga',
     ]
     return (
       <div
@@ -36,7 +40,12 @@ export default function ProjectGrid({ onProjectHover }: ProjectGridProps) {
         }}
       >
         {order.map((slug, i) => (
-          <div key={slug} style={{ aspectRatio: '4 / 5' }}>
+          // Aspect-ratio 5/4 matches the desktop card aspect (ROW = 20vw,
+          // each card spans 3 cols × 1 row → 25vw × 20vw = 5:4). Using the
+          // same shape on mobile means cover positioning the designer
+          // tuned on desktop continues to frame the subject correctly —
+          // 4/5 portrait was clipping landscape photography from the sides.
+          <div key={slug} style={{ aspectRatio: '5 / 4' }}>
             <ProjectCard
               project={find(slug)}
               onHoverChange={onProjectHover}

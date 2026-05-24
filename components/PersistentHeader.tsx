@@ -11,7 +11,6 @@ import BottomDock from './BottomDock'
 import HeroNameFallback from './HeroNameFallback'
 import { useHoverInfo } from './HoverInfoContext'
 import { useLowPowerDevice, useViewport } from '@/lib/useViewport'
-import ChapterProgressBar from './ChapterProgressBar'
 
 // Hero3D is WebGL — client only, no SSR. Lives in the persistent shell so the
 // <Canvas> and its PMREM env map are built once and reused across routes.
@@ -191,13 +190,12 @@ export default function PersistentHeader() {
           </div>
       </header>
 
-      {/* ── Mobile bottom-dock header + sheet + chapter progress bar ─────
-           Same DOM id (#nav-name-span) lives inside the dock, so the
-           Hero3D mesh's nav target naturally re-anchors to the bottom.
-           Both elements live in a CSS-gated wrapper so SSR and client
-           render the same tree (no hydration mismatch). */}
+      {/* ── Mobile bottom-dock — identical on every route ─────────────────
+           No chapter progress bar, no chapter list inside the sheet — the
+           dock UI stays the same whether the visitor is on the landing
+           page or deep in a case study so the brand affordances don't
+           shift under them. */}
       <div className="mobile-only">
-        <ChapterProgressBar />
         <BottomDock />
       </div>
 

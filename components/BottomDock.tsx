@@ -6,7 +6,6 @@ import { usePathname } from 'next/navigation'
 import { useMotionValue } from 'framer-motion'
 import { useLenis } from 'lenis/react'
 import BottomSheet from './BottomSheet'
-import { useChapterContext } from './ChapterContext'
 
 const FONT = "'TWK Lausanne Pan', system-ui, sans-serif"
 
@@ -31,17 +30,10 @@ export default function BottomDock() {
   const isHome = pathname === '/'
   const lenis = useLenis()
 
-  // ── Chapter data (case-study only) ───────────────────────────────────────
-  // Populated by <ChapterTracker> inside CaseStudyPage. On other routes
-  // state is null and the dock degrades to a plain nav menu.
-  const { state: chapterState } = useChapterContext()
-  const chapters = chapterState?.chapters
-  const activeChapter = chapterState?.activeChapter ?? 0
-  const accentColor = chapterState?.accentColor
-
   // Dock is always visible on mobile — there's no hero stage to defer to,
   // so the brand pill and the open-nav affordance lead the page from the
-  // first paint.
+  // first paint. Identical UI on every route (no chapter integration) so
+  // the brand affordances don't shift under visitors as they navigate.
   const dockVisible = true
 
   // ── Pill scroll-to-top behaviour ─────────────────────────────────────────
@@ -199,14 +191,11 @@ export default function BottomDock() {
         </div>
       </div>
 
-      {/* ── Sheet (State C + D) ──────────────────────────────────────────── */}
+      {/* ── Sheet ────────────────────────────────────────────────────────── */}
       <BottomSheet
         open={sheetOpen}
         onClose={closeSheet}
         sheetY={sheetY}
-        chapters={chapters}
-        activeChapter={activeChapter}
-        accentColor={accentColor}
       />
     </>
   )

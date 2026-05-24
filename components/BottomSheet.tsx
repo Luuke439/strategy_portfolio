@@ -23,20 +23,12 @@ interface BottomSheetProps {
   /** Optional — exposed so the dock can read the drag position if it ever
    *  needs to coordinate (currently unused but kept for future tilt logic). */
   sheetY?: MotionValue<number>
-  /** Chapter labels for case-study scroll-spy. */
-  chapters?: string[]
-  activeChapter?: number
-  accentColor?: string
 }
 
 export default function BottomSheet({
   open,
   onClose,
-  chapters,
-  activeChapter = 0,
-  accentColor = '#0A0A0A',
 }: BottomSheetProps) {
-  const hasChapters = Boolean(chapters && chapters.length > 0)
   const sheetRef = useRef<HTMLDivElement>(null)
 
   // ── Body scroll lock while sheet is open ─────────────────────────────────
@@ -73,16 +65,6 @@ export default function BottomSheet({
       onClose()
     }
     // Snap back is handled by Framer when we don't dismiss.
-  }
-
-  // Smooth scroll a chapter into view, then close. We use the standard
-  // browser scrollIntoView so this works whether or not Lenis is mounted.
-  const jumpToChapter = (i: number) => {
-    const el = document.getElementById(`chapter-${i}`)
-    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    // Defer the close so the scroll has begun before the sheet collapses —
-    // visually it feels like the sheet got out of the way of the destination.
-    setTimeout(onClose, 120)
   }
 
   return (
@@ -167,84 +149,12 @@ export default function BottomSheet({
               />
             </div>
 
-            {/* ── CHAPTERS section (case-study only) ─────────────────── */}
-            {hasChapters && (
-              <section style={{ padding: '1.25rem 1.75rem 0.5rem' }}>
-                <SectionLabel>Chapters</SectionLabel>
-                <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 1.25rem' }}>
-                  {chapters!.map((chapter, i) => {
-                    const isActive = i === activeChapter
-                    return (
-                      <li key={i}>
-                        <button
-                          type="button"
-                          onClick={() => jumpToChapter(i)}
-                          style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.85rem',
-                            width: '100%',
-                            background: 'none',
-                            border: 'none',
-                            padding: '0.85rem 0',
-                            textAlign: 'left',
-                            cursor: 'pointer',
-                            // Subtle separator between chapter rows
-                            borderBottom: i === chapters!.length - 1
-                              ? 'none'
-                              : '1px solid rgba(0,0,0,0.06)',
-                          }}
-                        >
-                          {/* Index — uses accent color when active */}
-                          <span
-                            style={{
-                              fontFamily: FONT,
-                              fontWeight: 500,
-                              fontSize: '0.65rem',
-                              letterSpacing: '0.12em',
-                              color: isActive ? accentColor : '#A0A0A0',
-                              minWidth: '24px',
-                              transition: 'color 0.2s ease',
-                            }}
-                          >
-                            {String(i + 1).padStart(2, '0')}
-                          </span>
-                          {/* Chapter label */}
-                          <span
-                            style={{
-                              fontFamily: FONT,
-                              fontWeight: isActive ? 500 : 400,
-                              fontSize: '0.95rem',
-                              color: isActive ? '#0A0A0A' : '#6B6B6B',
-                              transition: 'color 0.2s ease, font-weight 0.2s ease',
-                              flex: 1,
-                            }}
-                          >
-                            {chapter}
-                          </span>
-                          {/* Active indicator dot */}
-                          {isActive && (
-                            <span
-                              style={{
-                                width: '6px',
-                                height: '6px',
-                                borderRadius: '50%',
-                                background: accentColor,
-                              }}
-                              aria-hidden
-                            />
-                          )}
-                        </button>
-                      </li>
-                    )
-                  })}
-                </ul>
-              </section>
-            )}
-
-            {/* ── Navigate section ──────────────────────────────────── */}
+            {/* ── Nav links ─────────────────────────────────────────────
+                 Identical on every route — visitors get the same brand
+                 affordances whether they're on the landing page or deep
+                 in a case study. (Chapter navigation lives in the
+                 case-study body itself, not the global dock.) */}
             <section style={{ padding: '1.25rem 1.75rem 0.5rem' }}>
-              {hasChapters && <SectionLabel>Navigate</SectionLabel>}
               <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
                 {NAV_LINKS.map((link) => (
                   <li key={link.label}>
@@ -323,24 +233,6 @@ const navItemStyle: React.CSSProperties = {
   fontWeight: 500,
   fontSize: '1.4rem',
   letterSpacing: '-0.01em',
-}
-
-function SectionLabel({ children }: { children: string }) {
-  return (
-    <div
-      style={{
-        fontFamily: FONT,
-        fontWeight: 500,
-        fontSize: '0.62rem',
-        letterSpacing: '0.16em',
-        textTransform: 'uppercase',
-        color: '#A0A0A0',
-        marginBottom: '0.5rem',
-      }}
-    >
-      {children}
-    </div>
-  )
 }
 
 function ChromeLabel({ children }: { children: string }) {
