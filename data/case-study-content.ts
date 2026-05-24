@@ -92,7 +92,7 @@ const odo: CaseStudyContent = {
     strategy:
       'Designed an intent-to-route translation system: rider preferences (scenery, surface, shade, wind, safety) are converted into weighted routing constraints and processed through real environmental APIs. The result is a set of named route profiles, each representing a distinct ride intent, that produce genuinely different loops — not the same route with slight variations. Validated the system with 100+ real cyclists before a single screen was designed.',
     results:
-      'A functional vertical slice prototype using live APIs — OpenRouteService for routing and surface data, Shademap for time-based shade analysis, elevation processing for gradient metrics — proving the pipeline works with real data, not synthetic inputs. Competitive differentiation confirmed through blue ocean strategy analysis against five major tools.',
+      'A functional vertical slice prototype using live APIs — OpenRouteService for routing and surface data, Shademap for time-based shade analysis, elevation processing for gradient metrics — proving the pipeline works with real data, not synthetic inputs. Competitive differentiation confirmed through Blue Ocean strategy analysis against Garmin, Komoot, and Strava.',
   },
   chapters: [
     {
@@ -107,7 +107,7 @@ const odo: CaseStudyContent = {
     },
     {
       label: '02 · What We Found',
-      headline: 'What 100 cyclists actually told us.',
+      headline: 'What 116 cyclists actually told us.',
       paragraphs: [
         'We ran a survey of over 100 cyclists before sketching a single screen. This was not a formality. The survey results fundamentally shaped the direction of the project — and in one case, overturned an assumption we had walked in with.',
         'We assumed cyclists would be roughly split between loop routes and point-to-point. The survey showed a strong preference for loops — routes that return to the start — across all rider types. This is not a small detail. It means the entire routing model needs to generate loops, not paths. Existing tools are built around paths. odo had to be built around loops from the foundation.',

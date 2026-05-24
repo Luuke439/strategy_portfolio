@@ -60,7 +60,7 @@ export const projects: Project[] = [
     challenge:
       "Cyclists don't want the fastest route — they want the right one. Existing tools treat preference as a filter on top of distance optimization. The result is routes that look similar and feel generic.",
     strategy:
-      'Designed a preference-to-route translation system: rider intent (scenery, surface, wind, shade, safety) is converted into weighted API constraints, producing genuinely different loop routes — not the same route with slight variations. Two flows: Quick Start and Custom Ride. Validated against 100+ real cyclists before a single screen was designed.',
+      'Designed an intent-to-route translation system: rider intent (scenery, surface, wind, shade, safety) is converted into weighted API constraints, producing genuinely different loop routes — not the same route with slight variations. Two flows: Quick Start and Custom Ride. Validated against 100+ real cyclists before a single screen was designed.',
     results:
       'A functional vertical slice prototype using live routing, surface, and environmental APIs — proving the system works with real data, not synthetic inputs.',
     keyInsight:
