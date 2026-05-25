@@ -1,6 +1,8 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
+import { AUTHOR } from '@/lib/site'
 
 const FONT = "'TWK Lausanne Pan', system-ui, sans-serif"
 
@@ -77,17 +79,21 @@ function Portrait() {
     aspectRatio: '3 / 4',
     objectFit:   'cover',
     display:     'block',
+    height:      'auto',
   }
   if (failed) {
     return <div style={{ ...frame, backgroundColor: '#E0E0E0' }} aria-hidden />
   }
   return (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img
+    <Image
       src={PORTRAIT_SRC}
       alt="Luke Caporelli"
+      width={520}
+      height={693}
+      sizes="260px"
       onError={() => setFailed(true)}
       style={frame}
+      priority={false}
     />
   )
 }
@@ -259,7 +265,7 @@ export default function AboutPage() {
           <section style={{ marginBottom: '4.5rem' }}>
             <SectionLabel>Contact</SectionLabel>
             <a
-              href="mailto:hello@lukecaporelli.com"
+              href={AUTHOR.emailHref}
               style={{
                 fontFamily:     FONT,
                 fontWeight:     400,
@@ -268,7 +274,7 @@ export default function AboutPage() {
                 textDecoration: 'none',
               }}
             >
-              hello@lukecaporelli.com
+              {AUTHOR.email}
             </a>
           </section>
 

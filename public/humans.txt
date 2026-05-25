@@ -1,0 +1,16 @@
+/* TEAM */
+Designer & Engineer: Luke Caporelli
+Site: https://lukecaporelli.com
+Contact: hello@lukecaporelli.com
+LinkedIn: https://www.linkedin.com/in/lukecaporelli/
+From: Schwäbisch Gmünd, Germany
+
+/* SITE */
+Last update: 2026
+Standards: HTML5, CSS, ES2024
+Components: React 19, Next.js 16, Three.js, Framer Motion, Lenis
+Software: TypeScript, Tailwind CSS v4
+
+/* THANKS */
+HfG Schwäbisch Gmünd — for the years of training that produced the
+thinking behind these projects.

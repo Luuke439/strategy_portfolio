@@ -116,8 +116,13 @@ const LevaPanel = lazy(() => import('./Hero3D.leva').then(m => ({ default: m.Lev
 // R3F sets touch-action/pointer-events directly on gl.domElement (the <canvas>),
 // which overrides CSS on parent divs. We must override it here too.
 // ─────────────────────────────────────────────────────────────────────────────
-function CanvasSetup() {
+function CanvasSetup({ onContextRestored }: { onContextRestored?: () => void }) {
   const { scene, gl } = useThree()
+  // Latest callback in a ref so the listener effect doesn't re-bind on every
+  // parent render.
+  const cbRef = useRef(onContextRestored)
+  cbRef.current = onContextRestored
+
   useEffect(() => {
     scene.background = null
     try { gl.setClearAlpha(0) } catch { /* not ready */ }
@@ -125,6 +130,36 @@ function CanvasSetup() {
     // and page interactivity work normally underneath
     gl.domElement.style.pointerEvents = 'none'
     gl.domElement.style.touchAction = 'none'
+
+    // ── WebGL context loss recovery ───────────────────────────────────────
+    // A lost context flushes every GPU resource: textures, framebuffers, the
+    // PMREM env map, the Text3D geometry buffers. Without explicit handling
+    // the canvas goes black and stays that way. We:
+    //   1. Prevent the default browser action on lost — without preventDefault,
+    //      the context is gone forever. With it, the browser may restore.
+    //   2. On restored: invalidate the renderer so R3F kicks off a render
+    //      (which re-uploads geometry + materials), and call the parent
+    //      callback so it can bump the env-map reload counter.
+    const canvas = gl.domElement
+    const onLost = (e: Event) => {
+      e.preventDefault()
+    }
+    const onRestored = () => {
+      // R3F invalidate triggers a render which uploads geometry to the new
+      // context. The env map, however, was built imperatively via
+      // PMREMGenerator and must be rebuilt — that's what cbRef does.
+      try { gl.compile(scene, gl.getRenderTarget() as never) } catch { /* noop */ }
+      cbRef.current?.()
+    }
+    canvas.addEventListener('webglcontextlost', onLost, false)
+    canvas.addEventListener('webglcontextrestored', onRestored, false)
+    // Note: we deliberately don't touch gl.setAnimationLoop on visibility
+    // change — R3F owns its own rAF loop and the browser already throttles
+    // background tabs to ~1Hz, which is the right floor for our use case.
+    return () => {
+      canvas.removeEventListener('webglcontextlost', onLost, false)
+      canvas.removeEventListener('webglcontextrestored', onRestored, false)
+    }
   }, [scene, gl])
   return null
 }
@@ -183,7 +218,7 @@ function buildNeutralEnv(gl: THREE.WebGLRenderer): THREE.Texture {
   return envMap
 }
 
-function ImageEnv({ intensity, onReady }: { intensity: number; onReady?: () => void }) {
+function ImageEnv({ intensity, onReady, reloadEpoch = 0 }: { intensity: number; onReady?: () => void; reloadEpoch?: number }) {
   const { scene, gl } = useThree()
   // Latest callback in a ref — keeps the load effect dependency-stable so we
   // don't re-trigger PMREM generation when the parent re-renders.
@@ -191,6 +226,10 @@ function ImageEnv({ intensity, onReady }: { intensity: number; onReady?: () => v
   onReadyRef.current = onReady
 
   useEffect(() => {
+    // reloadEpoch in the dep array — bumped on webglcontextrestored so the
+    // PMREM env map is rebuilt against the fresh GL context. Without this,
+    // the chrome stays unlit after a context loss.
+    void reloadEpoch
     // Apply neutral studio env synchronously — guarantees the chrome is lit
     // from frame 0, so we never render black while day.jpg is downloading.
     const neutral = buildNeutralEnv(gl)
@@ -256,7 +295,7 @@ function ImageEnv({ intensity, onReady }: { intensity: number; onReady?: () => v
       if (hdriMap) { hdriMap.dispose(); if (scene.environment === hdriMap) scene.environment = null }
       else { neutral.dispose(); if (scene.environment === neutral) scene.environment = null }
     }
-  }, [scene, gl])
+  }, [scene, gl, reloadEpoch])
 
   useEffect(() => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -285,10 +324,14 @@ interface SceneProps {
   /** When true: text is always at nav position, regardless of scroll.
    *  NameMesh also snaps on every flip of this flag. */
   navOnly: boolean
+  /** Counter bumped on webglcontextrestored. Forces ImageEnv to rebuild
+   *  the PMREM env map against the fresh GL context. */
+  envReloadEpoch?: number
 }
 
 export function SceneBody({
   scrollRef, navRef, accentHoverRef, mousePosRef, onReady, onEnvReady, navOnly,
+  envReloadEpoch,
   geo, mat, lights, anim, stacked,
 }: SceneProps & {
   geo: typeof DEFAULT_GEO | Record<string, number>
@@ -305,7 +348,7 @@ export function SceneBody({
       <directionalLight color="#FFFFFF" intensity={lights.rim as number} position={[0, 1.5, -6]} />
       <directionalLight color="#FFD0A0" intensity={lights.kicker as number} position={[3, -2, -4]} />
       <ambientLight intensity={lights.ambient as number} />
-      <ImageEnv intensity={lights.envIntensity as number} onReady={onEnvReady} />
+      <ImageEnv intensity={lights.envIntensity as number} onReady={onEnvReady} reloadEpoch={envReloadEpoch} />
 
       <Suspense fallback={null}>
         <NameMesh
@@ -660,6 +703,11 @@ export default function Hero3D({ hoverInfo, navOnly, onVisualReady }: Hero3DProp
   // env are ready so the chrome is fully formed on the first visible
   // frame — no gray flash.
   const [envReady, setEnvReady] = useState(false)
+  // Bumped on webglcontextrestored — forces ImageEnv to rebuild the PMREM
+  // env map against the new GL context. Without this, after a context loss
+  // (which happens on tab GPU pressure, Mac sleep/wake, browser settings
+  // changes) the chrome would stay unlit until the user reloads the page.
+  const [envReloadEpoch, setEnvReloadEpoch] = useState(0)
 
   const scrollRef = useRef<number>(navOnly ? 1 : 0)
   const navRef = useRef<{ x: number; y: number } | null>(null)
@@ -826,7 +874,7 @@ export default function Hero3D({ hoverInfo, navOnly, onVisualReady }: Hero3DProp
         }}
         style={{ background: 'transparent', pointerEvents: 'none' }}
       >
-        <CanvasSetup />
+        <CanvasSetup onContextRestored={() => setEnvReloadEpoch((n) => n + 1)} />
         {levaEnabled ? (
           <Suspense fallback={null}>
             <SceneLeva
@@ -838,6 +886,7 @@ export default function Hero3D({ hoverInfo, navOnly, onVisualReady }: Hero3DProp
               onEnvReady={handleEnvReady}
               navOnly={!!navOnly}
               stacked={stacked}
+              envReloadEpoch={envReloadEpoch}
             />
           </Suspense>
         ) : (
@@ -850,6 +899,7 @@ export default function Hero3D({ hoverInfo, navOnly, onVisualReady }: Hero3DProp
             onReady={handleReady}
             onEnvReady={handleEnvReady}
             stacked={stacked}
+            envReloadEpoch={envReloadEpoch}
           />
         )}
         </Canvas>

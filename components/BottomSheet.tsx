@@ -3,6 +3,7 @@
 import { useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { AnimatePresence, motion, MotionValue, useMotionValue, useTransform } from 'framer-motion'
+import { AUTHOR } from '@/lib/site'
 
 const FONT = "'TWK Lausanne Pan', system-ui, sans-serif"
 
@@ -200,7 +201,7 @@ export default function BottomSheet({
                 © 2025 Luke Caporelli
               </span>
               <a
-                href="mailto:hello@lukecaporelli.com"
+                href={AUTHOR.emailHref}
                 style={{
                   fontFamily: FONT,
                   fontWeight: 400,
@@ -209,7 +210,7 @@ export default function BottomSheet({
                   textDecoration: 'none',
                 }}
               >
-                hello@lukecaporelli.com
+                {AUTHOR.email}
               </a>
             </div>
           </motion.div>

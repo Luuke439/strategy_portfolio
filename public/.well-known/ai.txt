@@ -1,0 +1,11 @@
+# Spawning AI opt-in / opt-out signal — https://spawning.ai/ai-txt
+# Site owner has chosen to ALLOW AI training and indexing on all public
+# content as part of a deliberate visibility strategy for a designer
+# portfolio. Per-bot controls live in /robots.txt (explicit user-agents
+# for GPTBot, ClaudeBot, Google-Extended, PerplexityBot, CCBot, etc.).
+
+User-Agent: *
+Allow: /
+
+Contact: hello@lukecaporelli.com
+Last-Modified: 2026-05-25

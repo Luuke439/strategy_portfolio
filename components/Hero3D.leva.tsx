@@ -30,6 +30,8 @@ interface Props {
   navOnly: boolean
   /** Two-line stacked layout — propagated through SceneBody to NameMesh. */
   stacked: boolean
+  /** Forwarded to SceneBody → ImageEnv for context-loss recovery. */
+  envReloadEpoch?: number
 }
 
 export function LevaPanel() {

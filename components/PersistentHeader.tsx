@@ -9,6 +9,7 @@ import { useLenis } from 'lenis/react'
 import GlassNav from './GlassNav'
 import BottomDock from './BottomDock'
 import HeroNameFallback from './HeroNameFallback'
+import Hero3DBoundary from './Hero3DBoundary'
 import { useHoverInfo } from './HoverInfoContext'
 import { useLowPowerDevice, useViewport } from '@/lib/useViewport'
 
@@ -189,10 +190,12 @@ export default function PersistentHeader() {
            Skipped entirely on low-power devices to keep first-paint cheap
            and avoid WebGL judder on budget phones. */}
       {renderHero3D && (
-        <Hero3D
-          hoverInfo={hoverInfo}
-          navOnly={!isHome}
-        />
+        <Hero3DBoundary fallbackVisible={isHome}>
+          <Hero3D
+            hoverInfo={hoverInfo}
+            navOnly={!isHome}
+          />
+        </Hero3DBoundary>
       )}
     </>
   )
