@@ -247,7 +247,7 @@ export const projects: Project[] = [
     type: 'external',
     externalUrl: 'https://resaga.cc',
     year: '2026',
-    tags: [],
+    tags: ['Live Product', 'E-Commerce', 'Solo Built'],
     label: 'Live Product',
     accentColor: '#8B7355',
     category: 'External',
