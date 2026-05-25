@@ -831,12 +831,14 @@ export default function CaseStudyPage({ project }: CaseStudyPageProps) {
             {project.label}
           </span>
 
-          {/* Project name */}
+          {/* Project name. Mobile floor bumped from 2.8rem → 4rem so the
+              title reads as a proper hero on a phone; desktop ceiling
+              unchanged. */}
           <h1
             style={{
               fontFamily: FONT,
               fontWeight: 500,
-              fontSize: 'clamp(2.8rem, 6vw, 5.5rem)',
+              fontSize: 'clamp(4rem, 7vw, 5.5rem)',
               lineHeight: 0.95,
               letterSpacing: '-0.03em',
               color: '#0A0A0A',

@@ -39,20 +39,26 @@ export default function ProjectGrid({ onProjectHover }: ProjectGridProps) {
           gap: '1rem',
         }}
       >
-        {order.map((slug, i) => (
+        {order.map((slug, i) => {
+          const project = find(slug)
           // Aspect-ratio 5/4 matches the desktop card aspect (ROW = 20vw,
           // each card spans 3 cols × 1 row → 25vw × 20vw = 5:4). Using the
           // same shape on mobile means cover positioning the designer
           // tuned on desktop continues to frame the subject correctly —
           // 4/5 portrait was clipping landscape photography from the sides.
-          <div key={slug} style={{ aspectRatio: '5 / 4' }}>
-            <ProjectCard
-              project={find(slug)}
-              onHoverChange={onProjectHover}
-              revealIndex={i}
-            />
-          </div>
-        ))}
+          // Per-project `mobileAspect` overrides the default for covers
+          // (like maya) that were shot vertically.
+          const aspect = project.mobileAspect ?? '5 / 4'
+          return (
+            <div key={slug} style={{ aspectRatio: aspect }}>
+              <ProjectCard
+                project={project}
+                onHoverChange={onProjectHover}
+                revealIndex={i}
+              />
+            </div>
+          )
+        })}
       </div>
     )
   }

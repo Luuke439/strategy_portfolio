@@ -16,6 +16,11 @@ export interface Project {
   coverVideoStart?: number
   coverPosition?: string
   coverFit?: 'cover' | 'contain'
+  /** Optional aspect-ratio override for the mobile project grid card.
+   *  Defaults to '5 / 4' (landscape, matching the desktop card aspect).
+   *  Set to a portrait value like '4 / 5' for projects whose cover
+   *  content was framed vertically. */
+  mobileAspect?: string
   year: string
   tags?: string[]
   label: string
@@ -114,6 +119,10 @@ export const projects: Project[] = [
     type: 'case-study',
     coverVideo: 'cover.mp4',
     coverVideoStart: 0,
+    // Cover video is framed vertically (phone in portrait centred against
+    // a dark backdrop). The default 5/4 landscape mobile card showed too
+    // much bezel — switch to portrait so the phone screen reads at size.
+    mobileAspect: '4 / 5',
     year: '2025',
     tags: ['AI Integration', 'Enterprise', 'Language & Inclusion'],
     label: 'Partner: Stiftung Liebenau',
