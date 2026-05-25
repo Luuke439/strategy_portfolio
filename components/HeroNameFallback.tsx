@@ -90,17 +90,6 @@ export default function HeroNameFallback({
   // content as the user scrolls past the hero. We map scrollY ∈ [0, 60% vh]
   // → opacity ∈ [1, 0], applied imperatively via a ref so the per-frame
   // change never re-renders the React tree.
-  //
-  // IMPORTANT: the scroll handler must only run while the fallback is still
-  // active. If Hero3D fires onVisualReady (or the safety timer expires) and
-  // showFallback flips to false, the state-driven opacity is set to 0 via
-  // React's render — but the imperative scroll handler would fire at scrollY=0
-  // and set opacity back to 1, causing a permanent double-name on desktop.
-  // We use a ref so the stale-closure callback always reads the live value.
-  const showFallback = permanent ? true : (visible && !safetyExpired)
-  const showFallbackRef = useRef(showFallback)
-  showFallbackRef.current = showFallback
-
   const { scrollY } = useScroll()
   const fadeRef = useRef<HTMLDivElement>(null)
   const [vh, setVh] = useState(() =>
@@ -113,10 +102,10 @@ export default function HeroNameFallback({
   }, [])
   const scrollOpacity = useTransform(scrollY, [0, vh * 0.6], [1, 0])
   useMotionValueEvent(scrollOpacity, 'change', (v) => {
-    if (fadeRef.current && showFallbackRef.current) {
-      fadeRef.current.style.opacity = String(v)
-    }
+    if (fadeRef.current) fadeRef.current.style.opacity = String(v)
   })
+
+  const showFallback = permanent ? true : (visible && !safetyExpired)
 
   return (
     <div

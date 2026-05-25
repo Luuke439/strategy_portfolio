@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import dynamic from 'next/dynamic'
-import { useScroll, useMotionValueEvent } from 'framer-motion'
+import { motion, useScroll, useTransform, useMotionValueEvent } from 'framer-motion'
 import { useLenis } from 'lenis/react'
 import GlassNav from './GlassNav'
 import BottomDock from './BottomDock'
@@ -83,6 +83,9 @@ export default function PersistentHeader() {
   // threshold. Both conditions resolve at render time — no effect needed.
   const navVisible = !isHome || scrolledPastThreshold
 
+  // Home-page pill opacity animates with scroll (bidirectional); off-home is 1.
+  const homeOpacity = useTransform(scrollY, [vh * 0.8, vh], [0, 1])
+
   useMotionValueEvent(scrollY, 'change', (v) => {
     if (!isHome) return
     if (!scrolledPastThreshold && v > vh * 0.8) setScrolledPastThreshold(true)
@@ -97,12 +100,6 @@ export default function PersistentHeader() {
     else window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
-  // ── Hero-fallback cross-fade ───────────────────────────────────────────────
-  // The CSS chrome name renders immediately; the 3D mesh fades in on top once
-  // its env map is wired up. We flip this flag from Hero3D's onVisualReady so
-  // the fallback gets out of the way (otherwise we'd see ghosted double-text).
-  const [hero3DReady, setHero3DReady] = useState(false)
-
   // WebGL hero is desktop-only:
   //  - On mobile: phone GPUs strain on the chrome material + HDRI PMREM, and
   //    the bottom-dock layout already uses a CSS chrome treatment for the pill
@@ -114,19 +111,11 @@ export default function PersistentHeader() {
 
   return (
     <>
-      {/* ── CSS chrome hero ──────────────────────────────────────────────
-           Painted immediately so the home hero never flashes empty.
-           On desktop, the WebGL canvas fades in on top once Hero3D signals
-           ready; on mobile (or low-power), the fallback IS the hero and
-           stays put as the permanent visual.
-           Only rendered on home — non-home routes have the brand in the
-           dock pill, so a centered hero would duplicate it. */}
-      {isHome && (
-        <HeroNameFallback
-          permanent={!renderHero3D}
-          visible={!renderHero3D || !hero3DReady}
-        />
-      )}
+      {/* ── CSS chrome hero — low-power / no-WebGL fallback only ───────────
+           On desktop with Hero3D the 3D canvas is the sole hero; no CSS
+           name is needed. On low-power (or mobile without WebGL) there is
+           no canvas, so this permanent CSS name is the final hero visual. */}
+      {isHome && !renderHero3D && <HeroNameFallback permanent />}
 
       {/* ── Desktop top-pill header ─ hidden via CSS on mobile viewports ── */}
       <header
@@ -144,10 +133,7 @@ export default function PersistentHeader() {
           pointerEvents:  'none',
         }}
       >
-          <div
-            className={`nav-pill${navVisible ? ' is-visible' : ''}`}
-            style={PILL}
-          >
+          <motion.div style={{ ...PILL, opacity: isHome ? homeOpacity : 1 }}>
             {/* Invisible name target — the 3D text renders on top via canvas z:110.
                 Pointer events mirror navVisible so the pill is not clickable
                 while it is faded out above the hero. */}
@@ -187,7 +173,7 @@ export default function PersistentHeader() {
                   — no re-staggering of items when switching between routes. */}
               <GlassNav isVisible={navVisible} animated={isHome} />
             </div>
-          </div>
+          </motion.div>
       </header>
 
       {/* ── Mobile bottom-dock — identical on every route ─────────────────
@@ -206,7 +192,6 @@ export default function PersistentHeader() {
         <Hero3D
           hoverInfo={hoverInfo}
           navOnly={!isHome}
-          onVisualReady={() => setHero3DReady(true)}
         />
       )}
     </>
