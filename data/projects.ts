@@ -246,6 +246,7 @@ export const projects: Project[] = [
     shortName: 'resaga',
     type: 'external',
     externalUrl: 'https://resaga.cc',
+    coverVideo: 'cover.mp4',
     year: '2026',
     tags: ['Live Product', 'E-Commerce', 'Solo Built'],
     label: 'Live Product',
