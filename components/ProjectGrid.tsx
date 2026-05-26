@@ -26,9 +26,10 @@ export default function ProjectGrid({ onProjectHover }: ProjectGridProps) {
     // follow. (Desktop keeps its masonry order — that's tuned for the
     // 12-col grid's visual balance, not for the linear flow of a phone.)
     const order = [
-      'odo', 'remarkt', 'maya',
+      'odo', 'remarkt',
       'packyourride', 'spotify-dashboard',
       'expressive-messaging', 'blend-it', 'resaga',
+      'maya',
     ]
     return (
       <div
