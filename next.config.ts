@@ -135,7 +135,7 @@ const nextConfig: NextConfig = {
         source: "/Resume_Luke_Caporelli.pdf",
         headers: [
           { key: "Cache-Control", value: "public, max-age=86400, must-revalidate" },
-          { key: "Content-Disposition", value: 'inline; filename="Resume_Luke_Caporelli.pdf"' },
+          { key: "Content-Disposition", value: 'attachment; filename="Resume_Luke_Caporelli.pdf"' },
         ],
       },
     ];
