@@ -57,11 +57,20 @@ export default function GlassNav({ isVisible = true, animated = true }: GlassNav
                   }
                 : { duration: 0 }
             }
+            // Hover/tap get their OWN spring transition so they stay smooth
+            // regardless of the `animated` entrance flag (off-home sets the
+            // shared transition to duration:0, which made the hover snap).
+            // Pure transform — no `filter` animation, which forced expensive
+            // off-GPU repaints and caused the visible jitter.
             whileHover={{
-              scale:  1.08,
-              filter: 'drop-shadow(0 2px 10px rgba(155,160,180,0.44))',
+              scale:      1.06,
+              transition: { type: 'spring', stiffness: 400, damping: 28 },
             }}
-            whileTap={{ scale: 0.96 }}
+            whileTap={{
+              scale:      0.97,
+              transition: { type: 'spring', stiffness: 500, damping: 30 },
+            }}
+            style={{ transformOrigin: 'center', willChange: 'transform' }}
           >
             {link.external ? (
               <a href={link.href} target="_blank" rel="noopener noreferrer" style={linkStyle}>
