@@ -194,7 +194,7 @@ export default function AboutPage() {
               margin:        '0 0 1.5rem',
               maxWidth:      '40ch',
             }}>
-              Designing what industrial systems should become next, not just the screens on top.
+              Designing what industrial and digital systems should become next, not just the screens on top.
             </h2>
             <div style={{
               fontFamily:    FONT,
@@ -208,6 +208,27 @@ export default function AboutPage() {
               Germany · US Citizen · Open to relocate
             </div>
           </header>
+
+          {/* ── Intro ─────────────────────────────────────────────────── */}
+          <section style={{ marginBottom: '3.5rem' }}>
+            <SectionLabel>Intro</SectionLabel>
+            <p style={{
+              fontFamily: FONT,
+              fontWeight: 300,
+              fontSize:   '0.95rem',
+              color:      '#0A0A0A',
+              lineHeight: 1.8,
+              maxWidth:   '52ch',
+              margin:     0,
+            }}>
+              Hello, I&apos;m Luke. I work where systems thinking meets craft. My background is
+              Digital Product Design and Development, so I think in feasibility
+              and structure, not just screens, and I work closely with engineers
+              from concept to shipped detail. Recently: in-car HMI at
+              Mercedes-Benz and a zero-to-one AI product at Paul Bauder. On the
+              side I build and run Gravelwerk, my own cycling brand, end to end.
+            </p>
+          </section>
 
           {/* ── Experience ────────────────────────────────────────────── */}
           <section style={{ marginBottom: '3.5rem' }}>
