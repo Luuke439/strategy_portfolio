@@ -226,7 +226,9 @@ export default function AboutPage() {
               and structure, not just screens, and I work closely with engineers
               from concept to shipped detail. Recently: in-car HMI at
               Mercedes-Benz and a zero-to-one AI product at Paul Bauder. On the
-              side I build and run Gravelwerk, my own cycling brand, end to end.
+              side I design and ship my own products end to end, like
+              Gravelwerk, using AI as my build partner. I can take an idea from
+              concept to a live product on my own.
             </p>
           </section>
 
