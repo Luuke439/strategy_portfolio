@@ -79,23 +79,19 @@ export default function Home() {
           pointerEvents:  'none',
         }}
       >
-        <motion.span
-          // Gentle float + opacity "breathing" so the cue is easy to spot
-          // without feeling busy. Both tracks share the loop duration, so the
-          // arrow is brightest right as it reaches the bottom of its dip.
-          animate={{ y: [0, 9, 0], opacity: [0.5, 1, 0.5] }}
-          transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}
+        {/* Idle float + opacity breathing — driven by a CSS keyframe
+            (.hero-scroll-arrow) so it reliably runs after hydration. */}
+        <span
+          className="hero-scroll-arrow"
           style={{
             fontFamily: "'TWK Lausanne Pan', system-ui, sans-serif",
             fontWeight: 300,
             fontSize:   '1.6rem',
             color:      'rgba(0,0,0,0.6)',
-            lineHeight: 1,
-            willChange: 'transform, opacity',
           }}
         >
           ↓
-        </motion.span>
+        </span>
       </motion.div>
 
       {/* ── Page flow ────────────────────────────────────────────────────── */}

@@ -455,3 +455,21 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .stagger-reveal .stagger-char { opacity: 1; transform: none; animation: none; }
 }
+
+/* ── Hero scroll-cue arrow ───────────────────────────────────────── */
+/* Idle "float" loop. Pure CSS so it always runs (framer-motion's repeat
+   keyframes didn't reliably start after hydration here). Composited on the
+   GPU via transform + opacity. */
+.hero-scroll-arrow {
+  display: inline-block;
+  line-height: 1;
+  will-change: transform, opacity;
+  animation: hero-arrow-float 2.4s ease-in-out infinite;
+}
+@keyframes hero-arrow-float {
+  0%, 100% { transform: translateY(0);   opacity: 0.5; }
+  50%      { transform: translateY(9px); opacity: 1;   }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-scroll-arrow { animation: none; opacity: 0.6; }
+}
