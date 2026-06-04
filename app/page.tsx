@@ -86,8 +86,8 @@ export default function Home() {
           style={{
             fontFamily: "'TWK Lausanne Pan', system-ui, sans-serif",
             fontWeight: 300,
-            fontSize:   '1.6rem',
-            color:      'rgba(0,0,0,0.6)',
+            fontSize:   '1.4rem',
+            color:      'rgba(0,0,0,0.35)',
           }}
         >
           ↓

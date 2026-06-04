@@ -464,12 +464,12 @@ body {
   display: inline-block;
   line-height: 1;
   will-change: transform, opacity;
-  animation: hero-arrow-float 2.4s ease-in-out infinite;
+  animation: hero-arrow-float 2.8s ease-in-out infinite;
 }
 @keyframes hero-arrow-float {
-  0%, 100% { transform: translateY(0);   opacity: 0.5; }
-  50%      { transform: translateY(9px); opacity: 1;   }
+  0%, 100% { transform: translateY(0);   opacity: 0.75; }
+  50%      { transform: translateY(4px); opacity: 1;    }
 }
 @media (prefers-reduced-motion: reduce) {
-  .hero-scroll-arrow { animation: none; opacity: 0.6; }
+  .hero-scroll-arrow { animation: none; }
 }
