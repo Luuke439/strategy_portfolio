@@ -80,14 +80,18 @@ export default function Home() {
         }}
       >
         <motion.span
-          animate={{ y: [0, 7, 0] }}
-          transition={{ duration: 2.2, repeat: Infinity, ease: 'easeInOut' }}
+          // Gentle float + opacity "breathing" so the cue is easy to spot
+          // without feeling busy. Both tracks share the loop duration, so the
+          // arrow is brightest right as it reaches the bottom of its dip.
+          animate={{ y: [0, 9, 0], opacity: [0.5, 1, 0.5] }}
+          transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}
           style={{
             fontFamily: "'TWK Lausanne Pan', system-ui, sans-serif",
             fontWeight: 300,
-            fontSize:   '1.4rem',
-            color:      'rgba(0,0,0,0.35)',
+            fontSize:   '1.6rem',
+            color:      'rgba(0,0,0,0.6)',
             lineHeight: 1,
+            willChange: 'transform, opacity',
           }}
         >
           ↓
