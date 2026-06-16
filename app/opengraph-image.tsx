@@ -106,32 +106,23 @@ export default async function OpenGraphImage() {
           </span>
         </div>
 
-        {/* ── Hero block: positioning statement + discipline triad ────────── */}
-        <div style={{ display: 'flex', flexDirection: 'column', maxWidth: 1000 }}>
-          <span
-            style={{
-              fontFamily: 'Lausanne',
-              fontWeight: 700,
-              fontSize: 60,
-              lineHeight: 1.06,
-              letterSpacing: '-0.025em',
-              color: '#0A0A0A',
-            }}
-          >
-            Designing what industrial and digital systems should become next, not just the screens on top.
-          </span>
-          <span
-            style={{
-              fontFamily: 'Lausanne',
-              fontWeight: 500,
-              fontSize: 28,
-              letterSpacing: '0.005em',
-              color: '#6b6b6b',
-              marginTop: 26,
-            }}
-          >
-            Product strategy · Interaction design · Systems thinking
-          </span>
+        {/* ── Hero block: discipline triad, stacked ────────────────────────── */}
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          {['Product strategy', 'Interaction design', 'Systems thinking'].map((d) => (
+            <span
+              key={d}
+              style={{
+                fontFamily: 'Lausanne',
+                fontWeight: 700,
+                fontSize: 92,
+                lineHeight: 1.02,
+                letterSpacing: '-0.035em',
+                color: '#0A0A0A',
+              }}
+            >
+              {d}
+            </span>
+          ))}
         </div>
 
         {/* ── Bottom: project chip row + school affiliation ───────────────── */}

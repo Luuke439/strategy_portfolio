@@ -194,7 +194,7 @@ export default function AboutPage() {
               margin:        '0 0 1.5rem',
               maxWidth:      '40ch',
             }}>
-              Designing what industrial and digital systems should become next, not just the screens on top.
+              Product strategy · Interaction design · Systems thinking
             </h2>
             <div style={{
               fontFamily:    FONT,
