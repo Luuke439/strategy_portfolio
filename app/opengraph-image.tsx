@@ -30,11 +30,6 @@ export default async function OpenGraphImage() {
     readFile(join(fontDir, 'TWKLausannePan-400.ttf')),
   ])
 
-  // Chrome gradient stops — pulled from HeroNameFallback so the share preview
-  // reads as a still frame of the actual site hero. Dark stops on light cream.
-  const CHROME_GRADIENT =
-    'linear-gradient(178deg, #5e5e5e 0%, #2a2a2a 22%, #6c6c6c 48%, #1a1a1a 72%, #4a4a4a 100%)'
-
   return new ImageResponse(
     (
       <div
@@ -94,7 +89,7 @@ export default async function OpenGraphImage() {
                 color: '#0A0A0A',
               }}
             >
-              Strategic Design — Portfolio
+              Luke Caporelli · Strategic Design
             </span>
           </div>
 
@@ -111,30 +106,28 @@ export default async function OpenGraphImage() {
           </span>
         </div>
 
-        {/* ── Hero block: name + subtitle ─────────────────────────────────── */}
-        <div style={{ display: 'flex', flexDirection: 'column' }}>
+        {/* ── Hero block: positioning statement + discipline triad ────────── */}
+        <div style={{ display: 'flex', flexDirection: 'column', maxWidth: 1000 }}>
           <span
             style={{
               fontFamily: 'Lausanne',
               fontWeight: 700,
-              fontSize: 168,
-              lineHeight: 0.92,
-              letterSpacing: '-0.045em',
-              backgroundImage: CHROME_GRADIENT,
-              backgroundClip: 'text',
-              color: 'transparent',
+              fontSize: 60,
+              lineHeight: 1.06,
+              letterSpacing: '-0.025em',
+              color: '#0A0A0A',
             }}
           >
-            Luke Caporelli
+            Designing what industrial and digital systems should become next, not just the screens on top.
           </span>
           <span
             style={{
               fontFamily: 'Lausanne',
               fontWeight: 500,
-              fontSize: 30,
-              letterSpacing: '-0.005em',
-              color: '#0A0A0A',
-              marginTop: 18,
+              fontSize: 28,
+              letterSpacing: '0.005em',
+              color: '#6b6b6b',
+              marginTop: 26,
             }}
           >
             Product strategy · Interaction design · Systems thinking

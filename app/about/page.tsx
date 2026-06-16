@@ -248,6 +248,25 @@ export default function AboutPage() {
             ))}
           </section>
 
+          {/* ── Recognition ───────────────────────────────────────────── */}
+          <section style={{ marginBottom: '3.5rem' }}>
+            <SectionLabel>Recognition</SectionLabel>
+            <p style={{
+              fontFamily: FONT,
+              fontWeight: 300,
+              fontSize:   '0.95rem',
+              color:      '#0A0A0A',
+              lineHeight: 1.8,
+              maxWidth:   '52ch',
+              margin:     0,
+            }}>
+              <span style={{ fontWeight: 500 }}>1st place, CodeTheState hackathon 2026</span>{' '}
+              (Heilbronn), out of 40 builders across four public-sector use
+              cases. Hosted by Komm.ONE, Public Makers, and the IPAI
+              Foundation.
+            </p>
+          </section>
+
           {/* ── Collaborations ────────────────────────────────────────── */}
           <section style={{ marginBottom: '3.5rem' }}>
             <SectionLabel>Collaborations</SectionLabel>
