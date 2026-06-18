@@ -933,7 +933,7 @@ export default function CaseStudyPage({ project }: CaseStudyPageProps) {
       )}
 
       {/* ── Body content ──────────────────────────────────────────────── */}
-      <main style={{ paddingTop: 'clamp(1.5rem, 3vh, 2.5rem)', paddingBottom: 'var(--page-bottom)' }}>
+      <main style={{ paddingTop: 'clamp(1.5rem, 3vh, 2.5rem)', paddingBottom: 'clamp(3rem, 7vw, 4.5rem)' }}>
         <div
           className="editorial-width"
           style={{ paddingLeft: 'var(--editorial-px)', paddingRight: 'var(--editorial-px)' }}
@@ -1189,7 +1189,20 @@ export default function CaseStudyPage({ project }: CaseStudyPageProps) {
         if (idx === -1) return null
         const next = caseStudies[(idx + 1) % caseStudies.length]
         if (!next || next.slug === project.slug) return null
-        return <NextCaseBlock next={next} currentAccent={accent} />
+        return (
+          <>
+            <div style={{ padding: '0 var(--editorial-px)' }}>
+              <div
+                style={{
+                  maxWidth: '760px',
+                  margin: '0 auto',
+                  borderTop: '1px solid #E5E5E5',
+                }}
+              />
+            </div>
+            <NextCaseBlock next={next} currentAccent={accent} />
+          </>
+        )
       })()}
 
       {/* ── Footer ────────────────────────────────────────────────────── */}
