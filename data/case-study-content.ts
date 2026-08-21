@@ -42,31 +42,37 @@ export interface CsCallout {
   body: string
 }
 
+// All chapter content is always visible — there is no expand/collapse mechanic.
+// Render order within a chapter: headline → paragraphs (beforeVideo sits after
+// the first paragraph, or beside the headline/paragraphs in split layouts) →
+// inlineImages (anchored between paragraphs) → pullQuote → beforeImage → beforeChart
+// → phoneRow → impactStats → impactText
+// → callout → images → keyTakeaway.
 export interface CsChapter {
   label: string
   headline: string             // supports \n for forced line breaks
   headlineVideoSplit?: boolean // headline + beforeVideo render in a 2-col row (video matches headline height)
-  paragraphs: string[]         // [0..visibleParagraphs) always visible, rest in expandable
-  visibleParagraphs?: number   // how many paragraphs render before the expand (default 1)
-  beforeImage?: CsImage        // shown before the expand toggle (max 1 per chapter)
-  beforeVideo?: CsVideo        // video shown before the expand toggle (always visible)
-  beforeChart?: CsBarChart     // inline bar chart, always visible, uses project accent
-  phoneRow?: CsImage[]         // row of phone screenshots shown always-visible, with accent border
-  pullQuote?: CsPullQuote      // inside expandable (or always-visible if pullQuoteVisible)
-  pullQuoteVisible?: boolean   // when true, pullQuote renders under the visible text
-  callout?: CsCallout          // inside expandable (or always-visible if calloutVisible)
-  calloutVisible?: boolean     // when true, callout renders under the visible text
-  expandImages?: CsImage[]     // inside expandable, fade in on open
+  paragraphs: string[]
+  splitParagraphs?: number     // split layouts only: how many paragraphs sit beside the media (default 1); the rest flow below
+  beforeImage?: CsImage        // primary image slot (max 1 per chapter)
+  beforeVideo?: CsVideo        // primary video slot
+  beforeChart?: CsBarChart     // inline bar chart, uses project accent
+  phoneRow?: CsImage[]         // row of phone screenshots, side by side with accent border
+  inlineImages?: { afterParagraph: number; image: CsImage }[]  // images anchored between paragraphs (afterParagraph is 1-based); standard non-split layout only
+  pullQuote?: CsPullQuote
+  callout?: CsCallout
+  images?: CsImage[]           // additional images at the end of the chapter
   // Impact chapter only
   impactStats?: CsImpactStat[]
-  impactText?: string[]        // inside expandable
-  // Reflection chapter only — always visible
+  impactText?: string[]        // paragraphs rendered after the stat grid
+  // Reflection chapter only
   keyTakeaway?: CsCallout
 }
 
 export interface CaseStudyContent {
   slug: string
-  heroImage: string                        // right-column hero visual
+  heroImage: string                        // right-column hero visual (also used as heroVideo poster)
+  heroVideo?: string                       // optional — replaces the static hero image with a looping video
   opening: { paragraphs: string[] }        // "What this project is really about"
   csr: { challenge: string; strategy: string; results: string }
   ministryQuoteBlock?: { text: string; attribution: string }  // re:markt only, full-width block
@@ -80,39 +86,37 @@ const odo: CaseStudyContent = {
   heroImage: '/images/odo/cover.jpg',
   opening: {
     paragraphs: [
-      'Every major route planning tool works the same way. You enter a start point, a distance, maybe a bike type. The algorithm finds the most efficient path between the constraints. Then it offers you three variations of essentially the same route.',
-      'The problem is not the technology. The problem is the model. These tools treat personalization as a filter applied on top of distance optimization — a layer you add after the route exists. odo inverts this. Rider intent is not a constraint on the route. It is the origin of the route. Scenery, surface, shade, wind, safety — these are not preferences you toggle. They are the inputs from which the route is generated.',
-      'This changes what the system has to do. It is not a routing problem. It is a data translation problem: how do you take a rider\'s intent and convert it into API parameters, weighted signals, and explainable output that a cyclist can actually trust? How do you build something that shows its reasoning — so that when the app says "this is your scenic loop," the rider understands why, and agrees?',
-      'The design challenge was not the interface. It was the pipeline behind the interface — and making that pipeline legible enough to feel like a recommendation, not a black box.',
+      'Every major route planning tool works the same way. You enter a start point, a distance, maybe a bike type. The algorithm finds the most efficient path between the constraints. Then it offers you three variations of the same route.',
+      'The problem is not the technology. It is the model. These tools treat personalization as a filter, a layer you add after the route exists. odo inverts this: rider intent is not a constraint on the route, it is the origin of the route. Scenery, surface, shade, wind, safety. Not preferences you toggle, but the inputs the route is generated from.',
+      'That changes the job. It is not a routing problem, it is a translation problem: turning a rider\'s intent into API parameters, weighted signals, and output a cyclist can verify. The design challenge was never the interface. It was the pipeline behind it, and making that pipeline legible enough to feel like a recommendation instead of a black box.',
     ],
   },
   csr: {
     challenge:
-      'Cyclists don\'t want the fastest route. They want the right one for the kind of ride they\'re in the mood for. Existing tools — Komoot, Strava, Outdooractive, Wikiloc — are technically robust but treat personalization as secondary. None generate genuinely differentiated routes based on rider intent. The output of most planners is minor path variations, not meaningfully different ride experiences.',
+      'Cyclists don\'t want the fastest route. They want the right one for the ride they\'re in the mood for. Existing tools are technically robust but treat personalization as secondary: the output is minor path variations, not meaningfully different rides.',
     strategy:
-      'Designed an intent-to-route translation system: rider preferences (scenery, surface, shade, wind, safety) are converted into weighted routing constraints and processed through real environmental APIs. The result is a set of named route profiles, each representing a distinct ride intent, that produce genuinely different loops — not the same route with slight variations. Validated the system with 100+ real cyclists before a single screen was designed.',
+      'Designed an intent-to-route translation system: rider preferences for scenery, surface, shade, wind, and safety become weighted routing constraints, processed through live environmental APIs. The result is a set of named route profiles that generate genuinely different loops, not one route with slight variations. Grounded in research with 116 cyclists before design began.',
     results:
-      'A functional vertical slice prototype using live APIs — OpenRouteService for routing and surface data, Shademap for time-based shade analysis, elevation processing for gradient metrics — proving the pipeline works with real data, not synthetic inputs. Competitive differentiation confirmed through Blue Ocean strategy analysis against Garmin, Komoot, and Strava.',
+      'A functional vertical slice prototype running on live APIs: OpenRouteService for routing and surface data, Shademap for time-based shade, custom elevation processing for gradients. The pipeline works with real data, not synthetic inputs. Differentiation against Garmin, Komoot, and Strava confirmed through a Blue Ocean analysis.',
   },
   chapters: [
     {
       label: '01 · The Situation',
       headline: 'A market full of tools, none of them personal.',
       paragraphs: [
-        'Cyclists plan rides in two distinct settings. For familiar areas, they rely on memory and habit. For unfamiliar terrain — a new region, a travel destination, a route longer than their usual range — they turn to digital tools. This is where the planning gap lives.',
-        'The tools that exist are built primarily for two use cases: athletic performance tracking and navigation during a ride. Neither is designed for the planning phase, and neither takes the rider\'s intent as a primary input. Komoot offers terrain-type filtering. Strava provides segment data for athletes. Outdooractive aggregates trail information. Wikiloc crowdsources routes from other users. All of them default to the same underlying model: optimize for distance and time, then let the rider filter the results.',
-        'The result is a particular kind of frustration that cyclists describe consistently in our research: the tools give you options, but the options feel arbitrary. You don\'t know why the app chose this route over another. You don\'t know if the "scenic" option is actually scenic, or just labeled that way. You don\'t know how the gradient compares between routes, or which one has the most shade at 10am, or whether the gravel sections are rideable on a road bike.',
-        'Trust requires explanation. The current generation of route planners does not explain.',
+        'Cyclists plan rides in two settings. Familiar terrain runs on memory and habit. For unfamiliar terrain, a new region or a route beyond the usual range, they turn to digital tools. That is where the planning gap lives.',
+        'The existing tools are built for athletic tracking and for navigation during the ride, not for planning. Komoot filters by terrain type, Strava serves segment data to athletes, Outdooractive aggregates trails, Wikiloc crowdsources routes. All of them share the same underlying model: optimize for distance and time, then let the rider filter the results.',
+        'The result is a specific frustration that cyclists described consistently in our research: the tools give you options, but the options feel arbitrary. You don\'t know why the app chose this route, whether the scenic option is actually scenic, or which loop still has shade at 10am. Trust requires explanation. The current generation of route planners does not explain.',
       ],
     },
     {
       label: '02 · What We Found',
       headline: 'What 116 cyclists actually told us.',
       paragraphs: [
-        'We ran a survey of over 100 cyclists before sketching a single screen. This was not a formality. The survey results fundamentally shaped the direction of the project — and in one case, overturned an assumption we had walked in with.',
-        'We assumed cyclists would be roughly split between loop routes and point-to-point. The survey showed a strong preference for loops — routes that return to the start — across all rider types. This is not a small detail. It means the entire routing model needs to generate loops, not paths. Existing tools are built around paths. odo had to be built around loops from the foundation.',
-        'The survey also showed clear hierarchy in what cyclists prioritize: scenery and safety were consistently the top two factors, well above surface type and distance. This held across casual riders, regular athletes, and touring cyclists. The insight was that scenery — something almost no existing tool addresses meaningfully — is not a nice-to-have for cyclists. It is often the reason they ride.',
-        'The nine in-depth interviews added texture to the numbers. Friction points clustered around three moments: before the ride (uncertainty about route quality, gradient, and conditions), during planning (inability to compare routes on the dimensions that actually matter), and route switching (the inability to quickly see how a different intent would change the output without reconfiguring everything from scratch).',
+        'We started with a survey of 116 cyclists and nine in-depth interviews. Not as a formality: the results shaped the direction of the project, and in one case overturned an assumption we had walked in with.',
+        'The overturned assumption: we expected riders to be roughly split between loops and point-to-point routes. Instead, 82 of 116 preferred loops, across every rider type. That is not a small detail. Existing tools are built around paths. odo had to be built around loops from the ground up.',
+        'The priorities were just as clear: scenery and safety ranked highest, well above surface type and distance, for casual riders and athletes alike. Scenery, which almost no existing tool addresses meaningfully, is not a nice-to-have. It is often the reason people ride.',
+        'The interviews added the texture. Friction clusters around three moments: uncertainty about conditions before the ride, the inability to compare routes on the dimensions that matter during planning, and the effort of reconfiguring everything when the ride intent changes.',
       ],
       beforeChart: {
         title: 'Preferred route format',
@@ -124,39 +128,30 @@ const odo: CaseStudyContent = {
           { label: 'Other', value: 4 },
         ],
       },
-      expandImages: [
-        {
-          src: '/images/odo/ch02-brainstorm.png',
-          alt: 'Early concept brainstorming — handwritten exploration of phone UI states spanning emotional registers (Verlangen / desire, Sarkasmus / sarcasm, Frechheit / cheekiness, Schmerzen / pain) and interaction patterns like flipping the phone to symbolize meaning inversion. Wide ideation before narrowing to route-planning.',
-          aspectRatio: '1708/1104',
-        },
-      ],
     },
     {
       label: '03 · The Real Problem',
       headline: 'Profiles over parameters.',
       paragraphs: [
-        'After research, the question was not "what features should we build?" It was "what model of personalization would actually work for this context?"',
-        'We explored three directions. The first was adventure-driven routing — routes selected based on novelty, unexplored territory, discovery. The second was safety-first — routes that explicitly minimize traffic exposure, avoid main roads, and prioritize protected infrastructure. The third was inspiration-driven — routes curated by community input, editorial selection, or social signals.',
-        'All three had appeal. None of them alone captured the dimension that our research consistently surfaced: the ride intent that changes day to day. The same cyclist wants a challenging mountain loop on Saturday and a flat scenic loop after work on Tuesday. A system built around a single persona or a single intent cannot serve them both.',
-        'Route profiles emerged as the strongest answer. A profile is not a set of filters. It is a named intent — Scenic, Safe, Challenging, Balanced — that maps to a specific combination of weighted signals, routing constraints, and avoidance criteria. Switching profiles does not reconfigure a form. It generates a different route from a different premise. The cognitive load stays low. The output stays meaningfully different.',
-        'The key tradeoff we made deliberately: explainability over sophistication. We could have built an opaque scoring system that processed dozens of signals and produced a ranked list. We chose not to. If a rider cannot understand why the app recommended this route, they will not trust it on an unfamiliar ride. The signals we used — shade at a given time, surface type per segment, gradient tier, wind direction — are ones a cyclist can verify. That verifiability is the trust mechanism.',
+        'After research, the question was not which features to build. It was which model of personalization would actually work.',
+        'We explored three directions: adventure-driven routing built on novelty and discovery, safety-first routing that minimizes traffic exposure, and inspiration-driven routing curated by community and editorial input. All three had appeal. None captured what the research kept surfacing: ride intent changes day to day. The same cyclist wants a challenging mountain loop on Saturday and a flat scenic loop after work on Tuesday. A system built around a single intent cannot serve them both.',
+        'Route profiles were the answer. A profile is not a set of filters. It is a named intent, Scenic, Safe, Challenging or Balanced, that maps to its own combination of weighted signals, routing constraints, and avoidance criteria. Switching profiles does not reconfigure a form. It generates a different route from a different premise.',
+        'One tradeoff was deliberate: explainability over sophistication. An opaque scoring system would have been easier to build, but a rider who cannot understand a recommendation will not trust it on an unfamiliar ride. Every signal we use, shade at a given time, surface per segment, gradient, wind direction, is one a cyclist can verify. That verifiability is the trust mechanism.',
       ],
     },
     {
       label: '04 · How It Works',
       headline: 'The pipeline behind the profile.',
       paragraphs: [
-        'The interface is simple. The system behind it is not. The design work that matters here is not the UI — it is the data architecture.',
-        'A route profile is a specification. When a rider selects "Scenic," odo translates that intent into a set of weighted API parameters: maximize shade coverage, prioritize unpaved surface where available, minimize main road exposure, optimize for continuous elevation change rather than flat terrain. These parameters are sent to OpenRouteService, which generates candidate routes against the constraints.',
-        'The raw routing output is then enriched. Shademap processes the route geometry against the current time and date to calculate actual shade coverage — not estimated, but computed from topographic and building data. Elevation data is processed to produce gradient metrics per segment, categorized into four tiers that match how cyclists actually think about climbs. Surface type is extracted from OpenStreetMap data via OpenRouteService and mapped to intelligible labels: paved, gravel, compacted dirt, technical trail.',
-        'Wind is the most behaviorally interesting signal. Cyclists care about wind direction relative to their route, not absolute wind speed. A strong tailwind on the outbound leg and a headwind on the return is a very different experience than the reverse. odo processes wind direction and route geometry together to produce a per-segment visualization: green above the axis for tailwind assistance, red below for headwind resistance. A rider can see, before starting, which sections will feel easy and which will be hard.',
-        'The output of all this processing is not a score. It is a set of labeled, segmented data that the interface displays in plain terms. The system is explaining itself continuously — not as a disclaimer, but as the product.',
+        'The interface is simple. The system behind it is not, and the design work that matters is the data architecture. A route profile is a specification: select Scenic, and odo translates that intent into weighted API parameters. Maximize shade coverage, prioritize unpaved surfaces where available, minimize main road exposure, favor continuous elevation change over flat terrain. OpenRouteService generates candidate routes against those constraints.',
+        'The raw output is then enriched. Shademap computes actual shade coverage for the planned start time from topographic and building data. Elevation becomes per-segment gradient metrics in four tiers that match how cyclists think about climbs. Surface type comes from OpenStreetMap and maps to plain labels: paved, gravel, compacted dirt, technical trail.',
+        'Wind is the most behaviorally interesting signal. Cyclists care about wind direction relative to their route, not absolute speed. A tailwind out and a headwind home is a very different ride than the reverse. odo processes wind direction and route geometry together into a per-segment visualization: green above the axis for tailwind, red below for headwind. A rider can see, before starting, which sections will feel easy and which will hurt.',
+        'The output is not a score. It is labeled, segmented data the interface can show in plain terms. The system explains itself continuously, not as a disclaimer but as the product.',
       ],
       beforeVideo: {
         src: '/videos/odo/ch04-shademap.mp4',
         aspectRatio: '1440/864',
-        alt: 'Shademap demo — shadow progression across Lake Constance / Liechtenstein region over a simulated day',
+        alt: 'Shademap demo: shadow progression across the Lake Constance and Liechtenstein region over a simulated day',
       },
       callout: {
         title: 'Stack',
@@ -166,61 +161,59 @@ const odo: CaseStudyContent = {
     {
       label: '05 · The Idea',
       headline: 'Two flows, real data, live APIs.',
-      visibleParagraphs: 2,
+      splitParagraphs: 2,
       paragraphs: [
-        'We designed two entry flows based on a consistent finding in the interviews: the difference between a rider who has 15 minutes and a rider who wants to spend an hour planning.',
-        'When the rider opens the app, they\'re greeted with three route profiles — each with one loop route, each built around a different set of metrics. Every day, each profile regenerates a fresh route against current conditions. Three profiles, three meaningfully different rides every morning. For the commuter cyclist with five minutes to decide, this is the flow.',
-        'Custom Ride offers full preference control. Onboarding in this flow captures rider type, bike type, specific preferences and avoidances, a time window, and a starting point. From these inputs, odo generates profiles and allows deep comparison before committing. For a cyclist planning a long weekend route in an unfamiliar region, this is the flow.',
-        'The functional prototype validated both flows using live API calls. We were not mocking data or using placeholder responses. Routes were generated from real OpenRouteService queries. Shade coverage was computed by Shademap against real topographic data for the query time. The prototype behaved as a real product would — including edge cases where API constraints produced unexpected route geometries that we had to design around.',
-        'This was the most important form of validation: the pipeline works with real signals, in real places, with real environmental variation. The concept is not theoretical.',
+        'We designed two entry flows for two planning realities the interviews kept describing: the rider with five minutes and the rider who wants to spend an hour.',
+        'Quick Start opens on the three profiles most differentiated for the current moment, each carrying one loop route regenerated daily against live conditions. Three meaningfully different rides every morning, no configuration. This is the five-minute flow.',
+        'Custom Ride is full control. Onboarding captures rider type, bike type, preferences and avoidances, a time window, and a starting point, then generates profiles for deep comparison before committing. This is the flow for planning a long weekend route in an unfamiliar region.',
+        'The prototype validated both flows on live API calls. No mocked data, no placeholder responses: routes came from real OpenRouteService queries, shade from Shademap against real topography for the query time, including edge cases where API constraints produced route geometries we had to design around. The pipeline works with real signals in real places. The concept is not theoretical.',
       ],
       beforeVideo: {
         src: '/videos/odo/ch05-profiles.mp4',
         aspectRatio: '524/1060',
         layout: 'phone',
-        alt: 'Quick Start flow in action — swiping between the three most differentiated route options for the current moment. Switching profiles regenerates the route from a different premise instead of reconfiguring filters.',
+        alt: 'Quick Start flow in action: swiping between the three most differentiated route options for the current moment. Switching profiles regenerates the route from a different premise instead of reconfiguring filters.',
       },
     },
     {
       label: '06 · The Result',
       headline: 'Plan. Navigate. Improve.',
       paragraphs: [
-        'The final product loop has three phases, designed as a continuous cycle rather than a one-shot experience.',
-        'In the plan phase, the rider selects a profile and reviews the route in detail before starting. The detail view presents the key metrics a cyclist uses to make the go/no-go decision: difficulty rating, total distance, elevation gain, estimated duration, and start time. The preview divides the route into segments with per-segment data — weather, surface, gradient — and highlights each segment on the map as the rider scrolls.',
-        'The navigate phase is designed for bike computer handoff. odo is a planning tool, not a turn-by-turn navigation tool — a deliberate scope decision. Cyclists navigate with dedicated devices. odo generates the route; the device runs the ride. This keeps odo focused on what it does well and avoids competing with the hardware category where Garmin and Wahoo have deep advantages.',
-        'The feedback phase is the long-term value driver. Post-ride, the rider can rate segments and adjust preferences. Over time, the profile learns — not through opaque machine learning, but through explicit preference signals that the rider understands and controls. A rider who consistently rates gravel sections poorly will see those sections appear less in future scenic routes. The system shows its reasoning at every step, including in how it updates.',
+        'The product loop has three phases, designed as a cycle rather than a one-shot experience. In the plan phase, the rider reviews the route before committing: difficulty, distance, elevation gain, duration, start time. The preview divides the route into segments with weather, surface, and gradient for each, highlighted on the map as the rider scrolls.',
+        'The navigate phase is a handoff. odo is a planning tool, not turn-by-turn navigation: a deliberate scope decision. odo generates the route, the bike computer runs the ride, and odo never competes with hardware where Garmin and Wahoo have deep advantages.',
+        'The feedback phase drives the long-term value. Post-ride, the rider rates segments and adjusts preferences, and the profile learns through explicit signals the rider controls, not opaque machine learning. Rate gravel sections poorly and they appear less. The profile updates the same way it recommends: visibly.',
       ],
       beforeImage: {
         src: '/images/odo/ch06-flow.webp',
-        alt: 'Main user flow for odo — profile selection on the left, route detail view in the middle, segment-by-segment preview on the right. The three phases of the plan / navigate / improve loop laid out end-to-end.',
+        alt: 'Main user flow for odo: profile selection on the left, route detail view in the middle, segment-by-segment preview on the right.',
         aspectRatio: '2048/1041',
         fullWidth: true,
       },
     },
     {
       label: '07 · What Changed',
-      headline: 'What we validated.',
+      headline: 'The architecture is the differentiation.',
       paragraphs: [
         'The most important thing we validated was not the interface. It was the feasibility of the underlying system.',
       ],
       impactStats: [
-        { number: '100+', description: 'cyclists surveyed before any screen was designed' },
+        { number: '116', description: 'cyclists surveyed before a single screen was designed' },
         { number: '9', description: 'in-depth interviews shaping the core concept' },
         { number: '4', description: 'differentiated route profiles validated with real API data' },
         { number: '3', description: 'live environmental APIs integrated in the functional prototype' },
       ],
       impactText: [
-        'Environmental signals — shade at a given time, surface type per segment, gradient per section, wind direction relative to route geometry — can be sourced from existing APIs, processed without proprietary data, and translated into labels that feel trustworthy in a planning context.',
-        'This matters because the core claim of odo is not "we designed a nicer route planner." It is "we proved that intent-based routing is possible with available data, at consumer scale, without requiring a proprietary data moat." The competitive differentiation is the architecture, not the visual design.',
+        'Shade at a given time, surface per segment, gradient per section, wind relative to route geometry: every signal odo needs can be sourced from existing APIs and translated into labels a rider can trust, without proprietary data.',
+        'That is the core claim. Not a nicer route planner, but proof that intent-based routing works with available data, at consumer scale, without a data moat.',
       ],
       callout: {
         title: 'Blue Ocean differentiation',
-        body: 'odo differentiates on four dimensions that no existing tool addresses simultaneously: intent-based routing (not filter-based), explainability (visible signals, not opaque scores), loop specialization (built around circular routes, not paths), and adaptive profile logic (the system updates based on rider feedback over time).',
+        body: 'odo differentiates on four dimensions no existing tool covers simultaneously: intent-based routing instead of filters, visible signals instead of opaque scores, loops instead of paths, and profiles that adapt to rider feedback over time.',
       },
-      expandImages: [
+      images: [
         {
           src: '/images/odo/ch08-blueocean.webp',
-          alt: 'Blue Ocean Strategy Canvas — odo (purple) compared against Garmin, Komoot, and Strava across six capability axes. odo dominates the Route Planning phase (user profiles, personalized routing, context adaptation) and intentionally scores low on the Navigating phase (live navigation, performance tracking) — a deliberate scope choice to leave hardware navigation to dedicated bike computers.',
+          alt: 'Blue Ocean Strategy Canvas: odo compared against Garmin, Komoot, and Strava across six capability axes. odo dominates the route planning phase and intentionally scores low on live navigation and performance tracking, a deliberate scope choice that leaves navigation to dedicated bike computers.',
           aspectRatio: '2048/1255',
           fullWidth: true,
         },
@@ -230,19 +223,318 @@ const odo: CaseStudyContent = {
       label: '08 · What I Learned',
       headline: 'Control beats automation every time.',
       paragraphs: [
-        'The clearest finding from our research — confirmed repeatedly through interviews — was that cyclists do not want the system to decide for them. They want to understand what the system is doing, adjust it, and trust the output because they can trace it back to their own preferences.',
-        'This pushed us toward explainability as a design principle, not just a feature. Every signal the system uses is visible. Every label is defined. Every recommendation comes with the reasoning behind it. This made the product harder to build — it is technically easier to produce an opaque score — but meaningfully more trustworthy.',
-        'The second reflection is about scope. We made a deliberate decision to build a vertical slice rather than a broad prototype. One city, four profiles, two flows — but with real data, real APIs, and real edge cases. That depth of validation is more useful than a wide prototype that fakes its data.',
+        'The clearest finding across the research: cyclists do not want the system to decide for them. They want to understand what it is doing, adjust it, and trust the output because they can trace it back to their own preferences.',
+        'That pushed explainability from feature to design principle. Every signal is visible, every label defined, every recommendation traceable. Harder to build than an opaque score, and meaningfully more trustworthy.',
+        'The second lesson is scope. A vertical slice, one city, four profiles, two flows, validated deeper than a broad prototype ever could. Depth beats width when the claim you are testing is feasibility.',
       ],
       keyTakeaway: {
         title: 'Explainability is the feature.',
-        body: 'Personalization only works when users understand why the system made its recommendation. The pipeline is the product — the interface is how you make the pipeline legible.',
+        body: 'Personalization only works when users understand why the system recommends what it does. The pipeline is the product. The interface is how you make it legible.',
       },
     },
   ],
 }
 
-// ── maya ──────────────────────────────────────────────────────────────────────
+// ── re:markt ──────────────────────────────────────────────────────────────────
+
+const remarkt: CaseStudyContent = {
+  slug: 'remarkt',
+  heroImage: '/images/remarkt/cover.jpg',
+  opening: {
+    paragraphs: [
+      'This is not a product design project. It is an operating system for a building most people have never thought of as a system at all. The supermarket is critical infrastructure that was never designed to fail gracefully. re:markt asks: what if it was?',
+      'The design challenge was operational, not visual: a store that stays legible and enforceable for staff, customers, and logistics partners when the usual infrastructure is gone. Fair distribution not as an intention, but as a rule that holds without power, without internet, and with a crowd that is scared.',
+      'The answer is not a generator. It is a prepared switch: a second operating mode built into the store from the start.',
+    ],
+  },
+  csr: {
+    challenge:
+      '95% of German supermarkets stop operating within four hours of a power outage; only 5% have backup generators. There is no standardized crisis mode: no distribution logic, no allocation rules, no plan for when normal operations collapse. What remains is improvisation under pressure, which means chaos.',
+    strategy:
+      'Designed a dual-mode operating system built into the store from the start. Normal mode: standard retail. Crisis mode: floor converts to storage and distribution, a token-based issuance system replaces queuing, and a standardized re:box unit travels unchanged from producer to household across five distribution channels.',
+    results:
+      'Selected for the HfG exhibition. Invited to present at the Baden-Württemberg Ministry of Food, Rural Affairs and Consumer Protection, a direct policy context. The Ministry endorsed the work in writing.',
+  },
+  ministryQuoteBlock: {
+    text: 'The projects arrived at extremely compelling, practically relevant results. The works have given us valuable impulses and opened fresh perspectives for our thinking and action with regard to strengthening societal resilience.',
+    attribution: 'Baden-Württemberg Ministry of Food, Rural Affairs and Consumer Protection',
+  },
+  chapters: [
+    {
+      label: '01 · The Situation',
+      headline: 'A system optimized for stability, not adaptability.',
+      paragraphs: [
+        'In normal conditions, supermarkets are extraordinarily efficient: lean inventory, just-in-time logistics, optimized shelf space. That efficiency is exactly the problem. It leaves no slack for disruption.',
+        'Power loss, supply chain interruption, or panic buying can break operations within hours. 89% of German households rely on supermarkets as their primary food source, so when stores stop functioning, even temporarily, the social consequences are immediate and disproportionate.',
+        'The gap is not a supply problem. It is a governance problem: no predefined crisis mode, no standardized logic for allocating goods under scarcity. Without rules, staff improvise. Improvisation under pressure produces chaos, and chaos costs the one thing a crisis needs most: trust.',
+      ],
+    },
+    {
+      label: '02 · What We Found',
+      headline: 'Where the current system breaks.',
+      paragraphs: [
+        'We analyzed how the system fails along three dimensions: energy, cold chain, and human behavior. Each revealed a different layer of the same problem.',
+        'Energy failure is the most visible, but it is the trigger, not the cause. When power goes out, refrigeration fails first, then checkout, then communication. Staff lose the tools to manage demand. Customers, uncertain what will be available or for how long, default to panic: buying more than they need, arriving earlier, staying longer.',
+        'Cold chain failure compounds this. Perishables become unsellable within hours, so a store that enters a crisis with full shelves quickly holds less usable product than it appears to. The visible abundance is a liability.',
+        'Human behavior is the layer most easily overlooked. People behave predictably under scarcity: they hoard, they queue, they compete. A store without allocation rules has no mechanism to counter this. "First come, first served" is not a distribution strategy. It is the absence of one.',
+      ],
+      pullQuote: {
+        text: 'Resilience is not improvisation. It is pre-defined operations that stay legible when infrastructure becomes unstable.',
+      },
+    },
+    {
+      label: '03 · The Real Problem',
+      headline: 'Three things that had to be true at once.',
+      paragraphs: [
+        'The concept had to work under three conditions at once: limited energy, high and unpredictable demand, and staff under severe stress. Anything that required extensive training, complex technology, or new infrastructure to activate was not a solution. It was a dependency.',
+        'Three non-negotiables followed. First: fair distribution must be explainable. Allocation rules have to be simple enough that a customer understands them before entering the store, because rules that require interpretation get contested, and contested rules under stress create conflict.',
+        'Second: the system must survive without digital infrastructure. QR codes and NFC tokens work offline, and paper fallbacks exist for everything digital.',
+        'Third: compatibility with existing logistics standards. Custom packaging or rebuilt distribution infrastructure would make the concept undeployable at scale. The re:box had to fit into what already exists.',
+      ],
+    },
+    {
+      label: '04 · The Idea',
+      headline: 'A store that operates in two modes.',
+      paragraphs: [
+        're:markt is a normal supermarket that contains, within its existing footprint, a fully operational crisis distribution system. Activating it requires no external resources and no emergency decisions. It requires executing a plan that was already made.',
+        'In normal mode, the store works like any supermarket: open shelving, free movement, standard checkout.',
+        'In crisis mode, the transformation is physical and operational at once. Community and waiting areas expand at the perimeter, the sales floor shrinks toward the center, and storage grows to receive incoming re:boxes. Signage switches from advertising to orientation: what is available, in what quantity, and how it will be distributed.',
+        'The transition is not an emergency response. It is a mode change, like a building switching into its fire evacuation protocol. Except this one can hold for days, not minutes.',
+      ],
+      beforeImage: {
+        src: '/images/remarkt/ch04-floorplan.png',
+        alt: 'Floor plan in normal and crisis mode. Two stacked diagrams: in normal mode the sales floor dominates the middle, with community area on top and storage below. In crisis mode the proportions invert: community area expands, the sales floor shrinks to a sliver, and storage grows to receive incoming re:boxes.',
+        aspectRatio: '5478/2400',
+        fullWidth: true,
+      },
+      callout: {
+        title: 'Infrastructure branding.',
+        body: 'The visual system is not designed for marketing. It is designed for orientation and trust: signage, zoning, and communication in crisis mode work like public infrastructure, legible at a distance, interpretable under stress, authoritative without being aggressive.',
+      },
+    },
+    {
+      label: '05 · How It Works',
+      headline: 'Three mechanisms that make it enforceable.',
+      paragraphs: [
+        'A good concept is not enough. The system has to be operable by real staff, under real stress, without specialized equipment. Three mechanisms carry that load.',
+        'The re:box is a standardized unit that stays identical from producer to household: fixed dimensions, fixed weight, fixed contents. The producer packs it, the warehouse stores it, the store hands it over, the household carries it home. Keeping the unit stable across every handoff removes the failure points that appear when packaging changes between stages. Staff count boxes without opening them; households receive a predictable quantity.',
+        'Token-based issuance replaces "first come, first served." Each household receives a QR or NFC token and a pickup window: everyone with a token has guaranteed access, so there is no advantage to arriving early. Queue dynamics collapse, and staff control throughput predictably.',
+        'Zoning divides the space into entry, waiting, handoff, and exit, with controlled transitions between them. It shields staff from full crowd pressure and prevents the compression that leads to conflict. The markings are tape and signage, deployable in under thirty minutes.',
+      ],
+    },
+    {
+      label: '06 · The Result',
+      headline: 'Five ways to reach a household.',
+      paragraphs: [
+        'A single store cannot serve a whole neighborhood in a crisis. re:markt is not one point of distribution but the anchor of a network that uses existing infrastructure wherever possible.',
+        'The Hub is the operational center: it receives re:boxes, manages inventory, and dispatches to the other channels. Click & Collect lets households pre-order and pick up their re:box in a set time window without entering the full store.',
+        'Delivery brings re:boxes directly to households, prioritizing people with limited mobility, the elderly, and families with small children: those least equipped to navigate a crowded store in a crisis. Pop-Up stations, vehicle-based, cover neighborhoods without a Hub nearby.',
+        'DHL Station uses Germany\'s existing network of automated parcel lockers to distribute re:boxes without any additional staffing. A household picks up a re:box the way it picks up any parcel.',
+        'The channels activate selectively, not all at once. A local outage might need only Hub and Click & Collect. A regional failure activates all five.',
+      ],
+      beforeImage: {
+        src: '/images/remarkt/ch06-channels.png',
+        alt: 'Five distribution channels arranged around the re:markt Hub: Click & Collect, Delivery, Pop-Up Store, and DHL Station. The Hub handles central distribution, storage, and coordination across all channels.',
+        aspectRatio: '1300/2067',
+      },
+    },
+    {
+      label: '07 · What Changed',
+      headline: 'What the numbers say.',
+      paragraphs: [
+        'The expected impact is predictability.',
+      ],
+      impactStats: [
+        { number: 'Up to 80%', description: 'energy demand reduction in crisis mode' },
+        { number: '4,000→800', description: 'kWh stepped down while staying operational' },
+        { number: '5', description: 'distribution channels designed and specified' },
+        { number: '89%', description: 'of German households rely on supermarkets as their primary food source' },
+      ],
+      impactText: [
+        'Clear allocation rules reduce conflict. Energy prioritization keeps critical systems running. Standardized logistics removes the fragile handoffs that break when packaging or process changes between stages.',
+        'The behavioral effect matters as much as the operational one. When people know what they can get, in what quantity, and when, panic behavior shifts to planning behavior. Crowds stabilize, pressure on staff drops, and trust in the supply system holds at exactly the moment it is most at risk.',
+      ],
+    },
+    {
+      label: '08 · What I Learned',
+      headline: 'The interface was never the screen.',
+      paragraphs: [
+        'I came into this project expecting to design an interface. I left it having designed a governance system.',
+        'In a crisis, the interface is the rules: how decisions are made, by whom, under what authority, with what fallback. The most important design work was the logic behind the token system, the zoning protocol, and the re:box specification. Getting those right gave the visual layer something real to communicate.',
+        'The AI-generated concept film for the exhibition taught a second lesson: generative tools did not find the narrative, they executed one we had already built.',
+      ],
+      keyTakeaway: {
+        title: 'Rule clarity is UX.',
+        body: 'When infrastructure fails, UX becomes operational governance: clear modes, enforceable rules, communication that holds under stress.',
+      },
+    },
+  ],
+}
+
+// ── Staedtler ─────────────────────────────────────────────────────────────────
+
+const staedtler: CaseStudyContent = {
+  slug: 'staedtler',
+  heroImage: '/images/staedtler/cover.jpg',
+  heroVideo: '/videos/staedtler/hero.mp4',
+  opening: {
+    paragraphs: [
+      'Pick a lane, commit, defend it: that is how brands usually answer pressure. This case study asks what happens if Staedtler refuses to choose a lane at all.',
+      'A synthesis of eight global futures reports surfaced one throughline across every domain we looked at: AI takes over routine work, the world fractures into isolated blocks, and in parallel a hunger grows for things that are real, made by hand, and present. Not nostalgia. A reaction to what is being lost right now.',
+      'The conclusion: authenticity is becoming the hardest currency a brand can hold. People are not buying a pen anymore, they are buying a reason to choose this one. For Staedtler, that reason is creativity: the one part of the brand that survives every version of the future, expressed in two directions that pull against each other and are both completely real.',
+    ],
+  },
+  csr: {
+    challenge:
+      "Staedtler's core business is shrinking as pen and paper lose ground to tablets, apps, and AI, while its own digital push, Noris Digital, never found its footing. Price pressure from cheap manufacturing squeezes every category at once, and the brand cannot say clearly what it stands for beyond school and office.",
+    strategy:
+      'Reframed the crisis as a question of range, not survival: how does Staedtler protect its analog identity while still opening the markets of tomorrow. The answer is a single brand core, creativity, expressed in two honest, opposite registers: goal-driven Fast Lane creativity and process-driven Slow Lane creativity. Neither is a compromise of the other.',
+    results:
+      'A dual product concept framed as a fictional Staedtler campaign launching in 2042. Mars Note, a Fast Lane device, turns a sticky note wall into a live shared workspace; Mars Mind, a Slow Lane device, holds sketching, journaling, and meditation with nothing else competing for attention. A three horizon roadmap carries both lanes from a 2026 portfolio reset to the 2042 launch.',
+  },
+  chapters: [
+    {
+      label: '01 · The Situation',
+      headline: 'A brand squeezed from every direction.',
+      paragraphs: [
+        'Four pressures, none of them hypothetical. The core business is shrinking: pen and paper lose ground every year to tablets, apps, and generative AI, and the losses are structural, not cyclical.',
+        'The digital answer failed. Noris Digital, Staedtler\'s own attempt to cross over, stayed too tentative to change the trajectory.',
+        'Price pressure hits every category at once. Cheap manufacturing out of Asia keeps undercutting the Made in Germany premium, and customers who see no reason to pay more simply do not.',
+        'The quietest problem is the most damaging: nobody can say what Staedtler stands for. The brand reads as traditional rather than contemporary, and its profile never leaves the classroom or the office desk. Heritage without a stance is just history.',
+      ],
+    },
+    {
+      label: '02 · What We Found',
+      headline: 'What the future actually says about creativity.',
+      paragraphs: [
+        'Instead of guessing at trends, we read the trends other people are already paid to find. Eight global futures reports went into the synthesis, spanning brands, technology, geopolitics, society, identity, economy, and consumption.',
+        'One image kept repeating across unrelated domains. Work becomes automated, always on, interchangeable. Identity fragments into isolation and burnout. The world splits into blocks that trade less and guard more. Every report describes a version of the same discomfort: people feel unheard, replaceable, and quietly exhausted by a life mediated through screens.',
+        'Against that, a second pattern showed up just as consistently, usually in the same reports, a few pages later. A pull toward the handmade, the slow, the unplugged. People want to breathe, reflect, touch something real, be present without an audience. Not a rejection of technology so much as a correction to how much of life it has already taken.',
+        'Put together, the two patterns describe the same person at two different moments of their day: efficient and outsourcing when it counts, deliberately slow and hands on when it does not. A brand built for only one of those moments is only half relevant.',
+      ],
+      inlineImages: [
+        {
+          afterParagraph: 2,
+          image: {
+            src: '/images/staedtler/ch02-discomfort-moodboard.png',
+            alt: 'Moodboard of the automation-era discomfort: scenes labeled Replaceable, Always-On, Burnout, Unheard, Isolated, and Automated',
+            aspectRatio: '1793/888',
+            fullWidth: true,
+          },
+        },
+        {
+          afterParagraph: 3,
+          image: {
+            src: '/images/staedtler/ch02-counterpull-moodboard.png',
+            alt: 'Moodboard of the counter-movement toward the handmade and present: scenes labeled Handmade, Pause, Breathe, Reflect, Unplug, Hands-on, Presence, and Touch',
+            aspectRatio: '1792/889',
+            fullWidth: true,
+          },
+        },
+      ],
+      callout: {
+        title: 'Reports synthesized',
+        body: 'McKinsey & Company, World Health Organization, Deloitte, World Economic Forum, Atlantic Council, Bruegel, IPCC, RANE.',
+      },
+    },
+    {
+      label: '03 · The Real Problem',
+      headline: 'One brand core, two honest expressions.',
+      paragraphs: [
+        'The question stopped being what should Staedtler build and became what is Staedtler actually for. Every audit, every workshop, every trend cluster kept circling back to the same word: creativity.',
+        'Creativity is not one thing, though. It splits into two opposite modes. One is goal-driven and output-oriented: ideas exist to solve a defined problem, fast, often with AI in the loop. The other is open and searching, with no fixed target: the point is the process, thinking through hand and material, not what comes out of it.',
+        'Both are genuinely Staedtler, and neither one is a compromise. A brand that only serves goal-driven creativity abandons the half of its audience that draws, journals, and doodles for no reason at all. A brand that only serves open-ended creativity has nothing to say to a team shipping on a deadline.',
+      ],
+      inlineImages: [
+        {
+          afterParagraph: 2,
+          image: {
+            src: '/images/staedtler/ch03-brand-core-diagram.png',
+            alt: 'Brand-core diagram: Creativity at the center, splitting into Outcome (Productivity, Goals, Tasks, Structure) and Experience (Mindfulness, Freedom, Possibilities, an end in itself)',
+            aspectRatio: '1699/807',
+          },
+        },
+      ],
+      pullQuote: {
+        text: 'How does Staedtler protect its analog identity and still open the markets of tomorrow?',
+      },
+    },
+    {
+      label: '04 · The Idea',
+      headline: 'Two lanes, one origin, launching in 2042.',
+      paragraphs: [
+        'The concept is framed as a fictional Staedtler campaign launching in 2042: far enough out that the brand has had time to grow past pens and pencils, and to grow past its German-speaking home market into a global one.',
+        'Fast Lane carries Intentional Creativity: efficient, structured, built for people who think in teams and deadlines. Slow Lane carries Explorative Creativity: unhurried, personal, built for people who think alone and without a clock running. Each lane gets its own product, its own typeface, its own color world, and its own reason to exist, but both trace back to the same brand core.',
+        'Fast Lane grows outward, into new markets and new industries. Slow Lane grows inward, into a single person\'s daily rhythm. Staedtler does not have to choose which direction it expands in, because both directions start from the same place.',
+      ],
+    },
+    {
+      label: '05 · Fast Lane',
+      headline: 'Mars Note: a wall\nthat thinks with the team.',
+      paragraphs: [
+        'Mars Note is built for teams that think analog and need to deliver digital. Small light units clip onto a wall. An infrared scan reads every sticky note in real time, and a pico laser projector throws the result back onto the wall, so remote colleagues see the same board live without anyone retyping a single line.',
+        'The handwriting never becomes someone\'s job to transcribe. The wall stays a wall, the sticky note stays a sticky note, and only the result quietly travels into Miro, Word, or Notion in the background.',
+        'Guided Workshops brings dozens of proven methods, from How Might We to Crazy 8s, directly onto the wall. Digital Capture keeps the board scrollable and searchable long after the sticky notes come down. Remote Co-Work lets a colleague who never entered the room point, comment, and move notes with the same authority as someone standing at the wall.',
+        'Mars Note is designed to grow outward. Method packs can be built for whole industries, from automotive to fintech, opening up a software business Staedtler has never had before.',
+      ],
+      images: [
+        {
+          src: '/images/staedtler/ch05-fastlane-branding.png',
+          alt: 'Fast Lane branding board for Mars Note: blue palette, GT America typeface, and product, mechanism, and packaging renders',
+          aspectRatio: '1920/1080',
+          fullWidth: true,
+        },
+      ],
+    },
+    {
+      label: '06 · Slow Lane',
+      headline: 'Mars Mind: built to not compete for attention.',
+      paragraphs: [
+        'Mars Mind is the opposite device on purpose. It does sketching, journaling, and guided meditation, nothing else, and nothing can be bought or added to change that. Where Mars Note grows outward into the market, Mars Mind grows inward into one person, learning their rhythm the longer they use it.',
+        'Picture an evening after work. The door closes, and the reflex is the phone, the feed, the slow sinking into someone else\'s scroll. Mars Mind interrupts that reflex with one projected question: what moved you today. An hour later, the notebook is full and the phone was never touched.',
+        'Every function is projected onto paper or a blank surface, so the hands stay busy and the eyes stay off a screen. Entries sync encrypted, and unlike Mars Note they stay private by default.',
+      ],
+      images: [
+        {
+          src: '/images/staedtler/ch06-slowlane-branding.png',
+          alt: 'Slow Lane branding board for Mars Mind: ochre palette, GT Super typeface, and product, pencil-heritage, and packaging renders',
+          aspectRatio: '1920/1080',
+          fullWidth: true,
+        },
+      ],
+    },
+    {
+      label: '07 · What Changed',
+      headline: 'What has to be true for this to work.',
+      paragraphs: [
+        'The relevance case rests on capabilities Staedtler already has, just never pointed in this direction.',
+      ],
+      impactStats: [
+        { number: '8', description: 'global futures reports synthesized into one throughline' },
+        { number: '2', description: 'lanes, one shared brand core, no compromise between them' },
+        { number: '3', description: 'roadmap horizons from 2026 to 2042' },
+        { number: '2042', description: 'the fictional year Mars Note and Mars Mind launch' },
+      ],
+      impactText: [
+        'Staedtler already has decades of material and manufacturing expertise and already serves students, professionals, and hobbyists at once. Until now that range was treated as heritage. Here it becomes strategy: the counter-movement to digitization, built the way only Staedtler can build it.',
+        'The roadmap moves in three horizons. 2026 to 2032: the portfolio narrows and both lanes launch quietly, starting with workshop cases and journaling sets. 2032 to 2038: the campaign claim Embrace Ambivalence becomes the brand\'s single voice, and an app ecosystem gets tested. 2038 to 2042: Mars Note and Mars Mind launch, backed by a campaign film, and Staedtler stands as a global two lane brand.',
+      ],
+    },
+    {
+      label: '08 · What I Learned',
+      headline: 'The answer to the question we started with.',
+      paragraphs: [
+        'The question we framed the project around was how Staedtler keeps its analog identity while still reaching the markets of tomorrow. The answer: it stops being either or. Fast and slow are not opposing bets, they are the same brand core pointed in two directions.',
+        'The harder lesson was about restraint. It would have been easy to give Mars Mind more features, more integrations, more reasons to open an app. The device only works because it refuses all of that, and holding that restraint against every instinct to add value was the actual design work.',
+        'This is one possible path, not the only one. What it shows is what becomes possible once Staedtler treats its range as strategy instead of heritage.',
+      ],
+      keyTakeaway: {
+        title: 'Creativity is the part that survives every future.',
+        body: 'Fast or slow, digital or analog, Staedtler does not have to choose. Both are genuinely the brand, and both are what carries it forward.',
+      },
+    },
+  ],
+}
 
 const maya: CaseStudyContent = {
   slug: 'maya',
@@ -287,7 +579,6 @@ const maya: CaseStudyContent = {
         text: 'On paper the language level often fits. But in the daily work reality, you notice it\'s not enough.',
         attribution: 'Interview, Stiftung Liebenau care coordinator',
       },
-      pullQuoteVisible: true,
     },
     {
       label: '03 · The Real Problem',
@@ -348,7 +639,6 @@ const maya: CaseStudyContent = {
       pullQuote: {
         text: 'Combined exposure per international trainee, per month: €160 (conservative) to €188 (normal). Anything maya costs to operate below that ceiling pays for itself in avoided cost alone — before any improvement in integration outcomes is counted.',
       },
-      pullQuoteVisible: true,
       phoneRow: [
         { src: '/images/maya/onboarding1.jpg', alt: 'Onboarding screen 1 — language welcome', aspectRatio: '9/16' },
         { src: '/images/maya/onboarding2.jpg', alt: 'Onboarding screen 2 — topic selection', aspectRatio: '9/16' },
@@ -389,146 +679,9 @@ const maya: CaseStudyContent = {
   ],
 }
 
-// ── re:markt ──────────────────────────────────────────────────────────────────
-
-const remarkt: CaseStudyContent = {
-  slug: 'remarkt',
-  heroImage: '/images/remarkt/cover.jpg',
-  opening: {
-    paragraphs: [
-      'This is not a product design project. It is an operating system for a building that most people have never thought of as a system at all. The supermarket is critical infrastructure — but it was never designed to fail gracefully. re:markt asks a different question: what if it was?',
-      'The design challenge was not visual. It was operational: how do you build a store that stays legible and enforceable under stress — for staff, for customers, for logistics partners — when the usual infrastructure is gone? How do you make "fair distribution" not just an intention but a rule that holds when there is no power, no internet, and a crowd that is scared?',
-      'The answer is not a generator. It is a prepared switch — a second operating mode baked into the store from the start.',
-    ],
-  },
-  csr: {
-    challenge:
-      '95% of German supermarkets can only operate for 2–4 hours during a power outage. Only 5% have backup generators. There is no standardized crisis mode — no distribution logic, no allocation rules, no plan for when normal operations collapse. The result is improvisation under pressure, which means chaos.',
-    strategy:
-      'Designed a dual-mode operating system built into the store from the start. Normal mode: standard retail. Crisis mode: floor converts to storage and distribution, a token-based issuance system replaces queuing, and a standardized re:box unit travels unchanged from producer to household across five distribution channels.',
-    results:
-      'Presented at HfG exhibition. Invited to present at the Baden-Württemberg Ministry of Food, Rural Affairs and Consumer Protection — a direct policy context. Ministry endorsed the work in writing.',
-  },
-  ministryQuoteBlock: {
-    text: 'The projects arrived at extremely compelling, practically relevant results. The works have given us valuable impulses and opened fresh perspectives for our thinking and action with regard to strengthening societal resilience.',
-    attribution: 'Baden-Württemberg Ministry of Food, Rural Affairs and Consumer Protection',
-  },
-  chapters: [
-    {
-      label: '01 · The Situation',
-      headline: 'A system optimized for stability, not adaptability.',
-      paragraphs: [
-        'Supermarkets are essential infrastructure but not designed for failure. In normal conditions, they are extraordinarily efficient — lean inventory, just-in-time logistics, optimized shelf space. That efficiency is the problem. It leaves no slack for disruption.',
-        'Power loss, supply chain interruption, or panic purchasing can break operations within hours. In Germany, 89% of households rely on supermarkets as their primary food source. When those stores stop functioning — even temporarily — the social consequences are immediate and disproportionate.',
-        'The gap is not a supply problem. It is a governance problem. There are no pre-defined crisis modes. There is no standardized logic for how goods should be allocated under scarcity. Without clear rules, staff improvise. Without improvisation, chaos. Without a plan, trust collapses.',
-      ],
-    },
-    {
-      label: '02 · What We Found',
-      headline: 'Where the current system breaks.',
-      paragraphs: [
-        'We analyzed failure cascades across four dimensions: energy, cold chain, logistics, and human behavior. Each revealed a different layer of the same problem.',
-        'Energy failure is the most visible, but it is the trigger, not the cause. When power goes out, refrigeration fails first, then point-of-sale systems, then communication. Staff lose the tools they need to manage demand. Customers, uncertain about what will be available or for how long, default to panic behavior — buying more than they need, arriving earlier than usual, staying longer than is useful.',
-        'The cold chain failure compounds this. Perishables become unsellable within hours. A store that enters a crisis event with a full inventory quickly has less usable product than it appears to have. The visible abundance is a liability, not an asset.',
-        'The human behavior dimension is the one most easily overlooked in system design. People behave predictably under scarcity — they hoard, they queue, they compete. A store without predefined allocation rules has no mechanism to counter this. "First come, first served" is not a distribution strategy. It is the absence of one.',
-      ],
-      pullQuote: {
-        text: 'Resilience is not improvisation. It is pre-defined operations that stay legible when infrastructure becomes unstable.',
-      },
-      pullQuoteVisible: true,
-    },
-    {
-      label: '03 · The Real Problem',
-      headline: 'Three things that had to be true at once.',
-      paragraphs: [
-        'The design requirements were unusually constrained. The concept had to work in three simultaneously difficult conditions: limited energy, high and unpredictable demand, and a staff that would be under significant stress. Any solution that required extensive training, complex technology, or additional infrastructure to activate was not a solution — it was a dependency.',
-        'Three non-negotiables shaped every subsequent decision. First: fair distribution must be explainable. Allocation rules need to be simple enough that a customer can understand them before they enter the store. If the rules require interpretation, they will be contested. Contested rules, under stress, create conflict.',
-        'Second: the system must work without full digital infrastructure. QR codes work without internet. NFC tokens work without a network connection. Paper fallbacks must exist for everything digital.',
-        'Third: the concept must be compatible with existing logistics standards. A solution that requires custom packaging, new supplier relationships, or rebuilt distribution infrastructure is not deployable at scale. The re:box had to fit into what already existed.',
-      ],
-      callout: {
-        title: 'Infrastructure branding.',
-        body: 'The visual system for re:markt is not designed for marketing — it is designed for orientation and trust. Signage, zoning, and communication in crisis mode must function like public infrastructure: legible at a distance, interpretable under stress, authoritative without being aggressive.',
-      },
-      calloutVisible: true,
-    },
-    {
-      label: '04 · The Idea',
-      headline: 'A store that operates in two modes.',
-      paragraphs: [
-        'The core idea is a prepared switch. re:markt is designed as a normal supermarket that contains, within its existing footprint, a fully operational crisis distribution system. Activating crisis mode does not require external resources or emergency decisions. It requires executing a plan that was already made.',
-        'In normal mode, the store functions like any supermarket: open shelving, free movement, standard checkout. The floor plan is optimized for browsing and purchase.',
-        'In crisis mode, the transformation is physical and operational simultaneously. The sales floor reconfigures: community and waiting areas expand at the perimeter, the sales floor shrinks toward the center, and storage space expands to accommodate incoming re:boxes. Communication shifts from promotional to operational — signage switches from advertising to orientation, providing clear information about what is available, in what quantities, and how it will be distributed.',
-        'The transition is not an emergency response. It is a mode change — like a building switching between normal and fire evacuation protocols. Except this one can sustain for days, not minutes.',
-      ],
-      beforeImage: {
-        src: '/images/remarkt/ch04-floorplan.png',
-        alt: 'Normal → Crisis mode floor plan. Two stacked bar diagrams: in normal mode the sales floor dominates the middle, with community area on top and storage at the bottom. In crisis mode the proportions invert — community area expands, sales floor shrinks to a thin sliver, and storage expands to accommodate incoming re:boxes.',
-        aspectRatio: '5478/2400',
-        fullWidth: true,
-      },
-    },
-    {
-      label: '05 · How It Works',
-      headline: 'Three mechanisms that make it enforceable.',
-      paragraphs: [
-        'A good concept is not enough. The system has to be operable by real staff, under real stress, without specialized equipment. Three mechanisms form the operational core of re:markt.',
-        'The re:box is a standardized unit that stays consistent from producer to household. The box dimensions, weight, and contents are fixed — producer packs it, warehouse stores it, store receives it, customer takes it home. By keeping the unit stable across every handoff, the system removes the failure points that typically appear when packaging changes between stages. Staff can count boxes without opening them. Customers receive a predictable quantity.',
-        'Token-based issuance replaces "first come, first served." Each household receives a QR or NFC token and a time window for pickup. This converts the store from a place where speed determines access to a place where everyone with a token has guaranteed access during their window. Queue dynamics collapse — there is no advantage to arriving early. Staff can control throughput predictably.',
-        'Store zoning divides the space into four operational zones — entry, waiting, handoff, and exit — with controlled transitions between them. This protects staff by separating them from the full crowd pressure, allows throughput to be measured and managed, and prevents the compression that leads to conflict. Zoning is marked physically with tape and signage that can be deployed in under thirty minutes.',
-      ],
-    },
-    {
-      label: '06 · The Result',
-      headline: 'Five ways to reach a household.',
-      paragraphs: [
-        'A single store cannot serve an entire neighborhood under crisis conditions. re:markt is not a point of distribution — it is the anchor of a multi-channel distribution network that uses existing infrastructure wherever possible.',
-        're:markt Hub is the central operational unit: a store that functions as normal retail while coordinating distribution across the other channels. It receives re:boxes, manages inventory, and dispatches to the satellite channels. Click & Collect allows households to pre-order re:boxes and pick them up directly at the store during a specific time window, bypassing the full in-store experience.',
-        'Delivery routes re:boxes via mobile vehicles directly to households. Priority goes to residents with limited mobility, elderly individuals, and families with small children — the populations least equipped to navigate a busy store in a crisis. Pop-Up distribution deploys a vehicle-based station to serve neighborhoods without a re:markt hub nearby.',
-        'DHL Station integration uses existing Packstation infrastructure — Germany\'s network of automated parcel pickup points — to distribute re:boxes without additional staffing or new physical infrastructure. A household can pick up a re:box the same way they pick up any parcel.',
-        'The five channels are designed to be activated selectively, not simultaneously. A localized power outage might only require Hub + Click & Collect. A regional infrastructure failure would activate all five.',
-      ],
-      beforeImage: {
-        src: '/images/remarkt/ch06-channels.png',
-        alt: 'Five distribution channels arranged around re:markt Hub at the center: Click & Collect (pre-ordered pickup), Delivery (mobile delivery vehicles), Pop-Up Store (vehicle-based station for areas without a Hub), and DHL Station (using existing Packstation infrastructure). The Hub handles central distribution, storage, and coordination across all channels.',
-        aspectRatio: '1300/2067',
-      },
-    },
-    {
-      label: '07 · What Changed',
-      headline: 'What the numbers say.',
-      paragraphs: [
-        'The expected impact is predictability.',
-      ],
-      impactStats: [
-        { number: 'Up to 80%', description: 'energy demand reduction in crisis mode' },
-        { number: '4,000→800', description: 'kWh stepped down while staying operational' },
-        { number: '5', description: 'distribution channels designed and specified' },
-        { number: '89%', description: 'of households currently have no alternative to supermarkets' },
-      ],
-      impactText: [
-        'Clear allocation rules reduce conflict. Energy prioritization keeps critical systems running. Standardized logistics removes dependency on fragile handoffs that break when packaging or process changes between stages.',
-        'The behavioral effect matters as much as the operational one. When people understand what they can get, in what quantity, and when — panic behavior shifts to planning behavior. This stabilizes crowds, reduces pressure on staff, and maintains trust in the supply system at exactly the moment when trust is most at risk.',
-      ],
-    },
-    {
-      label: '08 · What I Learned',
-      headline: 'What this changed for me.',
-      paragraphs: [
-        'I came into this project expecting to design an interface. I left it having designed a governance system.',
-        'The insight that landed hardest: in a crisis, the interface is not the screen. It is the rules. UX in this context means operational governance — how decisions are made, by whom, under what authority, and with what fallback. The most important design work we did was not visual. It was the logic behind the token system, the zoning protocol, the re:box specification. Getting those right meant that the visual layer had something real to communicate.',
-        'The AI-generated concept film was a secondary lesson. We used generative tools to compress complex system logic into a narrative that worked for a public exhibition context. That required understanding the story well enough to author it deliberately — the tool did not find the narrative, it executed one we had already built.',
-      ],
-      keyTakeaway: {
-        title: 'Rule clarity is UX.',
-        body: 'In crises, the interface isn\'t the screen. It\'s the rules behind it. re:markt reframed UX as operational governance: clear modes, minimal constraints, communication that holds under stress.',
-      },
-    },
-  ],
-}
-
 export const caseStudyContent: Record<string, CaseStudyContent> = {
   odo,
-  maya,
+  staedtler,
   remarkt,
+  maya,
 }

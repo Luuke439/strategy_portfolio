@@ -10,11 +10,12 @@ interface Props {
 }
 
 export async function generateStaticParams() {
-  // External projects link straight to their own URL from the home grid — we
-  // don't host a project page for them. Skipping them here means the route
-  // 404s instead of rendering a half-populated LabPage shell.
+  // External projects link straight to their own URL from the home grid, and
+  // placeholder tiles (e.g. an NDA thesis) are intentionally non-clickable —
+  // neither gets a hosted page. Skipping them here means those routes 404
+  // instead of rendering a half-populated shell.
   return projects
-    .filter((p) => p.type !== 'external')
+    .filter((p) => p.type !== 'external' && p.type !== 'placeholder')
     .map((p) => ({ slug: p.slug }))
 }
 
@@ -23,7 +24,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const project = getProjectBySlug(slug)
   if (!project) return {}
   const url = `${SITE_URL}/projects/${slug}`
-  const title = `${project.name} — ${project.category}`
+  const title = `${project.name} · ${project.category}`
   const description = project.problemStatement || `${project.name}: ${project.category} by ${AUTHOR.name}.`
   return {
     title,
@@ -44,10 +45,10 @@ export default async function ProjectPage({ params }: Props) {
   const { slug } = await params
   const project = getProjectBySlug(slug)
   if (!project) notFound()
-  // Defensive: an external project should never reach this route since it
-  // isn't in generateStaticParams. But during dev/runtime someone could still
-  // type the URL — 404 instead of rendering an empty page.
-  if (project.type === 'external') notFound()
+  // Defensive: external + placeholder projects should never reach this route
+  // since they're excluded from generateStaticParams. But during dev/runtime
+  // someone could still type the URL — 404 instead of rendering an empty page.
+  if (project.type === 'external' || project.type === 'placeholder') notFound()
 
   const url = `${SITE_URL}/projects/${slug}`
 

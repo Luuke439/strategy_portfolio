@@ -64,7 +64,7 @@
   /* Project accent colors */
   --color-odo:         #088559;
   --color-remarkt:     #00363A;
-  --color-maya:        #EB684E;
+  --color-staedtler:   #1B4B91;
   --color-expressive:  #3D2F5C;
   --color-spotify:     #2B6CB0;
   --color-blend:       #5A1A4F;
@@ -198,6 +198,62 @@ body {
   max-width: 760px;
   margin-left: auto;
   margin-right: auto;
+}
+
+/* ── About hero (two-column: intro copy + portrait) ──────────────── */
+.about-hero {
+  display: grid;
+  grid-template-columns: 1fr 240px;
+  gap: clamp(1.5rem, 3vw, 2.5rem);
+  align-items: center;
+  min-height: 280px;
+}
+.about-hero__portrait-frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  border-radius: 4px;
+  overflow: hidden;
+}
+@media (max-width: 700px) {
+  .about-hero {
+    grid-template-columns: 1fr;
+    gap: 1.75rem;
+    min-height: 0;
+    align-items: start;
+  }
+  .about-hero__portrait-frame {
+    max-width: 240px;
+    order: 2;
+  }
+}
+
+/* ── About detail sections (label-left, content-right editorial CV) ── */
+.about-section {
+  display: grid;
+  grid-template-columns: 132px 1fr;
+  gap: 1.5rem;
+  padding: clamp(1.6rem, 3vw, 2.4rem) 0;
+  border-top: 1px solid #ECECEC;
+}
+.about-section:last-child {
+  border-bottom: 1px solid #ECECEC;
+}
+.about-section__label {
+  font-family: 'TWK Lausanne Pan', system-ui, sans-serif;
+  font-weight: 500;
+  font-size: 0.68rem;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: #9A9A9A;
+  padding-top: 4px;
+}
+@media (max-width: 640px) {
+  .about-section {
+    grid-template-columns: 1fr;
+    gap: 0.85rem;
+    padding: 1.4rem 0;
+  }
 }
 
 /* ── Chapter headline + video row ────────────────────────────────── */

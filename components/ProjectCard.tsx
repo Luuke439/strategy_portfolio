@@ -253,29 +253,51 @@ function ProjectCardImpl({
         {isPlaceholder ? (
 
           /* ── Placeholder ────────────────────────────────────────── */
-          <div style={{ display: 'flex', flexDirection: 'column', height: '100%', cursor: 'default', borderRadius: RADIUS, overflow: 'hidden' }}>
-            <div style={{ flex: 1, position: 'relative', overflow: 'hidden', minHeight: 0, borderRadius: `${RADIUS} ${RADIUS} 0 0` }}>
-              <div style={{ position: 'absolute', inset: 0, backgroundColor: '#F0EDEA' }} />
+          /* Matches the photo tiles: the gradient "stroke" wraps the image
+             area only (a 1.5px gradient pad), not the whole card. The label
+             bar sits below, outside the ring. Falls back to a neutral tone
+             when no gradient is set. */
+          <div style={{
+            display: 'flex', flexDirection: 'column', height: '100%',
+            cursor: 'default', borderRadius: RADIUS, overflow: 'hidden',
+          }}>
+            {/* Image area — gradient fill wrapped by a gradient stroke ring */}
+            <div style={{
+              flex: 1, minHeight: 0, position: 'relative',
+              borderRadius: RADIUS, overflow: 'hidden',
+              padding: '1.5px',
+              background: project.gradient ?? '#E5E0D8',
+            }}>
               <div style={{
-                position: 'absolute', inset: 0,
-                display: 'flex', flexDirection: 'column',
-                alignItems: 'center', justifyContent: 'center',
-                gap: '0.45rem', padding: '1.5rem', textAlign: 'center',
+                position: 'relative', height: '100%',
+                borderRadius: `calc(${RADIUS} - 1.5px)`, overflow: 'hidden',
               }}>
-                <span style={{ fontFamily: "'TWK Lausanne Pan', system-ui, sans-serif", fontWeight: 400, fontSize: '0.6rem', letterSpacing: '0.16em', textTransform: 'uppercase', color: '#C0B8B0' }}>
-                  Coming Soon
-                </span>
-                <span style={{ fontFamily: "'TWK Lausanne Pan', system-ui, sans-serif", fontWeight: 400, fontSize: 'clamp(0.82rem, 1.1vw, 1rem)', letterSpacing: '-0.01em', color: '#908880', lineHeight: 1.3 }}>
-                  {project.name}
-                </span>
+                {/* gradient fill */}
+                <div style={{ position: 'absolute', inset: 0, background: project.gradient ?? '#F0EDEA' }} />
+                {/* soft top sheen so the tile has depth like the photo tiles */}
+                <div aria-hidden style={{
+                  position: 'absolute', inset: 0,
+                  background: 'linear-gradient(180deg, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0) 46%)',
+                  pointerEvents: 'none',
+                }} />
+                <div style={{
+                  position: 'absolute', inset: 0,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  padding: '1.5rem', textAlign: 'center',
+                }}>
+                  <span style={{ fontFamily: "'TWK Lausanne Pan', system-ui, sans-serif", fontWeight: 500, fontSize: 'clamp(0.9rem, 1.2vw, 1.1rem)', letterSpacing: '-0.01em', color: '#2A2533', lineHeight: 1.25 }}>
+                    {project.statusNote ?? 'Coming Soon'}
+                  </span>
+                </div>
               </div>
             </div>
+            {/* Label bar */}
             <div style={{ height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#FAFAFA', flexShrink: 0, padding: '0 8px', borderRadius: `0 0 ${RADIUS} ${RADIUS}` }}>
-              <span style={{ fontFamily: "'TWK Lausanne Pan', system-ui, sans-serif", fontWeight: 400, fontSize: '0.76rem', letterSpacing: '-0.01em', color: '#B8B0A8' }}>
+              <span style={{ fontFamily: "'TWK Lausanne Pan', system-ui, sans-serif", fontWeight: 400, fontSize: '0.76rem', letterSpacing: '-0.01em', color: '#6B6B6B' }}>
                 {project.shortName}
               </span>
               {project.tags && project.tags.length > 0 && (
-                <span style={{ fontFamily: "'TWK Lausanne Pan', system-ui, sans-serif", fontWeight: 400, fontSize: '0.76rem', letterSpacing: '-0.01em', color: '#C8C0B8', textAlign: 'right' }}>
+                <span style={{ fontFamily: "'TWK Lausanne Pan', system-ui, sans-serif", fontWeight: 400, fontSize: '0.76rem', letterSpacing: '-0.01em', color: '#A8A8A8', textAlign: 'right' }}>
                   {project.tags.join(' / ')}
                 </span>
               )}

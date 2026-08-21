@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useMemo, useRef } from 'react'
+import { useState, useEffect, useMemo, useRef, Fragment } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
@@ -19,15 +19,11 @@ const FONT = "'TWK Lausanne Pan', system-ui, sans-serif"
 
 function CsImageSlot({
   image,
-  fadeIn = false,
-  isVisible = true,
 }: {
   image: CsImage
   // Reserved for future styling — kept in the interface so call sites
   // don't need to be reshuffled when we wire it back in.
   accentColor?: string
-  fadeIn?: boolean
-  isVisible?: boolean
 }) {
   const [failed, setFailed] = useState(false)
 
@@ -38,13 +34,6 @@ function CsImageSlot({
   const outerStyle: React.CSSProperties = {
     margin: '2rem 0',
     ...(isPhone ? { display: 'flex', justifyContent: 'center' } : {}),
-    ...(fadeIn
-      ? {
-          opacity: isVisible ? 1 : 0,
-          transition: 'opacity 200ms ease',
-          transitionDelay: isVisible ? '150ms' : '0ms',
-        }
-      : {}),
   }
 
   const containerStyle: React.CSSProperties = isPhone
@@ -91,7 +80,6 @@ function CsImageSlot({
           src={image.src}
           fill
           alt={image.alt}
-          loading={fadeIn ? 'lazy' : 'eager'}
           sizes={isPhone ? '320px' : '(max-width: 760px) 100vw, 760px'}
           style={{ objectFit: 'cover', objectPosition: 'center top' }}
           onError={() => setFailed(true)}
@@ -105,15 +93,11 @@ function CsImageSlot({
 
 function FullWidthImageSlot({
   image,
-  fadeIn = false,
-  isVisible = true,
 }: {
   image: CsImage
   // Reserved for future styling — kept in the interface so call sites
   // don't need to be reshuffled when we wire it back in.
   accentColor?: string
-  fadeIn?: boolean
-  isVisible?: boolean
 }) {
   const [failed, setFailed] = useState(false)
   const ar = image.aspectRatio ?? '16/9'
@@ -126,13 +110,6 @@ function FullWidthImageSlot({
     position: 'relative',
     aspectRatio: ar,
     overflow: 'hidden',
-    ...(fadeIn
-      ? {
-          opacity: isVisible ? 1 : 0,
-          transition: 'opacity 200ms ease',
-          transitionDelay: isVisible ? '150ms' : '0ms',
-        }
-      : {}),
   }
 
   if (failed) {
@@ -170,7 +147,6 @@ function FullWidthImageSlot({
         src={image.src}
         fill
         alt={image.alt}
-        loading={fadeIn ? 'lazy' : 'eager'}
         sizes="(max-width: 760px) 100vw, 760px"
         // contain (not cover) for full-width media so charts and diagrams
         // with content flush against the canvas edge are never clipped.
@@ -250,7 +226,7 @@ function PullQuote({ text, attribution, accentColor }: { text: string; attributi
       </p>
       {attribution && (
         <p style={{ fontFamily: FONT, fontWeight: 400, fontSize: '0.68rem', letterSpacing: '0.06em', color: '#6B6B6B', margin: '0.4rem 0 0' }}>
-          — {attribution}
+          {attribution}
         </p>
       )}
     </blockquote>
@@ -287,49 +263,6 @@ function KeyTakeaway({ title, body, accentColor }: { title: string; body: string
         {body}
       </p>
     </div>
-  )
-}
-
-// ── Expandable section — CSS grid height animation ────────────────────────────
-
-function ExpandableSection({ isOpen, children }: { isOpen: boolean; children: React.ReactNode }) {
-  return (
-    <div
-      style={{
-        display: 'grid',
-        gridTemplateRows: isOpen ? '1fr' : '0fr',
-        transition: 'grid-template-rows 300ms ease',
-      }}
-    >
-      <div style={{ overflow: 'hidden' }}>
-        <div style={{ paddingTop: '0.25rem' }}>{children}</div>
-      </div>
-    </div>
-  )
-}
-
-// ── Toggle button ─────────────────────────────────────────────────────────────
-
-function ToggleButton({ isOpen, onToggle }: { isOpen: boolean; onToggle: () => void }) {
-  return (
-    <button
-      onClick={onToggle}
-      aria-label={isOpen ? 'Collapse' : 'Expand'}
-      style={{
-        fontFamily: FONT,
-        fontWeight: 300,
-        fontSize: '1.4rem',
-        lineHeight: 1,
-        color: '#A0A0A0',
-        background: 'none',
-        border: 'none',
-        padding: '1.25rem 0 0',
-        cursor: 'pointer',
-        display: 'block',
-      }}
-    >
-      {isOpen ? '−' : '+'}
-    </button>
   )
 }
 
@@ -451,7 +384,7 @@ function ChapterBarChart({
       }}
       aria-label={
         chart.title
-          ? `${chart.title}${chart.subtitle ? ' — ' + chart.subtitle : ''}: ` +
+          ? `${chart.title}${chart.subtitle ? ', ' + chart.subtitle : ''}: ` +
             chart.data.map((d) => `${d.label} ${d.value}`).join(', ')
           : undefined
       }
@@ -744,6 +677,90 @@ function FadeSection({ id, children }: { id: string; children: React.ReactNode }
   )
 }
 
+// ── Hero video with viewer controls ───────────────────────────────────────────
+// Autoplays muted + looping (browser policy blocks autoplay-with-sound), then
+// hands the viewer a play/pause and a mute toggle so they can stop it or turn
+// the sound on themselves.
+function HeroVideo({ src, poster, label }: { src: string; poster: string; label: string }) {
+  const ref = useRef<HTMLVideoElement>(null)
+  const [playing, setPlaying] = useState(true)
+  const [muted, setMuted] = useState(true)
+
+  const togglePlay = () => {
+    const v = ref.current
+    if (!v) return
+    if (v.paused) v.play()
+    else v.pause()
+  }
+  const toggleMute = () => {
+    const v = ref.current
+    if (!v) return
+    v.muted = !v.muted
+    setMuted(v.muted)
+  }
+
+  const btn: React.CSSProperties = {
+    width: 36,
+    height: 36,
+    borderRadius: '50%',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    background: 'rgba(0,0,0,0.42)',
+    backdropFilter: 'blur(6px)',
+    WebkitBackdropFilter: 'blur(6px)',
+    border: '1px solid rgba(255,255,255,0.18)',
+    cursor: 'pointer',
+    color: '#fff',
+    padding: 0,
+  }
+
+  return (
+    <div style={{ position: 'relative' }}>
+      <video
+        ref={ref}
+        src={src}
+        poster={poster}
+        autoPlay
+        muted
+        loop
+        playsInline
+        aria-label={label}
+        onPlay={() => setPlaying(true)}
+        onPause={() => setPlaying(false)}
+        style={{ width: '100%', height: 'auto', display: 'block' }}
+      />
+      <div style={{ position: 'absolute', bottom: 14, right: 14, display: 'flex', gap: 8, zIndex: 2 }}>
+        <button type="button" onClick={togglePlay} aria-label={playing ? 'Pause video' : 'Play video'} style={btn}>
+          {playing ? (
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+              <rect x="6" y="5" width="4" height="14" rx="1" />
+              <rect x="14" y="5" width="4" height="14" rx="1" />
+            </svg>
+          ) : (
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+              <path d="M8 5v14l11-7z" />
+            </svg>
+          )}
+        </button>
+        <button type="button" onClick={toggleMute} aria-label={muted ? 'Unmute video' : 'Mute video'} style={btn}>
+          {muted ? (
+            <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden>
+              <path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor" />
+              <path d="M16 9l5 6m0-6l-5 6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" fill="none" />
+            </svg>
+          ) : (
+            <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden>
+              <path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor" />
+              <path d="M16 8.8a4.5 4.5 0 010 6.4M18.5 6.5a8 8 0 010 11" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" fill="none" />
+            </svg>
+          )}
+        </button>
+      </div>
+    </div>
+  )
+}
+
 // ── Main component ────────────────────────────────────────────────────────────
 
 interface CaseStudyPageProps {
@@ -753,17 +770,6 @@ interface CaseStudyPageProps {
 export default function CaseStudyPage({ project }: CaseStudyPageProps) {
   const accent = project.accentColor
   const content: CaseStudyContent | undefined = caseStudyContent[project.slug]
-
-  // Set<number> — -1 = opening, 0-7 = chapters
-  const [expanded, setExpanded] = useState<Set<number>>(new Set())
-  const isOpen = (n: number) => expanded.has(n)
-  const toggle = (n: number) =>
-    setExpanded((prev) => {
-      const next = new Set(prev)
-      if (next.has(n)) next.delete(n)
-      else next.add(n)
-      return next
-    })
 
   // Always start at top of page — use Lenis API so smooth scroll doesn't fight us
   const didScroll = useRef(false)
@@ -870,14 +876,19 @@ export default function CaseStudyPage({ project }: CaseStudyPageProps) {
             ))}
           </div>
 
-          {/* Hero image — natural aspect ratio */}
+          {/* Hero visual — natural aspect ratio. Video (when set) replaces the
+              static image as the main visual; heroImage still serves as its poster. */}
           {content && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={content.heroImage}
-              alt={project.name}
-              style={{ width: '100%', height: 'auto', display: 'block' }}
-            />
+            content.heroVideo ? (
+              <HeroVideo src={content.heroVideo} poster={content.heroImage} label={project.name} />
+            ) : (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={content.heroImage}
+                alt={project.name}
+                style={{ width: '100%', height: 'auto', display: 'block' }}
+              />
+            )
           )}
 
         </div>
@@ -885,7 +896,7 @@ export default function CaseStudyPage({ project }: CaseStudyPageProps) {
 
       {/* ── re:markt ministry quote block — editorial width, dark bg ────── */}
       {/* Bottom margin is 0 because <main> paddingTop + FadeSection paddingTop
-          already provide the same 80–96px transition that odo/maya have between
+          already provide the same 80–96px transition that odo/staedtler have between
           hero image and opening — keeps all three case studies visually aligned. */}
       {content?.ministryQuoteBlock && (
         <div
@@ -926,7 +937,7 @@ export default function CaseStudyPage({ project }: CaseStudyPageProps) {
                 margin: 0,
               }}
             >
-              — {content.ministryQuoteBlock.attribution}
+              {content.ministryQuoteBlock.attribution}
             </p>
           </div>
         </div>
@@ -955,18 +966,9 @@ export default function CaseStudyPage({ project }: CaseStudyPageProps) {
               >
                 What this project is really about
               </h2>
-              <Para>{content.opening.paragraphs[0]}</Para>
-
-              {content.opening.paragraphs.length > 1 && (
-                <>
-                  <ExpandableSection isOpen={isOpen(-1)}>
-                    {content.opening.paragraphs.slice(1).map((p, i) => (
-                      <Para key={i}>{p}</Para>
-                    ))}
-                  </ExpandableSection>
-                  <ToggleButton isOpen={isOpen(-1)} onToggle={() => toggle(-1)} />
-                </>
-              )}
+              {content.opening.paragraphs.map((p, i) => (
+                <Para key={i}>{p}</Para>
+              ))}
             </FadeSection>
           )}
 
@@ -987,21 +989,14 @@ export default function CaseStudyPage({ project }: CaseStudyPageProps) {
             </motion.div>
           )}
 
-          {/* Chapters */}
+          {/* Chapters — all content renders; no expand/collapse mechanic */}
           {content?.chapters.map((chapter, i) => {
             const isImpact = i === 6
             const isReflection = i === 7
-            const open = isOpen(i)
 
-            const visibleCount = Math.max(1, chapter.visibleParagraphs ?? 1)
-            const pullQuoteHoisted = Boolean(chapter.pullQuote && chapter.pullQuoteVisible)
-            const calloutHoisted = Boolean(chapter.callout && chapter.calloutVisible)
-            const hasExpandContent =
-              chapter.paragraphs.length > visibleCount ||
-              (chapter.pullQuote && !pullQuoteHoisted) ||
-              (chapter.callout && !calloutHoisted) ||
-              (chapter.expandImages && chapter.expandImages.length > 0) ||
-              (isImpact && chapter.impactText && chapter.impactText.length > 0)
+            // Split layouts place the first `splitParagraphs` paragraphs
+            // beside the media; the rest flow below the split.
+            const splitCount = Math.max(1, chapter.splitParagraphs ?? 1)
 
             // headlineVideoSplit: render headline + beforeVideo as a 2-col row
             // (video height matches headline). Consumes the video, so the
@@ -1010,8 +1005,8 @@ export default function CaseStudyPage({ project }: CaseStudyPageProps) {
               chapter.headlineVideoSplit && chapter.beforeVideo
             )
 
-            // Phone-layout media gets a side-by-side split with Para 1 instead
-            // of stacking below it. Rules:
+            // Phone-layout media gets a side-by-side split with the leading
+            // paragraphs instead of stacking below them. Rules:
             //  - phone-layout beforeVideo always triggers the split
             //  - phone-layout beforeImage triggers the split ONLY when there
             //    is no other non-phone beforeVideo competing for the slot
@@ -1034,49 +1029,65 @@ export default function CaseStudyPage({ project }: CaseStudyPageProps) {
               <FadeSection key={i} id={`chapter-${i}`}>
                 <ChapterLabel label={chapter.label} accentColor={accent} />
                 {titleVideoActive ? (
-                  <HeadlineVideoRow
-                    headline={chapter.headline}
-                    paragraphs={chapter.paragraphs.slice(0, visibleCount)}
-                    video={chapter.beforeVideo!}
-                    accentColor={accent}
-                  />
+                  <>
+                    <HeadlineVideoRow
+                      headline={chapter.headline}
+                      paragraphs={chapter.paragraphs.slice(0, splitCount)}
+                      video={chapter.beforeVideo!}
+                      accentColor={accent}
+                    />
+                    {chapter.paragraphs.slice(splitCount).map((p, j) => (
+                      <Para key={`rest-${j}`}>{p}</Para>
+                    ))}
+                  </>
                 ) : (
                   <>
                     <ChapterHeadline>{chapter.headline}</ChapterHeadline>
 
-                    {/* Split layout: visible paragraphs stack in the text column
-                        next to the phone-layout media. Keeps the prose-and-video
-                        pair tightly bound instead of letting the second paragraph
-                        drift below the whole split. */}
                     {isSplit ? (
-                      <ChapterMediaSplit
-                        paragraphs={chapter.paragraphs.slice(0, visibleCount)}
-                        video={splitVideo}
-                        image={splitImage}
-                      />
+                      <>
+                        {/* Split layout: leading paragraphs stack in the text
+                            column next to the phone-layout media; the rest
+                            flow below the split. */}
+                        <ChapterMediaSplit
+                          paragraphs={chapter.paragraphs.slice(0, splitCount)}
+                          video={splitVideo}
+                          image={splitImage}
+                        />
+                        {chapter.paragraphs.slice(splitCount).map((p, j) => (
+                          <Para key={`rest-${j}`}>{p}</Para>
+                        ))}
+                      </>
                     ) : (
                       <>
-                        {/* First paragraph — always visible */}
-                        <Para>{chapter.paragraphs[0]}</Para>
+                        {chapter.paragraphs.map((p, j) => (
+                          <Fragment key={`p-${j}`}>
+                            <Para>{p}</Para>
 
-                        {/* Before-expand video — always visible */}
-                        {chapter.beforeVideo && (
-                          <ChapterVideoSlot video={chapter.beforeVideo} />
-                        )}
+                            {/* Primary video — sits after the first paragraph */}
+                            {j === 0 && chapter.beforeVideo && (
+                              <ChapterVideoSlot video={chapter.beforeVideo} />
+                            )}
 
-                        {/* Additional visible paragraphs render after the media
-                            when we're NOT in split mode. */}
-                        {visibleCount > 1 &&
-                          chapter.paragraphs.slice(1, visibleCount).map((p, j) => (
-                            <Para key={`vis-${j}`}>{p}</Para>
-                          ))}
+                            {/* Inline images anchored to this paragraph (1-based) */}
+                            {chapter.inlineImages
+                              ?.filter((ii) => ii.afterParagraph === j + 1)
+                              .map((ii, k) =>
+                                ii.image.fullWidth ? (
+                                  <FullWidthImageSlot key={`inl-${j}-${k}`} image={ii.image} accentColor={accent} />
+                                ) : (
+                                  <CsImageSlot key={`inl-${j}-${k}`} image={ii.image} accentColor={accent} />
+                                )
+                              )}
+                          </Fragment>
+                        ))}
                       </>
                     )}
                   </>
                 )}
 
-                {/* Always-visible pull quote — sits directly under the visible text */}
-                {pullQuoteHoisted && chapter.pullQuote && (
+                {/* Pull quote — directly under the text */}
+                {chapter.pullQuote && (
                   <PullQuote
                     text={chapter.pullQuote.text}
                     attribution={chapter.pullQuote.attribution}
@@ -1084,16 +1095,7 @@ export default function CaseStudyPage({ project }: CaseStudyPageProps) {
                   />
                 )}
 
-                {/* Always-visible callout — sits directly under the visible text */}
-                {calloutHoisted && chapter.callout && (
-                  <Callout
-                    title={chapter.callout.title}
-                    body={chapter.callout.body}
-                    accentColor={accent}
-                  />
-                )}
-
-                {/* Before-expand image — always visible, max 1 */}
+                {/* Primary image — max 1 per chapter */}
                 {/* (Skipped when image is the one consumed by the split) */}
                 {chapter.beforeImage && chapter.beforeImage !== splitImage && (
                   chapter.beforeImage.fullWidth ? (
@@ -1103,79 +1105,49 @@ export default function CaseStudyPage({ project }: CaseStudyPageProps) {
                   )
                 )}
 
-                {/* Inline editorial bar chart — always visible */}
+                {/* Inline editorial bar chart */}
                 {chapter.beforeChart && (
                   <ChapterBarChart chart={chapter.beforeChart} accentColor={accent} />
                 )}
 
-                {/* Phone row — always visible, side-by-side with accent border */}
+                {/* Phone row — side-by-side with accent border */}
                 {chapter.phoneRow && chapter.phoneRow.length > 0 && (
                   <PhoneRowSlot images={chapter.phoneRow} accentColor={accent} />
                 )}
 
-                {/* Impact stats — always visible */}
+                {/* Impact stats + follow-up text (impact chapter) */}
                 {isImpact && chapter.impactStats && (
                   <ImpactGrid stats={chapter.impactStats} accentColor={accent} />
                 )}
+                {isImpact && chapter.impactText?.map((p, j) => (
+                  <Para key={`it-${j}`}>{p}</Para>
+                ))}
 
-                {/* Key takeaway — always visible in reflection */}
+                {/* Callout — after media and stats */}
+                {chapter.callout && (
+                  <Callout
+                    title={chapter.callout.title}
+                    body={chapter.callout.body}
+                    accentColor={accent}
+                  />
+                )}
+
+                {/* Additional images at the chapter end */}
+                {chapter.images?.map((img, j) =>
+                  img.fullWidth ? (
+                    <FullWidthImageSlot key={j} image={img} accentColor={accent} />
+                  ) : (
+                    <CsImageSlot key={j} image={img} accentColor={accent} />
+                  )
+                )}
+
+                {/* Key takeaway — reflection chapter */}
                 {isReflection && chapter.keyTakeaway && (
                   <KeyTakeaway
                     title={chapter.keyTakeaway.title}
                     body={chapter.keyTakeaway.body}
                     accentColor={accent}
                   />
-                )}
-
-                {/* Expandable content */}
-                {hasExpandContent && (
-                  <ExpandableSection isOpen={open}>
-                    {chapter.paragraphs.slice(1).map((p, j) => (
-                      <Para key={j}>{p}</Para>
-                    ))}
-                    {chapter.pullQuote && !pullQuoteHoisted && (
-                      <PullQuote
-                        text={chapter.pullQuote.text}
-                        attribution={chapter.pullQuote.attribution}
-                        accentColor={accent}
-                      />
-                    )}
-                    {chapter.callout && !calloutHoisted && (
-                      <Callout
-                        title={chapter.callout.title}
-                        body={chapter.callout.body}
-                        accentColor={accent}
-                      />
-                    )}
-                    {isImpact && chapter.impactText?.map((p, j) => (
-                      <Para key={`it-${j}`}>{p}</Para>
-                    ))}
-                    {/* Expand images — fade in */}
-                    {chapter.expandImages?.map((img, j) =>
-                      img.fullWidth ? (
-                        <FullWidthImageSlot
-                          key={j}
-                          image={img}
-                          accentColor={accent}
-                          fadeIn
-                          isVisible={open}
-                        />
-                      ) : (
-                        <CsImageSlot
-                          key={j}
-                          image={img}
-                          accentColor={accent}
-                          fadeIn
-                          isVisible={open}
-                        />
-                      )
-                    )}
-                  </ExpandableSection>
-                )}
-
-                {/* Toggle button — always below expandable content */}
-                {hasExpandContent && (
-                  <ToggleButton isOpen={open} onToggle={() => toggle(i)} />
                 )}
               </FadeSection>
             )

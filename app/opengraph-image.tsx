@@ -4,7 +4,7 @@ import { join } from 'node:path'
 import { SITE_HOST } from '@/lib/site'
 
 // 1200×630 — canonical share size (LinkedIn / Twitter / Slack / Facebook).
-export const alt = 'Luke Caporelli — Strategic Design'
+export const alt = 'Luke Caporelli · Strategic Design'
 export const size = { width: 1200, height: 630 }
 export const contentType = 'image/png'
 
@@ -12,14 +12,13 @@ export const contentType = 'image/png'
 // Listed here (rather than imported) so the OG renderer doesn't pull the full
 // projects array — Satori only needs the labels and the accent dots.
 const PROJECT_CHIPS = [
-  { name: 'odo',          accent: '#088559' },
   { name: 're:markt',     accent: '#5a8a8d' },
-  { name: 'maya',         accent: '#EB684E' },
-  { name: 'gravelwerk',   accent: '#B45309' },
-  { name: 'resaga',       accent: '#8B7355' },
+  { name: 'Thesis',       accent: '#B9A5CA' },
+  { name: 'Embrace Ambivalence', accent: '#1B4B91' },
+  { name: 'Vera',         accent: '#B23A48' },
+  { name: 'Tourewerk',    accent: '#B45309' },
+  { name: 'odo',          accent: '#088559' },
   { name: 'expressive msg.', accent: '#6c5a8a' },
-  { name: 'blend it!',    accent: '#8a5a82' },
-  { name: 'Spotify Dashboard', accent: '#2B6CB0' },
 ] as const
 
 export default async function OpenGraphImage() {

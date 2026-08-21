@@ -66,7 +66,7 @@ function PrimaryVisual({ project }: { project: Project }) {
             letterSpacing: '0.06em',
             textTransform: 'uppercase',
           }}>
-            {`Primary visual — ${project.name}`}
+            {`Primary visual · ${project.name}`}
           </span>
         </div>
       )}
@@ -76,7 +76,7 @@ function PrimaryVisual({ project }: { project: Project }) {
 
 // Slugs that have a real /images/<slug>/closeup.jpg in /public.
 // Anything else: skip the secondary visual entirely (no 404, no empty box).
-const SLUGS_WITH_CLOSEUP = new Set(['spotify-dashboard'])
+const SLUGS_WITH_CLOSEUP = new Set<string>([])
 
 function SecondaryVisual({ project }: { project: Project }) {
   if (!SLUGS_WITH_CLOSEUP.has(project.slug)) return null
@@ -105,7 +105,7 @@ const EMOTION_STUDIES = [
   {
     slug: 'romance',
     label: 'Romance',
-    description: 'Two users hold their screens simultaneously — their fingerprints merge into a shared trace.',
+    description: 'Two users hold their screens at the same time. Their fingerprints merge into a shared trace.',
   },
   {
     slug: 'anger',
@@ -115,7 +115,7 @@ const EMOTION_STUDIES = [
   {
     slug: 'joy',
     label: 'Joy',
-    description: 'A real-world object, captured and gifted — the effort is the emotion.',
+    description: 'A real-world object, captured and gifted. The effort is the emotion.',
   },
   {
     slug: 'sarcasm',
@@ -279,7 +279,7 @@ export default function LabPage({ project }: LabPageProps) {
                 marginBottom: '1rem',
               }}
             >
-              Lab — {project.label}
+              Lab · {project.label}
             </span>
 
             {/* Project name. Mobile floor bumped from 2.8rem → 4rem so the
@@ -380,51 +380,38 @@ export default function LabPage({ project }: LabPageProps) {
           {/* Secondary visual */}
           <SecondaryVisual project={project} />
 
-          {/* Prototype duo — blend it only */}
-          {project.slug === 'blend-it' && (
+          {/* Podium — vera only, small closing image */}
+          {project.slug === 'vera' && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
-              style={{ marginBottom: '3rem' }}
+              style={{ marginBottom: '3rem', display: 'flex', flexDirection: 'column', alignItems: 'center' }}
             >
-              <span
-                style={{
-                  fontFamily: "'TWK Lausanne Pan', system-ui, sans-serif",
-                  fontWeight: 400,
-                  fontSize: '0.72rem',
-                  letterSpacing: '0.08em',
-                  textTransform: 'uppercase',
-                  color: '#A0A0A0',
-                  display: 'block',
-                  marginBottom: '1rem',
-                }}
-              >
-                Technical prototype
-              </span>
-              {/* Prototype duo — 68/32 side-by-side on desktop, stacked on
-                  mobile so neither thumbnail gets squashed to ~125px wide
-                  on a 375px viewport. The CSS class lives in globals.css. */}
-              <div className="prototype-duo">
-                <div className="prototype-duo__primary">
-                  <Image
-                    src="/images/blend-it/prototype.jpg"
-                    alt="Blend it prototype"
-                    fill
-                    sizes="(max-width: 640px) 100vw, (max-width: 768px) 68vw, 800px"
-                    style={{ objectFit: 'cover' }}
-                  />
-                </div>
-                <div className="prototype-duo__detail">
-                  <Image
-                    src="/images/blend-it/prototype2.jpg"
-                    alt="Blend it prototype detail"
-                    fill
-                    sizes="(max-width: 640px) 100vw, (max-width: 768px) 32vw, 400px"
-                    style={{ objectFit: 'cover' }}
-                  />
-                </div>
+              <div style={{ width: '100%', maxWidth: '440px' }}>
+                <Image
+                  src="/images/vera/podium.jpg"
+                  alt="The Vera team on the winners' podium at the CodeTheState hackathon in Heilbronn"
+                  width={800}
+                  height={533}
+                  sizes="(max-width: 768px) 100vw, 440px"
+                  style={{ width: '100%', height: 'auto', display: 'block', borderRadius: '6px' }}
+                />
+                <span
+                  style={{
+                    fontFamily: "'TWK Lausanne Pan', system-ui, sans-serif",
+                    fontWeight: 400,
+                    fontSize: '0.72rem',
+                    letterSpacing: '0.04em',
+                    color: '#A0A0A0',
+                    display: 'block',
+                    marginTop: '0.75rem',
+                    textAlign: 'center',
+                  }}
+                >
+                  1st place · CodeTheState, Heilbronn
+                </span>
               </div>
             </motion.div>
           )}

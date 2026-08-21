@@ -25,6 +25,12 @@ export interface Project {
   tags?: string[]
   label: string
   accentColor: string
+  /** placeholder tiles only: CSS gradient painted as the tile fill + ring.
+   *  Falls back to a neutral tone when unset. */
+  gradient?: string
+  /** placeholder tiles only: kicker text shown instead of "Coming Soon"
+   *  (e.g. "Currently under NDA"). */
+  statusNote?: string
   category: string
   problemStatement: string
   headline?: string
@@ -63,15 +69,15 @@ export const projects: Project[] = [
     tools: 'Figma · Next.js · OpenRouteService · Shademap API',
     scope: 'B.A. Thesis · HfG Schwäbisch Gmünd · 2025',
     challenge:
-      "Cyclists don't want the fastest route — they want the right one. Existing tools treat preference as a filter on top of distance optimization. The result is routes that look similar and feel generic.",
+      "Cyclists don't want the fastest route, they want the right one. Existing tools treat preference as a filter on top of distance optimization. The result is routes that look similar and feel generic.",
     strategy:
-      'Designed an intent-to-route translation system: rider intent (scenery, surface, wind, shade, safety) is converted into weighted API constraints, producing genuinely different loop routes — not the same route with slight variations. Two flows: Quick Start and Custom Ride. Validated against 100+ real cyclists before a single screen was designed.',
+      'Designed an intent-to-route translation system: rider intent (scenery, surface, wind, shade, safety) is converted into weighted API constraints, producing genuinely different loop routes instead of one route with slight variations. Two flows: Quick Start and Custom Ride. Grounded in research with 116 cyclists before a single screen was designed.',
     results:
-      'A functional vertical slice prototype using live routing, surface, and environmental APIs — proving the system works with real data, not synthetic inputs.',
+      'A functional vertical slice prototype using live routing, surface, and environmental APIs, proving the system works with real data, not synthetic inputs.',
     keyInsight:
       "Riders don't want automation. They want control they can trust. The interface has to show its reasoning, or it loses the rider.",
     impactStats: [
-      { label: 'Cyclists surveyed', number: '100+', description: 'Before designing a single screen' },
+      { label: 'Cyclists surveyed', number: '116', description: 'Before designing a single screen' },
       { label: 'In-depth interviews', number: '9', description: 'Deep qualitative research' },
       { label: 'Live API integrations', number: '3', description: 'Routing, surface, and environmental' },
       { label: 'Route profiles', number: '4', description: 'Genuinely differentiated ride types' },
@@ -98,18 +104,54 @@ export const projects: Project[] = [
     tools: 'Figma · Runway · Generative AI (concept film)',
     scope: 'HfG Schwäbisch Gmünd · Presented at Baden-Württemberg Ministry · 2025',
     challenge:
-      "95% of German supermarkets shut down within 4 hours of a power outage. There's no standardized crisis mode — no defined distribution logic, no allocation rules, no plan for when normal operations collapse. The result is improvisation under pressure, which means chaos.",
+      "95% of German supermarkets shut down within 4 hours of a power outage. There's no standardized crisis mode: no defined distribution logic, no allocation rules, no plan for when normal operations collapse. The result is improvisation under pressure, which means chaos.",
     strategy:
       'Designed a dual-mode operating system built into the store from the start. Normal mode: standard retail. Crisis mode: floor converts to storage and distribution, a token-based issuance system replaces queuing, and a standardized re:box unit travels unchanged from producer to household across 5 distribution channels.',
     results:
-      'Selected for HfG exhibition. Invited to present at the Baden-Württemberg Ministry of Food, Rural Affairs and Consumer Protection — a direct policy context.',
+      'Selected for the HfG exhibition. Invited to present at the Baden-Württemberg Ministry of Food, Rural Affairs and Consumer Protection, a direct policy context.',
     keyInsight:
-      "In a crisis, the interface isn't the screen. It's the rules. UX here means operational governance — clear modes, enforceable logic, communication that holds under stress.",
+      "In a crisis, the interface isn't the screen. It's the rules. UX here means operational governance: clear modes, enforceable logic, communication that holds under stress.",
     impactStats: [
       { label: 'Energy demand reduction', number: '80%', description: 'In crisis mode vs. normal operation' },
       { label: 'kWh reduction', number: '4,000→800', description: 'Per day in crisis mode' },
       { label: 'Distribution channels', number: '5', description: 'Designed end to end' },
       { label: 'Ministry presentation', number: '1', description: 'Baden-Württemberg policy context' },
+    ],
+  },
+  {
+    slug: 'staedtler',
+    name: 'Embrace Ambivalence',
+    shortName: 'Embrace Ambivalence',
+    type: 'case-study',
+    // Grid tile is a still frame grabbed from hero.mp4 (~77.8s, the centred
+    // Staedtler device product shot) into public/images/staedtler/cover.jpg —
+    // no hover playback, just the image.
+    year: '2026',
+    tags: ['Brand Strategy', 'Futuring'],
+    label: 'Partner: Staedtler',
+    accentColor: '#1B4B91',
+    category: 'Case Study',
+    gridArea: 'staedtler',
+    size: 'medium',
+    problemStatement:
+      'Fast or slow. Digital or analog. Usually a brand has to pick one.',
+    role: 'Brand strategy · Futures research · Product concept · Systems design',
+    team: 'Luke Caporelli, Lukas Predan, Peter Schneider',
+    tools: 'Figma · Generative AI (concept visualization)',
+    scope: 'M.A. Strategic Design · HfG Schwäbisch Gmünd · Partner: Staedtler · 2026',
+    challenge:
+      "Staedtler's core business is shrinking as pen and paper lose ground to tablets, apps, and AI, while its own digital push, Noris Digital, never found its footing. Price pressure from cheap Asian manufacturers squeezes every category at once. The brand cannot say clearly what it stands for, and its heritage reads as traditional rather than contemporary: a strong profile that never leaves school and office.",
+    strategy:
+      'Reframed the crisis as a question of range, not survival: how does Staedtler protect its analog identity while still opening the markets of tomorrow. A synthesis of global futures reports pointed to one throughline: AI absorbs routine work, the world fractures into isolated blocks, and in parallel a hunger grows for things that are real and made by hand. The brand core is creativity itself, expressed in two opposite registers: goal-driven Fast Lane creativity and process-driven Slow Lane creativity. Both are genuinely Staedtler.',
+    results:
+      'A dual product concept framed as a fictional Staedtler campaign launching in 2042: Mars Note, a Fast Lane device that turns a sticky note wall into a live, shared workspace, and Mars Mind, a Slow Lane device built to hold sketching, journaling, and meditation with nothing else competing for attention. A three horizon roadmap carries both lanes from a 2026 portfolio reset to a 2042 global launch.',
+    keyInsight:
+      "Authenticity is becoming the hardest currency a brand can hold. People are no longer buying a pen, they're buying a reason to choose this exact one, and creativity is the one part of Staedtler that survives into every version of the future.",
+    impactStats: [
+      { label: 'Futures reports synthesized', number: '8', description: 'McKinsey, WEF, WHO, Deloitte, Atlantic Council and others' },
+      { label: 'Product lanes', number: '2', description: 'Fast Lane and Slow Lane, one shared brand core' },
+      { label: 'Roadmap horizons', number: '3', description: 'From portfolio reset to global two lane brand' },
+      { label: 'Campaign framing', number: '2042', description: 'Fictional launch year for Mars Note and Mars Mind' },
     ],
   },
   {
@@ -171,92 +213,79 @@ export const projects: Project[] = [
     tools: 'Figma · Protopie',
     scope: 'Interaction Study · HfG Schwäbisch Gmünd · 2025',
     description:
-      "Emojis translate emotion into symbols. This translates emotion into behavior. Shake your phone to send anger — the bubble distorts on impact. Hold the screen together with someone for romance — your fingerprints merge into a shared mark. Photograph something real for joy — it becomes a collectible sticker you gift. Tilt a bubble to signal sarcasm. No new interface. Just the physics of how you hold your phone, put to work.",
+      "Emojis translate emotion into symbols. This study translates it into behavior. Shake your phone to send anger: the bubble distorts on impact. Hold the screen together with someone for romance: your fingerprints merge into a shared mark. Photograph something real for joy: it becomes a collectible sticker you gift. Tilt a bubble to signal sarcasm. No new interface. Just the physics of how you hold your phone, put to work.",
     impactStats: [],
   },
   {
-    slug: 'spotify-dashboard',
-    name: 'Spotify Dashboard',
-    shortName: 'Spotify Dashboard',
-    type: 'lab',
-    year: '2023',
-    tags: ['Data Visualization', 'Information Design'],
-    label: 'Data Visualization',
-    accentColor: '#2B6CB0',
-    category: 'Lab',
-    gridArea: 'spotify',
+    // Master thesis — shown as a non-clickable placeholder tile while the
+    // work is under NDA. No project page, no case content. The gradient +
+    // statusNote drive the tile's look (see ProjectCard placeholder branch).
+    slug: 'thesis',
+    name: 'Master Thesis',
+    shortName: 'Master Thesis',
+    type: 'placeholder',
+    year: '2026',
+    tags: ['NDA'],
+    label: 'M.A. Thesis',
+    accentColor: '#B9A5CA',
+    gradient:
+      'linear-gradient(90deg, hsla(211, 66%, 87%, 1) 0%, hsla(348, 67%, 88%, 1) 50%, hsla(272, 26%, 72%, 1) 100%)',
+    statusNote: 'Still in progress',
+    category: 'Case Study',
+    gridArea: 'thesis',
     size: 'small',
-    problemStatement: 'A century of music, made legible.',
-    headline: 'A century of music, made legible.',
-    team: 'Luke Caporelli, Selamawit Gegziabher',
-    tools: 'Figma',
-    scope: 'Data Visualization · HfG Schwäbisch Gmünd · 2023',
-    description:
-      "Real Spotify data mapped across time — speechiness, positivity, instrumentalness, and acousticness from 1925 to 2021. Subscriber growth, global artist distribution, revenue, and workforce composition. Built to reveal patterns that feel obvious in hindsight and weren't visible before.",
+    problemStatement: 'Drone-captured roof inspection, read and classified by AI.',
+    team: 'Luke Caporelli',
+    tools: '',
     impactStats: [],
   },
   {
-    // Slug intentionally stays `packyourride` so the existing cover assets
-    // under /images/packyourride/ + /videos/packyourride/ keep resolving.
-    // Display name + external URL update to the rebranded gravelwerk.
-    slug: 'packyourride',
-    name: 'gravelwerk',
-    shortName: 'gravelwerk',
+    // Live GPX-enrichment product. Replaces gravelwerk as the external/live
+    // entry. Cover assets go under /images/tourewerk/ + /videos/tourewerk/.
+    slug: 'tourewerk',
+    name: 'Tourewerk',
+    shortName: 'Tourewerk',
     type: 'external',
-    externalUrl: 'https://gravelwerk.de',
-    coverVideo: 'cover.mp4',
-    coverVideoStart: 3,
-    year: '2024',
-    tags: ['Live Product', 'Direct-to-Customer', 'Solo Built'],
+    externalUrl: 'https://tourewerk.gravelwerk.de/planen',
+    // Cover = enriched-route satellite screenshot, left-aligned crop.
+    coverPosition: 'left center',
+    year: '2026',
+    tags: ['Live Product', 'GPX', 'Solo Built'],
     label: 'Live Product',
     accentColor: '#B45309',
     category: 'External',
-    gridArea: 'packyourride',
+    gridArea: 'tourewerk',
     size: 'small',
-    problemStatement: 'The packing list for every ride.',
+    problemStatement: 'A bare GPX track, enriched into a ride you can plan around.',
     team: 'Luke Caporelli',
     tools: 'Next.js',
-    scope: 'Live product · 2024',
+    scope: 'Live product · 2026',
     impactStats: [],
   },
   {
-    slug: 'blend-it',
-    name: 'blend it!',
-    shortName: 'blend it!',
+    // Vera (formerly Codewehr) — case glimpse rendered by LabPage. Slightly
+    // fuller description than a standard lab so the concept reads properly.
+    // DRAFT COPY — team, tools and accent to be confirmed.
+    slug: 'vera',
+    name: 'Vera',
+    shortName: 'Vera',
     type: 'lab',
-    year: '2023',
-    tags: ['Hardware', 'IoT', 'Prototyping'],
-    label: 'Physical + Digital',
-    accentColor: '#5A1A4F',
-    category: 'Lab',
-    gridArea: 'blend',
-    size: 'small',
-    problemStatement: 'A cocktail machine that actually works.',
-    headline: 'A cocktail machine that actually works.',
-    team: 'Luke Caporelli, Anton Pelezki, Tim Niedermeier',
-    tools: 'ESP32 · MQTT · Next.js · AI (3D visualization)',
-    scope: 'Physical + Digital · HfG Schwäbisch Gmünd · 2023',
-    description:
-      'ESP32 microcontroller driving 8 relay-controlled pumps, communicating via MQTT with a Next.js application. Select a recipe, trigger dispensing, get a drink. The 3D render of the machine was generated with AI — designed and visualized entirely without a 3D artist. Fully functional prototype built from scratch with two collaborators.',
-    impactStats: [],
-  },
-  {
-    slug: 'resaga',
-    name: 'resaga',
-    shortName: 'resaga',
-    type: 'external',
-    externalUrl: 'https://resaga.cc',
-    coverVideo: 'cover.mp4',
+    // Tile cover is left-aligned so the crop keeps the left of the frame.
+    coverPosition: 'left center',
     year: '2026',
-    tags: ['Live Product', 'Direct-to-Customer', 'Solo Built'],
-    label: 'Live Product',
-    accentColor: '#8B7355',
-    category: 'External',
-    gridArea: 'resaga',
+    tags: ['Civil Protection', 'Verification', 'AI Cockpit'],
+    label: 'Hackathon Winner · In Build',
+    accentColor: '#B23A48',
+    category: 'Glimpse',
+    gridArea: 'vera',
     size: 'medium',
-    team: 'Luke Caporelli',
-    tools: '',
-    problemStatement: '',
+    problemStatement: 'A verification cockpit for disaster response.',
+    headline: "We didn't ask what AI can do. We asked where the human stays irreplaceable.",
+    team: 'Luke Caporelli, Lukas Predan, Habiba Khalil, Ahmed Harb, Abdullah Dinc',
+    tools: 'Fully Functional · Backend · AI Integration',
+    scope: 'CodeTheState Hackathon · 1st place · Heilbronn · 2026',
+    description:
+      'Vera, short for Verified Real-Time Risk Assessment, is a decision cockpit for crisis management. It pulls live signals from social media, weather services, water levels, and fire data, then clusters them into single coherent events instead of a raw, noisy feed. Every eyewitness report is cross-checked against official DWD weather-service data and given a transparent credibility score, so an operator sees not only what is being claimed but how far to trust it. The build held three hard constraints: a zero-training interface, full traceability of every signal, and a human in the loop on every call. The principle underneath is simple. AI prepares, the human decides, crisis management acts, because responsibility cannot be automated away. Built as a working prototype in two days, Vera won first place at the CodeTheState hackathon against 40 builders across four public-sector use cases, developed with Komm.ONE, Public Makers, and the IPAI Foundation in Heilbronn. It is now being taken into real implementation with a dedicated team.',
     impactStats: [],
   },
 ]

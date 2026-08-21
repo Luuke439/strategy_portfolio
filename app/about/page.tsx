@@ -11,10 +11,16 @@ const PORTRAIT_SRC = '/images/about/portrait.jpg'
 
 const EXPERIENCE = [
   {
+    years: 'Sep 2025 – now',
+    org: 'Paul Bauder GmbH',
+    role: 'Master\'s Thesis Cooperation',
+    detail: null,
+  },
+  {
     years: '2025 – now',
     org: 'Paul Bauder GmbH',
-    role: 'Working Student UX + Master\'s Thesis',
-    detail: 'Drones + AI for automated roof inspection',
+    role: 'Working Student Digital Products',
+    detail: null,
   },
   {
     years: '2024 – 2025',
@@ -51,84 +57,76 @@ const EDUCATION = [
   },
 ]
 
-function SectionLabel({ children }: { children: string }) {
+// Hero portrait — fills the right column of the two-column hero, cropped to a
+// consistent 4:5 frame. object-position lifts the crop toward the subject so
+// the tall analog frame keeps the face in view instead of centring on the table.
+function HeroPortrait() {
+  const [failed, setFailed] = useState(false)
   return (
-    <div style={{ marginBottom: '1.5rem' }}>
-      <span style={{
-        fontFamily:    FONT,
-        fontWeight:    500,
-        fontSize:      '0.68rem',
-        letterSpacing: '0.12em',
-        textTransform: 'uppercase' as const,
-        color:         '#0A0A0A',
-      }}>
-        {children}
-      </span>
-      <div style={{ height: '1px', background: '#E5E5E5', marginTop: '0.5rem' }} />
+    <div className="about-hero__portrait-frame">
+      {failed ? (
+        <div style={{ position: 'absolute', inset: 0, backgroundColor: '#E5E5E5' }} aria-hidden />
+      ) : (
+        <Image
+          src={PORTRAIT_SRC}
+          alt="Luke Caporelli"
+          fill
+          sizes="(max-width: 700px) 240px, 240px"
+          onError={() => setFailed(true)}
+          style={{ objectFit: 'cover', objectPosition: '50% 34%' }}
+          priority
+        />
+      )}
     </div>
   )
 }
 
-function Portrait() {
-  const [failed, setFailed] = useState(false)
-  // Bottom-of-page portrait — wider than the old header-corner version
-  // so it reads as a deliberate page closer instead of a thumbnail.
-  const frame: React.CSSProperties = {
-    width:       '100%',
-    maxWidth:    '260px',
-    aspectRatio: '3 / 4',
-    objectFit:   'cover',
-    display:     'block',
-    height:      'auto',
-  }
-  if (failed) {
-    return <div style={{ ...frame, backgroundColor: '#E0E0E0' }} aria-hidden />
-  }
-  return (
-    <Image
-      src={PORTRAIT_SRC}
-      alt="Luke Caporelli"
-      width={520}
-      height={693}
-      sizes="260px"
-      onError={() => setFailed(true)}
-      style={frame}
-      priority={false}
-    />
-  )
-}
-
-function TimelineRow({ years, org, role, detail }: {
+// One career/education entry — org left, years right-aligned on the same
+// baseline (classic résumé line), role + optional detail beneath.
+function EntryRow({ years, org, role, detail }: {
   years: string
   org: string
   role: string
   detail: string | null
 }) {
   return (
-    <div className="timeline-row">
-      <span
-        className="timeline-row__years"
-        style={{
-          fontFamily: FONT,
-          fontWeight: 300,
-          fontSize:   '0.78rem',
-          color:      '#A0A0A0',
-          paddingTop: '2px',
-          lineHeight: 1.5,
-        }}
-      >
-        {years}
-      </span>
-      <div>
-        <div style={{
+    <div style={{ marginBottom: '1.35rem' }}>
+      <div style={{
+        display:        'flex',
+        justifyContent: 'space-between',
+        alignItems:     'baseline',
+        gap:            '1rem',
+      }}>
+        <span style={{
           fontFamily: FONT,
           fontWeight: 500,
-          fontSize:   '0.88rem',
+          fontSize:   '0.9rem',
           color:      '#0A0A0A',
-          lineHeight: 1.5,
+          lineHeight: 1.45,
         }}>
           {org}
-        </div>
+        </span>
+        <span style={{
+          fontFamily: FONT,
+          fontWeight: 300,
+          fontSize:   '0.72rem',
+          color:      '#A0A0A0',
+          whiteSpace: 'nowrap',
+          lineHeight: 1.45,
+        }}>
+          {years}
+        </span>
+      </div>
+      <div style={{
+        fontFamily: FONT,
+        fontWeight: 300,
+        fontSize:   '0.82rem',
+        color:      '#6B6B6B',
+        lineHeight: 1.5,
+      }}>
+        {role}
+      </div>
+      {detail && (
         <div style={{
           fontFamily: FONT,
           fontWeight: 300,
@@ -136,20 +134,9 @@ function TimelineRow({ years, org, role, detail }: {
           color:      '#6B6B6B',
           lineHeight: 1.5,
         }}>
-          {role}
+          {detail}
         </div>
-        {detail && (
-          <div style={{
-            fontFamily: FONT,
-            fontWeight: 300,
-            fontSize:   '0.82rem',
-            color:      '#6B6B6B',
-            lineHeight: 1.5,
-          }}>
-            {detail}
-          </div>
-        )}
-      </div>
+      )}
     </div>
   )
 }
@@ -163,101 +150,78 @@ export default function AboutPage() {
           paddingBottom: 'var(--page-bottom)',
         }}
       >
-        <div
+
+        {/* ── Hero — two-column: intro copy left, portrait right ──────── */}
+        <section
           className="editorial-width"
           style={{
             paddingLeft:  'var(--editorial-px)',
             paddingRight: 'var(--editorial-px)',
           }}
         >
+          <div className="about-hero">
 
-          {/* ── Header: single editorial pillar ────────────────────────── */}
-          <header style={{ marginBottom: '4rem' }}>
-            <h1 style={{
-              fontFamily:    FONT,
-              fontWeight:    500,
-              fontSize:      'clamp(2.25rem, 4vw, 4rem)',
-              lineHeight:    1.0,
-              letterSpacing: '-0.02em',
-              color:         '#0A0A0A',
-              margin:        '0 0 1.25rem',
-            }}>
-              Strategic Designer
-            </h1>
-            <h2 style={{
-              fontFamily:    FONT,
-              fontWeight:    300,
-              fontSize:      'clamp(1.05rem, 1.5vw, 1.35rem)',
-              lineHeight:    1.4,
-              letterSpacing: '-0.01em',
-              color:         '#6B6B6B',
-              margin:        '0 0 1.5rem',
-              maxWidth:      '40ch',
-            }}>
-              Product strategy · Interaction design · Systems thinking
-            </h2>
-            <div style={{
-              fontFamily:    FONT,
-              fontWeight:    400,
-              fontSize:      '0.72rem',
-              letterSpacing: '0.08em',
-              textTransform: 'uppercase',
-              color:         '#A0A0A0',
-              lineHeight:    1.5,
-            }}>
-              Germany · US Citizen · Open to relocate
+            <div>
+              <h1 style={{
+                fontFamily:    FONT,
+                fontWeight:    300,
+                fontSize:      'clamp(1.35rem, 1.9vw, 1.7rem)',
+                lineHeight:    1.25,
+                letterSpacing: '-0.015em',
+                color:         '#0A0A0A',
+                margin:        0,
+              }}>
+                I&apos;m Luke,<br />
+                a <strong style={{ fontWeight: 500 }}>Strategic Designer</strong><br />
+                guiding transformation across<br />
+                Brands, Systems and Products
+              </h1>
             </div>
-          </header>
 
-          {/* ── Intro ─────────────────────────────────────────────────── */}
-          <section style={{ marginBottom: '3.5rem' }}>
-            <SectionLabel>Intro</SectionLabel>
-            <p style={{
-              fontFamily: FONT,
-              fontWeight: 300,
-              fontSize:   '0.95rem',
-              color:      '#0A0A0A',
-              lineHeight: 1.8,
-              maxWidth:   '52ch',
-              margin:     0,
-            }}>
-              Hello, I&apos;m Luke. I work where systems thinking meets craft. My background is
-              Digital Product Design and Development, so I think in feasibility
-              and structure, not just screens, and I work closely with engineers
-              from concept to shipped detail. Recently: in-car HMI at
-              Mercedes-Benz and a zero-to-one AI product at Paul Bauder. On the
-              side I design and ship my own products end to end, like
-              Gravelwerk, using AI as my build partner. I can take an idea from
-              concept to a live product on my own.
-            </p>
-          </section>
+            <HeroPortrait />
+
+          </div>
+        </section>
+
+        {/* ── Detail sections — label-left / content-right editorial CV ── */}
+        <div
+          className="editorial-width"
+          style={{
+            paddingLeft:  'var(--editorial-px)',
+            paddingRight: 'var(--editorial-px)',
+            marginTop:    'clamp(2.5rem, 6vw, 4rem)',
+          }}
+        >
 
           {/* ── Experience ────────────────────────────────────────────── */}
-          <section style={{ marginBottom: '3.5rem' }}>
-            <SectionLabel>Experience</SectionLabel>
-            {EXPERIENCE.map((item, i) => (
-              <TimelineRow key={i} {...item} />
-            ))}
+          <section className="about-section">
+            <div className="about-section__label">Experience</div>
+            <div>
+              {EXPERIENCE.map((item, i) => (
+                <EntryRow key={i} {...item} />
+              ))}
+            </div>
           </section>
 
           {/* ── Education ─────────────────────────────────────────────── */}
-          <section style={{ marginBottom: '3.5rem' }}>
-            <SectionLabel>Education</SectionLabel>
-            {EDUCATION.map((item, i) => (
-              <TimelineRow key={i} {...item} />
-            ))}
+          <section className="about-section">
+            <div className="about-section__label">Education</div>
+            <div>
+              {EDUCATION.map((item, i) => (
+                <EntryRow key={i} {...item} />
+              ))}
+            </div>
           </section>
 
           {/* ── Recognition ───────────────────────────────────────────── */}
-          <section style={{ marginBottom: '3.5rem' }}>
-            <SectionLabel>Recognition</SectionLabel>
+          <section className="about-section">
+            <div className="about-section__label">Recognition</div>
             <p style={{
               fontFamily: FONT,
               fontWeight: 300,
-              fontSize:   '0.95rem',
+              fontSize:   '0.9rem',
               color:      '#0A0A0A',
-              lineHeight: 1.8,
-              maxWidth:   '52ch',
+              lineHeight: 1.7,
               margin:     0,
             }}>
               <span style={{ fontWeight: 500 }}>1st place, CodeTheState hackathon 2026</span>{' '}
@@ -268,8 +232,8 @@ export default function AboutPage() {
           </section>
 
           {/* ── Collaborations ────────────────────────────────────────── */}
-          <section style={{ marginBottom: '3.5rem' }}>
-            <SectionLabel>Collaborations</SectionLabel>
+          <section className="about-section">
+            <div className="about-section__label">Projects with</div>
             <p style={{
               fontFamily: FONT,
               fontWeight: 300,
@@ -282,36 +246,15 @@ export default function AboutPage() {
             </p>
           </section>
 
-          {/* ── Outside Work ──────────────────────────────────────────── */}
-          <section style={{ marginBottom: '4rem' }}>
-            <SectionLabel>Outside Work</SectionLabel>
-            <p style={{
-              fontFamily: FONT,
-              fontWeight: 300,
-              fontSize:   '0.95rem',
-              color:      '#0A0A0A',
-              lineHeight: 1.8,
-              maxWidth:   '52ch',
-              margin:     0,
-            }}>
-              Most of my real thinking happens on a gravel bike, seventy plus
-              kilometres at a time, alone and without a phone. The rest goes
-              into analog photography and into my own side projects. The
-              biggest one is Gravelwerk, a cycling brand I am building from
-              the ground up. It is the place where I get to apply strategy to
-              something I own, instead of advising someone else on theirs.
-            </p>
-          </section>
-
-          {/* ── Contact — LinkedIn + CV live in the header ───────────── */}
-          <section style={{ marginBottom: '4.5rem' }}>
-            <SectionLabel>Contact</SectionLabel>
+          {/* ── Contact ───────────────────────────────────────────────── */}
+          <section className="about-section">
+            <div className="about-section__label">Contact</div>
             <a
               href={AUTHOR.emailHref}
               style={{
                 fontFamily:     FONT,
                 fontWeight:     400,
-                fontSize:       '1.1rem',
+                fontSize:       '1rem',
                 color:          '#0A0A0A',
                 textDecoration: 'none',
               }}
@@ -319,11 +262,6 @@ export default function AboutPage() {
               {AUTHOR.email}
             </a>
           </section>
-
-          {/* ── Portrait — page closer ───────────────────────────────── */}
-          <div style={{ marginTop: '1rem' }}>
-            <Portrait />
-          </div>
 
         </div>
       </main>

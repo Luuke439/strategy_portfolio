@@ -12,8 +12,8 @@ import { SITE_URL, AUTHOR, DESCRIPTION, SOCIAL } from '@/lib/site'
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: 'Luke Caporelli — Strategic Design',
-    template: '%s — Luke Caporelli',
+    default: 'Luke Caporelli · Strategic Design',
+    template: '%s · Luke Caporelli',
   },
   description: DESCRIPTION,
   applicationName: 'Luke Caporelli',
@@ -39,7 +39,7 @@ export const metadata: Metadata = {
     apple: '/icon.svg',
   },
   openGraph: {
-    title: 'Luke Caporelli — Strategic Design',
+    title: 'Luke Caporelli · Strategic Design',
     description: DESCRIPTION,
     type: 'website',
     url: SITE_URL,
@@ -48,7 +48,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Luke Caporelli — Strategic Design',
+    title: 'Luke Caporelli · Strategic Design',
     description: DESCRIPTION,
     creator: '@lukecaporelli',
   },
@@ -92,7 +92,7 @@ const personJsonLd = {
     name: 'HfG Schwäbisch Gmünd',
     url: 'https://www.hfg-gmuend.de/',
   },
-  sameAs: [SOCIAL.linkedin, SOCIAL.gravelwerk, SOCIAL.resaga],
+  sameAs: [SOCIAL.linkedin, SOCIAL.tourewerk],
 } as const
 
 const websiteJsonLd = {

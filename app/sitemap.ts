@@ -5,11 +5,11 @@ import { SITE_URL } from '@/lib/site'
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date()
 
-  // External projects (resaga, gravelwerk) live at their own domain and
-  // have no /projects/<slug> page on this site — exclude them so crawlers
-  // don't index a 404.
+  // External projects live at their own domain, and placeholder tiles (the
+  // NDA thesis) are non-clickable — neither has a /projects/<slug> page on
+  // this site, so exclude them so crawlers don't index a 404.
   const projectEntries: MetadataRoute.Sitemap = projects
-    .filter((p) => p.type !== 'external')
+    .filter((p) => p.type !== 'external' && p.type !== 'placeholder')
     .map((p) => ({
       url: `${SITE_URL}/projects/${p.slug}`,
       lastModified: now,

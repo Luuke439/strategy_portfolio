@@ -21,8 +21,7 @@ export const AUTHOR = {
 
 export const SOCIAL = {
   linkedin: 'https://www.linkedin.com/in/lukecaporelli/',
-  gravelwerk: 'https://gravelwerk.de',
-  resaga: 'https://resaga.cc',
+  tourewerk: 'https://tourewerk.gravelwerk.de/planen',
 } as const
 
 export const DESCRIPTION =
