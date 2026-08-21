@@ -151,23 +151,27 @@ export default function AboutPage() {
         }}
       >
 
-        {/* ── Hero — two-column: intro copy left, portrait right ──────── */}
-        <section
+        {/* ── One editorial column: hero + CV share the same spine ────── */}
+        <div
           className="editorial-width"
           style={{
             paddingLeft:  'var(--editorial-px)',
             paddingRight: 'var(--editorial-px)',
           }}
         >
-          <div className="about-hero">
+
+          {/* Hero — portrait sits in the spine column, statement in content */}
+          <section className="about-hero">
+
+            <HeroPortrait />
 
             <div>
               <h1 style={{
                 fontFamily:    FONT,
                 fontWeight:    300,
-                fontSize:      'clamp(1.35rem, 1.9vw, 1.7rem)',
-                lineHeight:    1.25,
-                letterSpacing: '-0.015em',
+                fontSize:      'clamp(1.5rem, 2.5vw, 2.05rem)',
+                lineHeight:    1.22,
+                letterSpacing: '-0.02em',
                 color:         '#0A0A0A',
                 margin:        0,
               }}>
@@ -176,22 +180,21 @@ export default function AboutPage() {
                 guiding transformation across<br />
                 Brands, Systems and Products
               </h1>
+              <p style={{
+                fontFamily:    FONT,
+                fontWeight:    300,
+                fontSize:      'clamp(0.92rem, 1.3vw, 1.02rem)',
+                lineHeight:    1.6,
+                color:         '#6B6B6B',
+                maxWidth:      '44ch',
+                margin:        'clamp(1.1rem, 2.2vw, 1.5rem) 0 0',
+              }}>
+                Service and transformation design, with a focus on AI-enabled
+                services for complex, regulated organizations.
+              </p>
             </div>
 
-            <HeroPortrait />
-
-          </div>
-        </section>
-
-        {/* ── Detail sections — label-left / content-right editorial CV ── */}
-        <div
-          className="editorial-width"
-          style={{
-            paddingLeft:  'var(--editorial-px)',
-            paddingRight: 'var(--editorial-px)',
-            marginTop:    'clamp(2.5rem, 6vw, 4rem)',
-          }}
-        >
+          </section>
 
           {/* ── Experience ────────────────────────────────────────────── */}
           <section className="about-section">
