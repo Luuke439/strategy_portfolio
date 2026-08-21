@@ -31,6 +31,29 @@ function PrimaryVisual({ project }: { project: Project }) {
     )
   }
 
+  // Any lab project with a cover video (e.g. Vera) gets a looping, muted hero
+  // video instead of the static cover image. Poster falls back to the still.
+  if (project.coverVideo) {
+    return (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.8, delay: 0.2 }}
+        style={{ width: '100%', marginBottom: '3rem', overflow: 'hidden' }}
+      >
+        <video
+          src={`/videos/${project.slug}/${project.coverVideo}`}
+          poster={`/images/${project.slug}/cover.jpg`}
+          autoPlay
+          loop
+          muted
+          playsInline
+          style={{ width: '100%', height: 'auto', display: 'block' }}
+        />
+      </motion.div>
+    )
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0 }}

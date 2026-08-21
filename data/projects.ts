@@ -265,13 +265,17 @@ export const projects: Project[] = [
   {
     // Vera (formerly Codewehr) — case glimpse rendered by LabPage. Slightly
     // fuller description than a standard lab so the concept reads properly.
-    // DRAFT COPY — team, tools and accent to be confirmed.
     slug: 'vera',
     name: 'Vera',
     shortName: 'Vera',
     type: 'lab',
     // Tile cover is left-aligned so the crop keeps the left of the frame.
     coverPosition: 'left center',
+    // Tile plays the cockpit video on hover; the still poster
+    // (/images/vera/cover.jpg) is grabbed from the same frame the video
+    // seeks to (t=3s), so the fade-in has no visible jump.
+    coverVideo: 'cover.mp4',
+    coverVideoStart: 3,
     year: '2026',
     tags: ['Civil Protection', 'Verification', 'AI Cockpit'],
     label: 'Hackathon Winner · In Build',

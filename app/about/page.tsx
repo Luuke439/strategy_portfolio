@@ -11,7 +11,7 @@ const PORTRAIT_SRC = '/images/about/portrait.jpg'
 
 const EXPERIENCE = [
   {
-    years: 'Sep 2025 – now',
+    years: 'from Sep 2026',
     org: 'Paul Bauder GmbH',
     role: 'Master\'s Thesis Cooperation',
     detail: null,

@@ -27,9 +27,9 @@ export default function ProjectGrid({ onProjectHover }: ProjectGridProps) {
     // 12-col grid's visual balance, not for the linear flow of a phone.)
     const order = [
       'remarkt', 'staedtler',
-      'odo', 'thesis',
-      'tourewerk', 'maya', 'expressive-messaging',
-      'vera',
+      'odo', 'expressive-messaging',
+      'vera', 'maya', 'thesis',
+      'tourewerk',
     ]
     return (
       <div
@@ -75,17 +75,17 @@ export default function ProjectGrid({ onProjectHover }: ProjectGridProps) {
           <div style={{ gridColumn: '1 / 3', height: '280px' }}>
             <ProjectCard project={find('staedtler')} onHoverChange={onProjectHover} revealIndex={0} />
           </div>
-          {['odo', 'thesis'].map((slug, i) => (
+          {['odo', 'expressive-messaging'].map((slug, i) => (
             <div key={slug} style={{ height: '180px' }}>
               <ProjectCard project={find(slug)} onHoverChange={onProjectHover} revealIndex={i + 1} />
             </div>
           ))}
-          {['tourewerk', 'vera'].map((slug, i) => (
+          {['vera', 'tourewerk'].map((slug, i) => (
             <div key={slug} style={{ height: '180px' }}>
               <ProjectCard project={find(slug)} onHoverChange={onProjectHover} revealIndex={i + 1} />
             </div>
           ))}
-          {['maya', 'expressive-messaging'].map((slug, i) => (
+          {['maya', 'thesis'].map((slug, i) => (
             <div key={slug} style={{ height: '180px' }}>
               <ProjectCard project={find(slug)} onHoverChange={onProjectHover} revealIndex={i + 1} />
             </div>
@@ -98,8 +98,8 @@ export default function ProjectGrid({ onProjectHover }: ProjectGridProps) {
   // ── Desktop ────────────────────────────────────────────────────────────────
   //
   //  Stagger order is chosen for visual balance across the masonry layout.
-  //  Top half:    remarkt(0 anchor) → vera(1) → thesis(2) → staedtler(3)
-  //  Bottom half: maya(0) → tourewerk(1) → expressive(3) → odo(2 wide)
+  //  Top half:    remarkt(0 anchor) → tourewerk(1) → expressive(3) → staedtler(2)
+  //  Bottom half: maya(0) → vera(1) → thesis(3) → odo(2 wide)
   //
   const colGrid: React.CSSProperties = {
     display: 'grid',
@@ -119,11 +119,11 @@ export default function ProjectGrid({ onProjectHover }: ProjectGridProps) {
         </div>
 
         <div style={{ gridColumn: '7 / 10', gridRow: '1 / 2' }}>
-          <ProjectCard project={find('vera')} onHoverChange={onProjectHover} revealIndex={1} />
+          <ProjectCard project={find('tourewerk')} onHoverChange={onProjectHover} revealIndex={1} />
         </div>
 
         <div style={{ gridColumn: '7 / 10', gridRow: '2 / 3' }}>
-          <ProjectCard project={find('thesis')} onHoverChange={onProjectHover} revealIndex={3} />
+          <ProjectCard project={find('expressive-messaging')} onHoverChange={onProjectHover} revealIndex={3} />
         </div>
 
         <div style={{ gridColumn: '10 / 13', gridRow: '1 / 3' }}>
@@ -140,11 +140,11 @@ export default function ProjectGrid({ onProjectHover }: ProjectGridProps) {
           </div>
 
           <div style={{ gridColumn: '4 / 7', gridRow: '1 / 2' }}>
-            <ProjectCard project={find('tourewerk')} onHoverChange={onProjectHover} revealIndex={1} />
+            <ProjectCard project={find('vera')} onHoverChange={onProjectHover} revealIndex={1} />
           </div>
 
           <div style={{ gridColumn: '4 / 7', gridRow: '2 / 3' }}>
-            <ProjectCard project={find('expressive-messaging')} onHoverChange={onProjectHover} revealIndex={3} />
+            <ProjectCard project={find('thesis')} onHoverChange={onProjectHover} revealIndex={3} />
           </div>
 
           <div style={{ gridColumn: '7 / 13', gridRow: '1 / 3' }}>
